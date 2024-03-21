@@ -1,6 +1,6 @@
 import { $ } from "bun";
 import { watch } from "fs";
-import { zzapBundler } from "../bundler/Bundler";
+import { zzapBundler } from "../bundler/zzapBundler";
 
 export let generatingPromise:
   | ReturnType<typeof zzapBundler.generate>

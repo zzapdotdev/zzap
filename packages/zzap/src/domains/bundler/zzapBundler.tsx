@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import markdownit from "markdown-it";
 import { renderToString } from "react-dom/server";
 import { logger } from "../../cli";
-import { zaapConfig } from "../config/Conig";
+import { zaapConfig } from "../config/zzapConfig";
 
 export const zzapBundler = {
   async generate() {
