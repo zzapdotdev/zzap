@@ -11,9 +11,7 @@ jobs:
         uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: "Install Dependencies"
-        run: |
-          bun install
+      - name: Install Dependencies
+        run: bun install
       - name: "Test"
-        run: |
-          bun run test
+        run: bun run test
