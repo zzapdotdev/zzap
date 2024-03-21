@@ -1,14 +1,14 @@
 import { $ } from "bun";
 import { watch } from "fs";
-import { zZapBundler } from "../bundler/zZapBundler";
+import { zzapBundler } from "../bundler/Bundler";
 
 export let generatingPromise:
-  | ReturnType<typeof zZapBundler.generate>
+  | ReturnType<typeof zzapBundler.generate>
   | undefined;
 
-export const zZapCommander = {
+export const zzapCommander = {
   async watch(props: { port: number | undefined }) {
-    await zZapBundler.generate();
+    await zzapBundler.generate();
 
     const watcher = watch("./", { recursive: true }, (_event, filename) => {
       const filesToWatch = ["zzap.config.tsx"];
@@ -21,7 +21,7 @@ export const zZapCommander = {
         return;
       }
 
-      generatingPromise = zZapBundler.generate();
+      generatingPromise = zzapBundler.generate();
       generatingPromise.then(() => {
         generatingPromise = undefined;
       });
@@ -50,7 +50,7 @@ export const zZapCommander = {
   },
   async build() {
     await tailwind();
-    await zZapBundler.generate();
+    await zzapBundler.generate();
   },
 };
 

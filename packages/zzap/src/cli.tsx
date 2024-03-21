@@ -1,6 +1,6 @@
 import Bun from "bun";
 import { parseArgs } from "util";
-import { zZapCommander } from "./domains/commander/zZapCommander";
+import { zzapCommander } from "./domains/commander/Commadner";
 import { getLogger } from "./domains/logging/getLogger";
 
 export const logger = getLogger();
@@ -28,12 +28,12 @@ async function main() {
   logger.info("Verifying zzap.config.tsx");
 
   if (values.watch) {
-    await zZapCommander.watch({
+    await zzapCommander.watch({
       port: Number(values.port),
     });
   }
 
   if (values.build) {
-    await zZapCommander.build();
+    await zzapCommander.build();
   }
 }

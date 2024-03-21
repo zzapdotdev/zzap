@@ -1,6 +1,6 @@
 import type { zZapConfig as zZapConfigType } from "../../module";
 
-export const zZapConfig = {
+export const zaapConfig = {
   async get() {
     const configFileLocation = "./zzap.config.tsx";
     const configModule = await import(configFileLocation);

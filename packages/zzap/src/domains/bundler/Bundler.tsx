@@ -3,14 +3,14 @@ import fs from "fs/promises";
 import markdownit from "markdown-it";
 import { renderToString } from "react-dom/server";
 import { logger } from "../../cli";
-import { zZapConfig } from "../config/zZapConfig";
-export const zZapBundler = {
+import { zaapConfig } from "../config/Conig";
+
+export const zzapBundler = {
   async generate() {
     logger.info("Building site");
-    const config = await zZapConfig.get();
+    const config = await zaapConfig.get();
 
     // Clean output folder
-
     for await (const path of new Glob(config.outputFolder + "/**/*.html").scan({
       cwd: ".",
     })) {
@@ -30,7 +30,6 @@ export const zZapBundler = {
     }
 
     // Render Pages with Glob
-
     let globFileCount = 0;
     const globPatterns = config.globPatterns || ["**/*.mdx"];
 
@@ -50,7 +49,7 @@ export const zZapBundler = {
           .replace(config.contentFolder, "")
           .replace(/\.mdx?$/, "")
           .replace(/\/index$/, "");
-        console.log("path", path);
+
         const pageHTML = md.render(pageMarkdown);
         const jsx = config.layout({
           head: <></>,

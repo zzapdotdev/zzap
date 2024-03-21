@@ -2,7 +2,7 @@ import React from "react";
 import { defineConfig } from "zzap";
 
 export default defineConfig({
-  siteTitle: "zZap",
+  siteTitle: "zzap",
   contentFolder: "./content",
   outputFolder: "./dist",
   cssFiles: ["styles.css"],
