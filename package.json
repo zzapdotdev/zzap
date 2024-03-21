@@ -2,13 +2,19 @@
   "name": "zzap",
   "private": true,
   "scripts": {
-    "dev": "bunx turbo dev",
-    "build": "bunx turbo build"
+    "dev": "bun run package && bunx turbo dev",
+    "build": "bun run package && bunx turbo build",
+    "test": "bunx turbo test",
+    "package": "bunx turbo package"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "sites/*"
   ],
   "dependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.12",
     "turbo": "^1.12.5"
   }
 }

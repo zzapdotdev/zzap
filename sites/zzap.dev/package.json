@@ -7,6 +7,10 @@
     "dev": "bun zzap --watch",
     "build": "bun zzap --build"
   },
+  "dependencies": {
+    "@picocss/pico": "^2.0.6",
+    "tailwindcss": "^3.4.1"
+  },
   "devDependencies": {
     "zzap": "workspace:*"
   }

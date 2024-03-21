@@ -1,0 +1,15 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  build:
+    uses: ./.github/workflows/ci_build.yml
+  test:
+    uses: ./.github/workflows/ci_test.yml

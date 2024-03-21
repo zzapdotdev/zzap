@@ -1,14 +1,19 @@
-export const getLogger = makeGetLogger("zzap", {
+export const getLogger = makeGetLogger("⚡Zap", {
   console,
 });
 
 function makeGetLogger(appName: string, deps: { console: Console }) {
-  return function getLogger(serviceName: string, props?: { pretty?: boolean }) {
+  return function getLogger(
+    serviceName: string = "",
+    props?: { pretty?: boolean }
+  ) {
     const pretty =
       props?.pretty !== undefined
         ? props?.pretty
         : process.env.NODE_ENV === "development";
-    const prefix = `${appName} ▶ ${serviceName} ▶`;
+    const prefix = serviceName
+      ? `${appName} ▶ ${serviceName} ▶`
+      : `${appName} ▶`;
 
     const infoLabel = style("INFO").bold().blue().toString();
     const debugLabel = style("DEBUG").bold().magenta().toString();
