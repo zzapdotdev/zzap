@@ -1,5 +1,17 @@
 {
   "name": "zzap",
+  "description": "All-in-one static site generator",
+  "authors": "René-Pier Deshaies-Géllinas",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.mts",
+  "bin": {
+    "zzap": "./dist/zzap"
+  },
+  "scripts": {
+    "dev": "bun build --watch ./src/index.ts --outdir ./dist --target node",
+    "build": "bun build --compile ./src/index.ts --outfile ./dist/zzap --target node"
+  },
   "dependencies": {
     "@types/bun": "^1.0.10",
     "bun": "^1.0.33",

@@ -1,4 +1,4 @@
-export const getLogger = makeGetLogger("Hexadocs", {
+export const getLogger = makeGetLogger("zzap", {
   console,
 });
 

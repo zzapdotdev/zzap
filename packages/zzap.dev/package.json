@@ -1,9 +1,12 @@
 {
   "name": "zzap.dev",
   "description": "Documentation website for zZap",
-  "authors": "René-Pier DEshaies-Géllinas",
+  "authors": "René-Pier Deshaies-Géllinas",
   "version": "1.0.0",
-  "dependencies": {},
+  "scripts": {
+    "dev": "bun zzap --watch",
+    "build": "bun zzap --build"
+  },
   "devDependencies": {
     "zzap": "workspace:*"
   }
