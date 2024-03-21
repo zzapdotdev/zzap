@@ -7,8 +7,9 @@ export let generatingPromise:
   | undefined;
 
 export const zZapCommander = {
-  async watch() {
+  async watch(props: { port: number | undefined }) {
     await zZapBundler.generate();
+
     const watcher = watch("./", { recursive: true }, (_event, filename) => {
       const filesToWatch = ["zzap.config.tsx"];
 
@@ -26,7 +27,9 @@ export const zZapCommander = {
       });
     });
 
-    watchTailwind();
+    tailwind({
+      watch: true,
+    });
 
     process.on("SIGINT", function closeWatcherWhenCtrlCIsPressed() {
       // close watcher when Ctrl-C is pressed
@@ -35,21 +38,22 @@ export const zZapCommander = {
     });
 
     Bun.serve({
-      port: 3000,
+      port: props.port || 3000,
       fetch(request) {
         const url = request.url;
         const pathname = new URL(url).pathname;
 
-        const fileName = pathname.endsWith("/") ? "index.html" : "";
+        const fileName = pathname.split(".").length > 1 ? "" : "/index.html";
         return new Response(Bun.file(`./dist${pathname}${fileName}`));
       },
     });
   },
   async build() {
+    await tailwind();
     await zZapBundler.generate();
   },
 };
 
-async function watchTailwind() {
-  await $`tailwindcss -i ./styles.css -o ./dist/styles.css --watch`;
+async function tailwind(props: { watch?: boolean } = {}) {
+  await $`tailwindcss -i ./styles.css -o ./dist/styles.css ${props.watch ? "--watch" : ""}`;
 }

@@ -17,6 +17,9 @@ async function main() {
       build: {
         type: "boolean",
       },
+      port: {
+        type: "string",
+      },
     },
     strict: true,
     allowPositionals: true,
@@ -25,7 +28,9 @@ async function main() {
   logger.info("Verifying zzap.config.tsx");
 
   if (values.watch) {
-    await zZapCommander.watch();
+    await zZapCommander.watch({
+      port: Number(values.port),
+    });
   }
 
   if (values.build) {
