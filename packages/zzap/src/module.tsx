@@ -15,4 +15,4 @@ export function defineConfig(config: {
   return config;
 }
 
-export type zZapConfig = ReturnType<typeof defineConfig>;
+export type zzapConfigType = ReturnType<typeof defineConfig>;
