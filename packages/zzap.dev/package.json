@@ -1,0 +1,10 @@
+{
+  "name": "zzap.dev",
+  "description": "Documentation website for zZap",
+  "authors": "René-Pier DEshaies-Géllinas",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "zzap": "workspace:*"
+  }
+}

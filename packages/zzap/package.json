@@ -1,0 +1,10 @@
+{
+  "name": "zzap",
+  "dependencies": {
+    "@types/bun": "^1.0.10",
+    "bun": "^1.0.33",
+    "markdown-it": "^14.1.0",
+    "minisearch": "^6.3.0",
+    "shiki": "^1.2.0"
+  }
+}

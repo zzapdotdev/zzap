@@ -1,0 +1,14 @@
+{
+  "name": "zzap",
+  "private": true,
+  "scripts": {
+    "dev": "bunx turbo dev",
+    "build": "bunx turbo build"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "turbo": "^1.12.5"
+  }
+}
