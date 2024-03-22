@@ -8,9 +8,6 @@ export default defineConfig({
   tailwind: true,
   cssFiles: [
     {
-      path: "styles.css",
-    },
-    {
       path: "../../node_modules/@picocss/pico/css/pico.css",
     },
   ],
