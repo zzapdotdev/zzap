@@ -1,11 +1,11 @@
 {
   "name": "pokedex",
   "scripts": {
-    "dev": "bun zzap --watch --port 3001",
+    "dev": "bun zzap --watch --port 3002",
     "build": "bun zzap --build"
   },
   "dependencies": {
-    "tailwindcss": "^3.4.1"
+    "@picocss/pico": "^2.0.6"
   },
   "devDependencies": {
     "zzap": "workspace:*"

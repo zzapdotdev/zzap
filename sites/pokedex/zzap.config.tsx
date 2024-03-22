@@ -7,7 +7,7 @@ export default defineConfig({
   outputFolder: "./dist",
   cssFiles: [
     {
-      path: "styles.css",
+      path: "../../node_modules/@picocss/pico/css/pico.css",
     },
   ],
   layout(props) {
@@ -20,10 +20,28 @@ export default defineConfig({
               name="viewport"
               content="width=device-width, initial-scale=1.0"
             />
-            <link rel="stylesheet" href="/styles.css" />
+            <link rel="stylesheet" href="/pico.css" />
             {props.head}
           </head>
-          <body>{props.children}</body>
+          <body className="container">
+            <nav
+              style={{
+                marginBottom: "2rem",
+              }}
+            >
+              <ul>
+                <li>
+                  <strong>Pokedex (zaap)</strong>
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <a href="/">Home</a>
+                </li>
+              </ul>
+            </nav>
+            {props.children}
+          </body>
         </html>
       </>
     );
@@ -59,10 +77,8 @@ export default defineConfig({
     pages.push({
       path: "/",
       children: (
-        <div className="container mx-auto">
-          <h1 className="mb-8 text-center text-4xl font-bold text-gray-800">
-            Pokedex
-          </h1>
+        <div className="">
+          <h1 className="">Pokedex</h1>
           <ul>
             {pokemonList.map((pokemon) => (
               <li key={pokemon.name}>
@@ -74,12 +90,18 @@ export default defineConfig({
       ),
     });
 
-    for (const pokemon of pokemonList) {
+    const ps = pokemonList.map(async (pokemon) => {
+      const detailedPokemonResponse = await fetch(pokemon.url);
+      const detailedPokemon: {
+        name: string;
+        url: string;
+      } = await detailedPokemonResponse.json();
+
       pages.push({
         path: `/pokemon/${pokemon.name}`,
         children: (
           <>
-            <h1>{pokemon.name}</h1>
+            <h1>{detailedPokemon.name}</h1>
             <img
               src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.url
                 .split("/")
@@ -89,7 +111,9 @@ export default defineConfig({
           </>
         ),
       });
-    }
+    });
+
+    await Promise.all(ps);
 
     return pages;
   },

@@ -2,10 +2,13 @@ import { $ } from "bun";
 import { watch } from "fs";
 import { zzapBundler } from "../bundler/zzapBundler";
 import { zaapConfig } from "../config/zzapConfig";
+import { getLogger } from "../logging/getLogger";
 
 export let generatingPromise:
   | ReturnType<typeof zzapBundler.generate>
   | undefined;
+
+const logger = getLogger();
 
 export const zzapCommander = {
   async watch(props: { port: number | undefined; open?: boolean }) {
@@ -43,8 +46,11 @@ export const zzapCommander = {
       process.exit(0);
     });
 
+    const port = props.port || 3000;
+    logger.info(`zzag server running on http://localhost:${port}`);
+
     Bun.serve({
-      port: props.port || 3000,
+      port: port,
       fetch(request) {
         const url = request.url;
         const pathname = new URL(url).pathname;
@@ -53,10 +59,6 @@ export const zzapCommander = {
         return new Response(Bun.file(`./dist${pathname}${fileName}`));
       },
     });
-
-    if (props.open) {
-      await $`open http://localhost:${props.port || 3000}`;
-    }
   },
   async build() {
     const config = await zaapConfig.get();

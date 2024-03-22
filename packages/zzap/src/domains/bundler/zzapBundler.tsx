@@ -7,8 +7,8 @@ import { zaapConfig } from "../config/zzapConfig";
 
 export const zzapBundler = {
   async generate() {
-    logger.info("Building site");
     const config = await zaapConfig.get();
+    logger.info(`Building ${config.siteTitle}...`);
 
     // Clean output folder
     for await (const path of new Glob(config.outputFolder + "/**/*.html").scan({
@@ -46,23 +46,25 @@ export const zzapBundler = {
 
       for await (const filePath of filesIterator) {
         const pageMarkdown = await Bun.file(filePath).text();
+
         const path = filePath
           .replace(config.contentFolder, "")
           .replace(/\.mdx?$/, "")
           .replace(/\.md?$/, "")
           .replace(/\/index$/, "");
 
+        console.log("path", path);
+
         const pageHTML = md.render(pageMarkdown);
         const jsx = config.layout({
           head: <></>,
           children: (
             <>
-              <main
-                className="container"
+              <div
                 dangerouslySetInnerHTML={{
                   __html: pageHTML,
                 }}
-              ></main>
+              ></div>
             </>
           ),
         });
