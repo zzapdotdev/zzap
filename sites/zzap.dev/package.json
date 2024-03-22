@@ -4,10 +4,11 @@
   "authors": "René-Pier Deshaies-Géllinas",
   "version": "1.0.0",
   "scripts": {
-    "dev": "bun zzap --watch --port 3000",
+    "dev": "bun zzap --watch --open --port 3000",
     "build": "bun zzap --build"
   },
   "dependencies": {
+    "@picocss/pico": "^2.0.6",
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {

@@ -5,7 +5,14 @@ export default defineConfig({
   siteTitle: "zzap",
   contentFolder: "./content",
   outputFolder: "./dist",
-  cssFiles: ["styles.css"],
+  cssFiles: [
+    {
+      path: "styles.css",
+    },
+    {
+      path: "../../node_modules/@picocss/pico/css/pico.css",
+    },
+  ],
   layout(props) {
     return (
       <>

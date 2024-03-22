@@ -5,7 +5,9 @@
     "dev": "bun run package && bunx turbo dev",
     "build": "bun run package && bunx turbo build",
     "test": "bunx turbo test",
-    "package": "bunx turbo package"
+    "package": "bunx turbo package",
+    "build:zzap.dev": "bun run package && bunx turbo build --filter zzap.dev",
+    "build:pokedex": "bun run package && bunx turbo build --filter pokedex"
   },
   "workspaces": [
     "packages/*",

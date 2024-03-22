@@ -25,13 +25,14 @@ export const zzapBundler = {
 
     // Copy CSS files
     for (const file of config.cssFiles || []) {
-      const css = await Bun.file(file).text();
-      await Bun.write(`./${config.outputFolder}/` + file, css);
+      const css = await Bun.file(file.path).text();
+      const fileName = file.fileName || file.path.split("/").pop();
+      await Bun.write(`./${config.outputFolder}/` + fileName, css);
     }
 
     // Render Pages with Glob
     let globFileCount = 0;
-    const globPatterns = config.globPatterns || ["**/*.mdx"];
+    const globPatterns = config.globPatterns || ["**/*.mdx", "**/*.md"];
 
     for (const pattern of globPatterns) {
       const glob = new Glob(config.contentFolder + "/" + pattern);
@@ -48,6 +49,7 @@ export const zzapBundler = {
         const path = filePath
           .replace(config.contentFolder, "")
           .replace(/\.mdx?$/, "")
+          .replace(/\.md?$/, "")
           .replace(/\/index$/, "");
 
         const pageHTML = md.render(pageMarkdown);
