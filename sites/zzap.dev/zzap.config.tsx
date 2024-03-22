@@ -1,4 +1,5 @@
 import React from "react";
+import Server from "react-dom/server";
 import { defineConfig } from "zzap";
 import { Content } from "./src/Content";
 
@@ -7,12 +8,19 @@ export default defineConfig({
   contentFolder: "./content",
   outputFolder: "./dist",
   tailwind: true,
+  favicon: {
+    path: "./favicon.png",
+  },
+  react: {
+    React: React,
+    Server: Server,
+  },
   cssFiles: [
     {
       path: "../../node_modules/@picocss/pico/css/pico.css",
     },
   ],
-  layout(props) {
+  document(props) {
     return (
       <>
         <html lang="en">
@@ -22,19 +30,18 @@ export default defineConfig({
               name="viewport"
               content="width=device-width, initial-scale=1.0"
             />
+            <link rel="icon" href="/favicon.png" />
 
+            <link rel="stylesheet" href="/zzap-styles/pico.css" />
             {props.head}
           </head>
-          <body>
-            <div id="root">
-              <React.StrictMode>
-                <Content>{props.children}</Content>
-              </React.StrictMode>
-            </div>
-          </body>
+          <body>{props.children}</body>
           {props.scripts}
         </html>
       </>
     );
+  },
+  body(props) {
+    return <Content>{props.children}</Content>;
   },
 });

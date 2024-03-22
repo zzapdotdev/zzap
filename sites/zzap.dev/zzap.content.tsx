@@ -1,5 +1,8 @@
-const root = document.querySelector("#root");
+import React from "react";
+import { hydrateRoot } from "react-dom/client";
+
+const root = document.querySelector("#zzap-id");
 
 if (root) {
-  // hydrateRoot(root, <Content children={<>ok?</>} />);
+  hydrateRoot(root, <div {...(window as any).__zzap.props} />);
 }

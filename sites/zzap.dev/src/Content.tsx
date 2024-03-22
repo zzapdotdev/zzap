@@ -2,6 +2,8 @@ import clsx from "clsx";
 import React from "react";
 
 export function Content(props: { children: React.ReactNode }) {
+  const [counter, setCounter] = React.useState(0);
+
   return (
     <div className="bg-white text-black dark:bg-zinc-900 dark:text-white">
       <main className="container mx-auto">
@@ -16,7 +18,7 @@ export function Content(props: { children: React.ReactNode }) {
                   "self-center whitespace-nowrap text-2xl font-semibold"
                 }
               >
-                zzap
+                zzap {counter > 0 ? `(${counter})` : ""}
               </ZzapText>
             </a>
             <button
@@ -62,6 +64,13 @@ export function Content(props: { children: React.ReactNode }) {
         </nav>
         <Container className="prose prose-xl dark:prose-invert">
           {props.children}
+          <button
+            onClick={() => {
+              setCounter(counter + 1);
+            }}
+          >
+            Increment
+          </button>
         </Container>
       </main>
     </div>
@@ -75,7 +84,7 @@ export function Container(props: {
   return (
     <div
       className={clsx(
-        "mx-auto flex max-w-screen-xl flex-wrap items-center justify-between p-4",
+        "mx-auto flex w-full max-w-screen-xl flex-wrap items-center justify-between p-4",
         props.className,
       )}
     >

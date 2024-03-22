@@ -1,7 +1,7 @@
 import Bun, { Glob } from "bun";
 import fs from "fs/promises";
 import markdownit from "markdown-it";
-import { renderToString } from "react-dom/server";
+
 import { logger } from "../../cli";
 import { zaapConfig } from "../config/zzapConfig";
 
@@ -36,6 +36,10 @@ export const zzapBundler = {
       await Bun.write(`./${config.outputFolder}/zzap-styles/` + fileName, css);
     }
 
+    // Copy Favicon
+    const favicon = await Bun.file(config.favicon.path);
+    await Bun.write(`./${config.outputFolder}/${favicon.name}`, favicon);
+
     // Make ClientJS
     await Bun.build({
       entrypoints: ["./zzap.content.tsx"],
@@ -48,6 +52,20 @@ export const zzapBundler = {
     let globFileCount = 0;
     const globPatterns = config.globPatterns || ["**/*.mdx", "**/*.md"];
 
+    const head = (
+      <>
+        {config.tailwind && (
+          <link rel="stylesheet" href="/zzap-styles/tailwind.css" />
+        )}
+      </>
+    );
+
+    const scripts = (
+      <>
+        <script src="/zzap-scripts/zzap.content.js"></script>
+      </>
+    );
+
     for (const pattern of globPatterns) {
       const glob = new Glob(config.contentFolder + "/" + pattern);
 
@@ -57,19 +75,6 @@ export const zzapBundler = {
       });
 
       logger.info(`Rendering pages with pattern: ${pattern}`);
-      const head = (
-        <>
-          {config.tailwind && (
-            <link rel="stylesheet" href="/zzap-styles/tailwind.css" />
-          )}
-        </>
-      );
-
-      const scripts = (
-        <>
-          <script src="/zzap-scripts/zzap.content.js"></script>
-        </>
-      );
 
       for await (const filePath of filesIterator) {
         const pageMarkdown = await Bun.file(filePath).text();
@@ -81,23 +86,37 @@ export const zzapBundler = {
           .replace(/\/index$/, "");
 
         const pageHTML = md.render(pageMarkdown);
-        const jsx = config.layout({
-          head: head,
+
+        const content = config.body({
           children: (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: pageHTML,
+              }}
+            ></div>
+          ),
+        });
+
+        const root = <div id="zzap-root">{content}</div>;
+
+        const jsx = config.document({
+          head: head,
+          children: root,
+          scripts: (
             <>
-              <div
-                style={{
-                  width: "100%",
-                }}
+              <script
                 dangerouslySetInnerHTML={{
-                  __html: pageHTML,
+                  __html: `
+window.__zzap = ${JSON.stringify({
+                    props: content.props,
+                  })};`,
                 }}
-              ></div>
+              ></script>
+              {scripts}
             </>
           ),
-          scripts: scripts,
         });
-        const html = renderToString(jsx);
+        const html = config.react.Server.renderToString(jsx);
         Bun.write(`${config.outputFolder}/${path}/index.html`, html);
         globFileCount++;
       }
@@ -113,12 +132,12 @@ export const zzapBundler = {
       });
 
       for (const page of dynamicPages) {
-        const jsx = config.layout({
-          head: <></>,
+        const jsx = config.document({
+          head: head,
           children: page.children,
-          scripts: <></>,
+          scripts: scripts,
         });
-        const html = renderToString(jsx);
+        const html = config.react.Server.renderToString(jsx);
         Bun.write(`${config.outputFolder}/${page.path}/index.html`, html);
       }
     }

@@ -1,5 +1,11 @@
+import type { default as React } from "react";
+import type { default as Server } from "react-dom/server";
+
 export function defineConfig(config: {
   siteTitle: string;
+  favicon: {
+    path: string;
+  };
   contentFolder: string;
   outputFolder: string;
   tailwind?: boolean;
@@ -7,12 +13,17 @@ export function defineConfig(config: {
     path: string;
     fileName?: string;
   }>;
+  react: {
+    React: typeof React;
+    Server: typeof Server;
+  };
   globPatterns?: Array<string>;
-  layout(props: {
+  document(props: {
     head: JSX.Element;
     children: JSX.Element;
     scripts: JSX.Element;
   }): JSX.Element;
+  body(props: { children: JSX.Element }): JSX.Element;
   dynamic?(context: {
     addPage(props: { path: string; children: JSX.Element }): void;
   }): Promise<void>;
