@@ -64,13 +64,13 @@ export function Content(props: { children: React.ReactNode }) {
         </nav>
         <Container className="prose prose-xl dark:prose-invert">
           {props.children}
-          <button
+          {/* <button
             onClick={() => {
               setCounter(counter + 1);
             }}
           >
             Increment
-          </button>
+          </button> */}
         </Container>
       </main>
     </div>
