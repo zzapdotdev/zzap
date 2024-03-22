@@ -12,7 +12,7 @@ export const zzapBundler = {
 
     // Clean output folder
     const filesNotToRemoveDuringOuputFolderCleanup = [
-      config.outputFolder + "/tailwind.css",
+      config.outputFolder + "/zzap-styles/tailwind.css",
     ];
 
     for await (const path of new Glob(config.outputFolder + "/**/*").scan({
