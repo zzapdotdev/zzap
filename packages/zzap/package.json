@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@types/bun": "^1.0.10",
-    "bun": "^1.0.33",
+    "bun": "^1.0.34",
     "lightningcss": "^1.24.1",
     "markdown-it": "^14.1.0",
     "minisearch": "^6.3.0",

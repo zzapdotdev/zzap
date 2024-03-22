@@ -47,7 +47,7 @@ export default defineConfig({
     );
   },
 
-  async dynamic() {
+  async dynamic(context) {
     const pages: Array<{ path: string; children: JSX.Element }> = [];
     const limit = 5000;
     let nextUrl = `https://pokeapi.co/api/v2/pokemon?limit=${limit}`;
@@ -74,7 +74,7 @@ export default defineConfig({
       nextUrl = pokemons.next;
     }
 
-    pages.push({
+    context.addPage({
       path: "/",
       children: (
         <div className="">
@@ -97,7 +97,7 @@ export default defineConfig({
         url: string;
       } = await detailedPokemonResponse.json();
 
-      pages.push({
+      context.addPage({
         path: `/pokemon/${pokemon.name}`,
         children: (
           <>
@@ -114,7 +114,5 @@ export default defineConfig({
     });
 
     await Promise.all(ps);
-
-    return pages;
   },
 });

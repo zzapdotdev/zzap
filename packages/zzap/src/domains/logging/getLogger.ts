@@ -1,11 +1,11 @@
-export const getLogger = makeGetLogger("⚡Zap", {
+export const getLogger = makeGetLogger("⚡zzap", {
   console,
 });
 
 function makeGetLogger(appName: string, deps: { console: Console }) {
   return function getLogger(
     serviceName: string = "",
-    props?: { pretty?: boolean }
+    props?: { pretty?: boolean },
   ) {
     const pretty =
       props?.pretty !== undefined
@@ -29,7 +29,13 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
         deps.console.info(
           pretty
             ? `${infoLabel} ${prefixLabel} ${message}${prettyData}`
-            : getJSONLog({ level: "info", appName, serviceName, message, data })
+            : getJSONLog({
+                level: "info",
+                appName,
+                serviceName,
+                message,
+                data,
+              }),
         );
       },
       debug(message: string, data?: Record<string, any>) {
@@ -57,7 +63,7 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
                   serviceName,
                   message,
                   data,
-                })
+                }),
           );
         }
       },
@@ -67,7 +73,13 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
         deps.console.warn(
           pretty
             ? `${warnLabel} ${prefixLabel} ${message}${prettyData}`
-            : getJSONLog({ level: "warn", appName, serviceName, message, data })
+            : getJSONLog({
+                level: "warn",
+                appName,
+                serviceName,
+                message,
+                data,
+              }),
         );
       },
       error(message: string, data?: Record<string, any> & { error?: any }) {
@@ -97,7 +109,7 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
                 serviceName,
                 message,
                 data: dataWithError,
-              })
+              }),
         );
       },
     };

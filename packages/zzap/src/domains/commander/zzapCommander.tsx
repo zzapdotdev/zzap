@@ -17,16 +17,23 @@ export const zzapCommander = {
     const config = await zaapConfig.get();
 
     const watcher = watch("./", { recursive: true }, (_event, filename) => {
-      if (generatingPromise) {
+      if (generatingPromise || !filename) {
+        return;
+      }
+      const isInsideDistFolder = filename.includes("dist/");
+      if (isInsideDistFolder) {
         return;
       }
 
+      const contentFolderPath = config.contentFolder.replace("./", "");
+      const foldersToWatch = [contentFolderPath, "src"];
       const filesToWatch = ["zzap.config.tsx"];
 
-      const cleanedContentFolder = config.contentFolder.replace("./", "");
-      const isInsideContentFolder = filename?.includes(cleanedContentFolder);
-
-      if (filesToWatch.includes(filename || "") || isInsideContentFolder) {
+      if (
+        filesToWatch.includes(filename) ||
+        foldersToWatch.some((folder) => filename.startsWith(folder))
+      ) {
+        logger.info(`File changed: ${filename}`);
         generatingPromise = zzapBundler.generate();
         generatingPromise.then(() => {
           generatingPromise = undefined;
@@ -47,7 +54,7 @@ export const zzapCommander = {
     });
 
     const port = props.port || 3000;
-    logger.info(`zzag server running on http://localhost:${port}`);
+    logger.info(`zzap server running on http://localhost:${port}`);
 
     Bun.serve({
       port: port,
@@ -72,5 +79,5 @@ export const zzapCommander = {
 };
 
 async function runTailwind(props: { watch: boolean }) {
-  await $`tailwindcss -i ./styles.css -o ./dist/styles.css ${props.watch ? "--watch" : ""}`;
+  await $`tailwindcss -i ./tailwind.css -o ./dist/zzap-styles/tailwind.css ${props.watch ? "--watch" : ""}`;
 }

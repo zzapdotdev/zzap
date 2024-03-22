@@ -1,11 +1,11 @@
 import type { zzapConfigType } from "../../module";
 
-let get = 0;
+let counterToBustCache = 0;
 export const zaapConfig = {
   async get() {
-    get++;
+    counterToBustCache++;
 
-    const configFileLocation = `./zzap.config.tsx?get=${get}`;
+    const configFileLocation = `./zzap.config.tsx?counter==${counterToBustCache}`;
     const configModule = require(configFileLocation);
     const config: zzapConfigType = configModule.default;
 

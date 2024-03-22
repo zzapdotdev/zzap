@@ -6,6 +6,9 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[ignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"

@@ -11,10 +11,16 @@ export const zzapBundler = {
     logger.info(`Building ${config.siteTitle}...`);
 
     // Clean output folder
-    for await (const path of new Glob(config.outputFolder + "/**/*.html").scan({
+    const filesNotToRemoveDuringOuputFolderCleanup = [
+      config.outputFolder + "/tailwind.css",
+    ];
+
+    for await (const path of new Glob(config.outputFolder + "/**/*").scan({
       cwd: ".",
     })) {
-      await fs.rm(path);
+      if (!filesNotToRemoveDuringOuputFolderCleanup.includes(path)) {
+        await fs.rm(path);
+      }
     }
 
     const timestampMs = Date.now();
@@ -27,8 +33,16 @@ export const zzapBundler = {
     for (const file of config.cssFiles || []) {
       const css = await Bun.file(file.path).text();
       const fileName = file.fileName || file.path.split("/").pop();
-      await Bun.write(`./${config.outputFolder}/` + fileName, css);
+      await Bun.write(`./${config.outputFolder}/zzap-styles/` + fileName, css);
     }
+
+    // Make ClientJS
+    await Bun.build({
+      entrypoints: ["./zzap.content.tsx"],
+      target: "browser",
+      format: "esm",
+      outdir: "./dist/zzap-scripts",
+    });
 
     // Render Pages with Glob
     let globFileCount = 0;
@@ -43,6 +57,19 @@ export const zzapBundler = {
       });
 
       logger.info(`Rendering pages with pattern: ${pattern}`);
+      const head = (
+        <>
+          {config.tailwind && (
+            <link rel="stylesheet" href="/zzap-styles/tailwind.css" />
+          )}
+        </>
+      );
+
+      const scripts = (
+        <>
+          <script src="/zzap-scripts/zzap.content.js"></script>
+        </>
+      );
 
       for await (const filePath of filesIterator) {
         const pageMarkdown = await Bun.file(filePath).text();
@@ -53,20 +80,22 @@ export const zzapBundler = {
           .replace(/\.md?$/, "")
           .replace(/\/index$/, "");
 
-        console.log("path", path);
-
         const pageHTML = md.render(pageMarkdown);
         const jsx = config.layout({
-          head: <></>,
+          head: head,
           children: (
             <>
               <div
+                style={{
+                  width: "100%",
+                }}
                 dangerouslySetInnerHTML={{
                   __html: pageHTML,
                 }}
               ></div>
             </>
           ),
+          scripts: scripts,
         });
         const html = renderToString(jsx);
         Bun.write(`${config.outputFolder}/${path}/index.html`, html);
@@ -75,23 +104,28 @@ export const zzapBundler = {
     }
 
     // Render dynamic pages
-    let dynamicPageCount = 0;
+    const dynamicPages: Array<{ path: string; children: JSX.Element }> = [];
     if (config.dynamic) {
-      const dynamicPages = await config.dynamic();
+      await config.dynamic({
+        addPage(props) {
+          dynamicPages.push(props);
+        },
+      });
+
       for (const page of dynamicPages) {
         const jsx = config.layout({
           head: <></>,
           children: page.children,
+          scripts: <></>,
         });
         const html = renderToString(jsx);
         Bun.write(`${config.outputFolder}/${page.path}/index.html`, html);
-        dynamicPageCount++;
       }
     }
 
     const timeDiff = Date.now() - timestampMs;
     logger.info(
-      `Site built in ${timeDiff}ms. ${dynamicPageCount} dynamic pages and ${globFileCount} glob pages rendered.`,
+      `Site built in ${timeDiff}ms with ${globFileCount} glob pages and ${dynamicPages.length} dynamic pages.`,
     );
   },
 };

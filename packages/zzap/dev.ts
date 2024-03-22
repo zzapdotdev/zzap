@@ -1,4 +1,4 @@
-import Bun, { $ } from "bun";
+import { $ } from "bun";
 
 const zzapCLITask = $`bun --watch build --compile ./src/cli.tsx --outfile ./dist/zzap --target node`;
 const zzapModuleTask = $`bun --watch build ./src/module.tsx --outfile ./dist/index.js --target node`;

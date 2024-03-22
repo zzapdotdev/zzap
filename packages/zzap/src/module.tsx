@@ -8,13 +8,14 @@ export function defineConfig(config: {
     fileName?: string;
   }>;
   globPatterns?: Array<string>;
-  layout(props: { head: JSX.Element; children: JSX.Element }): JSX.Element;
-  dynamic?(): Promise<
-    Array<{
-      path: string;
-      children: JSX.Element;
-    }>
-  >;
+  layout(props: {
+    head: JSX.Element;
+    children: JSX.Element;
+    scripts: JSX.Element;
+  }): JSX.Element;
+  dynamic?(context: {
+    addPage(props: { path: string; children: JSX.Element }): void;
+  }): Promise<void>;
 }) {
   return config;
 }
