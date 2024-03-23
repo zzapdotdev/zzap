@@ -13,21 +13,22 @@
     "package": "bun package.ts"
   },
   "dependencies": {
-    "@types/bun": "1.0.10",
     "bun": "1.0.35",
     "lightningcss": "1.24.1",
     "markdown-it": "14.1.0",
     "minisearch": "6.3.0",
     "shiki": "1.2.0",
-    "typescript": "5.4.3"
+    "typescript": "5.4.3",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/bun": "1.0.10",
     "@types/react": "18.2.67",
     "@types/react-dom": "18.2.22",
     "@types/markdown-it": "13.0.7"
   },
   "peerDependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "*",
+    "react-dom": "*"
   }
 }

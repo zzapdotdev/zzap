@@ -1,19 +1,10 @@
 import React from "react";
 import Server from "react-dom/server";
 import { defineConfig } from "zzap";
-import { Root } from "./src/Root";
 
 export default defineConfig({
   title: "zzap.dev",
-  features: {
-    tailwind: true,
-  },
-  publicFiles: [
-    {
-      path: "../../node_modules/@picocss/pico/css/pico.css",
-      name: "pico.css",
-    },
-  ],
+
   deps: {
     react: React,
     "react-dom/server": Server,
@@ -40,5 +31,4 @@ export default defineConfig({
       </>
     );
   },
-  RootComponent: Root,
 });

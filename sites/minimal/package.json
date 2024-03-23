@@ -1,13 +1,12 @@
 {
-  "name": "pokedex",
+  "name": "minimal",
   "scripts": {
     "dev": "bun zzap --watch --port 3000",
     "build": "bun zzap --build"
   },
-  "dependencies": {
-    "@picocss/pico": "^2.0.6"
-  },
   "devDependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "zzap": "workspace:*"
   }
 }

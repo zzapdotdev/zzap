@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 
-export function Content(props: { children: React.ReactNode }) {
+export function Root(props: { children: React.ReactNode; content: string }) {
   const [counter, setCounter] = React.useState(0);
 
   return (
@@ -63,7 +63,11 @@ export function Content(props: { children: React.ReactNode }) {
           </Container>
         </nav>
         <Container className="prose prose-xl dark:prose-invert">
-          {props.children}
+          <div
+            dangerouslySetInnerHTML={{
+              __html: props.content,
+            }}
+          ></div>
           {/* <button
             onClick={() => {
               setCounter(counter + 1);

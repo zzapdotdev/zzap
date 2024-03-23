@@ -1,7 +1,7 @@
 import Bun from "bun";
 import { parseArgs } from "util";
 import { zzapCommander } from "./domains/commander/zzapCommander";
-import { getLogger } from "./domains/logging/getLogger";
+import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
 export const logger = getLogger();
 
@@ -20,7 +20,7 @@ async function main() {
       port: {
         type: "string",
       },
-      open: {
+      debug: {
         type: "boolean",
       },
     },
@@ -28,12 +28,13 @@ async function main() {
     allowPositionals: true,
   });
 
-  logger.info("Verifying zzap.config.tsx");
-
+  logger.log("Verifying zzap.config.tsx");
+  if (values.debug) {
+    enableDebug();
+  }
   if (values.watch) {
     await zzapCommander.watch({
       port: Number(values.port),
-      open: values.open,
     });
   }
 

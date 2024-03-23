@@ -4,7 +4,7 @@
   "authors": "René-Pier Deshaies-Géllinas",
   "version": "1.0.0",
   "scripts": {
-    "dev": "bun zzap --watch --open --port 3002",
+    "dev": "bun zzap --watch --port 3000 --debug",
     "build": "bun zzap --build"
   },
   "dependencies": {

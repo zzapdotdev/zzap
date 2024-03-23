@@ -1,120 +1,132 @@
-export const getLogger = makeGetLogger("⚡zzap", {
+export const { getLogger, enableDebug } = makeGetLogger("⚡zzap", {
   console,
 });
 
 function makeGetLogger(appName: string, deps: { console: Console }) {
-  return function getLogger(
-    serviceName: string = "",
-    props?: { pretty?: boolean },
-  ) {
-    const pretty =
-      props?.pretty !== undefined
-        ? props?.pretty
-        : process.env.NODE_ENV === "development";
-    const prefix = serviceName
-      ? `${appName} ▶ ${serviceName} ▶`
-      : `${appName} ▶`;
+  let includeDebugStatements = false;
+  return {
+    enableDebug() {
+      includeDebugStatements = true;
+    },
+    getLogger(serviceName: string = "", props?: { pretty?: boolean }) {
+      const pretty =
+        props?.pretty !== undefined
+          ? props?.pretty
+          : process.env.NODE_ENV === "development";
+      const prefix = serviceName
+        ? `${appName} ▶ ${serviceName} ▶`
+        : `${appName} ▶`;
 
-    const infoLabel = style("INFO").bold().blue().toString();
-    const debugLabel = style("DEBUG").bold().magenta().toString();
-    const warnLabel = style("WARN").bold().yellow().toString();
-    const errorLabel = style("ERROR").bold().red().toString();
-    const prefixLabel = style(prefix).cyan().toString();
+      const infoLabel = style("INFO:").bold().blue().toString();
+      const debugLabel = style("DEBUG").bold().magenta().toString();
+      const warnLabel = style("WARN:").bold().yellow().toString();
+      const errorLabel = style("ERROR").bold().red().toString();
+      const prefixLabel = style(prefix).cyan().toString();
 
-    let debugTimestamp: number;
-    const childLogger = {
-      info(message: string, data?: Record<string, any>) {
-        const prettyData = getPrettyData(data, pretty);
+      let debugTimestamp: number;
+      const childLogger = {
+        log(message: string, data?: Record<string, any>) {
+          const prettyData = getPrettyData(data, pretty);
 
-        deps.console.info(
-          pretty
-            ? `${infoLabel} ${prefixLabel} ${message}${prettyData}`
-            : getJSONLog({
-                level: "info",
-                appName,
-                serviceName,
-                message,
-                data,
-              }),
-        );
-      },
-      debug(message: string, data?: Record<string, any>) {
-        const prettyData = getPrettyData(data, pretty);
-
-        const currentTimestamp = new Date().getTime();
-        const timeDiff = debugTimestamp
-          ? ` [+${currentTimestamp - debugTimestamp}ms]`
-          : " ";
-        debugTimestamp = currentTimestamp;
-
-        const DEBUG = process.env["DEBUG"];
-        const isDebug =
-          DEBUG === "*" ||
-          DEBUG?.split(",").includes(serviceName) ||
-          DEBUG?.split(",").includes(appName);
-
-        if (isDebug) {
-          deps.console.debug(
+          deps.console.info(
             pretty
-              ? `${debugLabel} ${prefixLabel}${timeDiff} ${message}${prettyData}`
+              ? `${prefixLabel} ${message}${prettyData}`
               : getJSONLog({
-                  level: "debug",
+                  level: "info",
                   appName,
                   serviceName,
                   message,
                   data,
                 }),
           );
-        }
-      },
-      warn(message: string, data?: Record<string, any>) {
-        const prettyData = getPrettyData(data, pretty);
+        },
+        info(message: string, data?: Record<string, any>) {
+          const prettyData = getPrettyData(data, pretty);
 
-        deps.console.warn(
-          pretty
-            ? `${warnLabel} ${prefixLabel} ${message}${prettyData}`
-            : getJSONLog({
-                level: "warn",
-                appName,
-                serviceName,
-                message,
-                data,
-              }),
-        );
-      },
-      error(message: string, data?: Record<string, any> & { error?: any }) {
-        const error = data?.error;
-        const errorObject =
-          error instanceof Error
-            ? {
-                name: error.name,
-                message: error.message,
-                stack: error.stack,
-                cause: error.cause,
-              }
-            : error;
+          deps.console.info(
+            pretty
+              ? `${prefixLabel} ${infoLabel} ${message}${prettyData}`
+              : getJSONLog({
+                  level: "info",
+                  appName,
+                  serviceName,
+                  message,
+                  data,
+                }),
+          );
+        },
+        debug(message: string, data?: Record<string, any>) {
+          const prettyData = getPrettyData(data, pretty);
 
-        const hasDataOrError = error || data;
-        const dataWithError = hasDataOrError
-          ? { ...data, error: errorObject }
-          : undefined;
-        const prettyData = getPrettyData(dataWithError, pretty);
+          const currentTimestamp = new Date().getTime();
+          const timeDiff = debugTimestamp
+            ? ` [+${currentTimestamp - debugTimestamp}ms]`
+            : "";
+          debugTimestamp = currentTimestamp;
 
-        deps.console.error(
-          pretty
-            ? `${errorLabel} ${prefixLabel} ${message}${prettyData}`
-            : getJSONLog({
-                level: "error",
-                appName,
-                serviceName,
-                message,
-                data: dataWithError,
-              }),
-        );
-      },
-    };
+          if (includeDebugStatements) {
+            deps.console.debug(
+              pretty
+                ? `${prefixLabel} ${debugLabel}${timeDiff} ${message}${prettyData}`
+                : getJSONLog({
+                    level: "debug",
+                    appName,
+                    serviceName,
+                    message,
+                    data,
+                  }),
+            );
+          }
+        },
+        warn(message: string, data?: Record<string, any>) {
+          const prettyData = getPrettyData(data, pretty);
 
-    return childLogger;
+          deps.console.warn(
+            pretty
+              ? `${prefixLabel} ${warnLabel} ${message}${prettyData}`
+              : getJSONLog({
+                  level: "warn",
+                  appName,
+                  serviceName,
+                  message,
+                  data,
+                }),
+          );
+        },
+        error(message: string, data?: Record<string, any> & { error?: any }) {
+          const error = data?.error;
+          const errorObject =
+            error instanceof Error
+              ? {
+                  name: error.name,
+                  message: error.message,
+                  stack: error.stack,
+                  cause: error.cause,
+                }
+              : error;
+
+          const hasDataOrError = error || data;
+          const dataWithError = hasDataOrError
+            ? { ...data, error: errorObject }
+            : undefined;
+          const prettyData = getPrettyData(dataWithError, pretty);
+
+          deps.console.error(
+            pretty
+              ? `${prefixLabel} ${errorLabel} ${message}${prettyData}`
+              : getJSONLog({
+                  level: "error",
+                  appName,
+                  serviceName,
+                  message,
+                  data: dataWithError,
+                }),
+          );
+        },
+      };
+
+      return childLogger;
+    },
   };
 }
 

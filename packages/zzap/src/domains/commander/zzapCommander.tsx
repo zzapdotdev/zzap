@@ -1,17 +1,15 @@
 import { $ } from "bun";
 import { watch } from "fs";
+import path from "path";
 import { zzapBundler } from "../bundler/zzapBundler";
 import { zaapConfig } from "../config/zzapConfig";
 import { getLogger } from "../logging/getLogger";
-
-export let generatingPromise:
-  | ReturnType<typeof zzapBundler.generate>
-  | undefined;
+export let generatingPromise: ReturnType<typeof $> | undefined;
 
 const logger = getLogger();
 
 export const zzapCommander = {
-  async watch(props: { port: number | undefined; open?: boolean }) {
+  async watch(props: { port: number | undefined }) {
     await zzapBundler.generate();
 
     const config = await zaapConfig.get();
@@ -20,41 +18,46 @@ export const zzapCommander = {
       if (generatingPromise || !filename) {
         return;
       }
-      const isInsideDistFolder = filename.includes("dist/");
-      if (isInsideDistFolder) {
-        return;
-      }
 
-      const contentFolderPath = config.contentFolder.replace("./", "");
-      const foldersToWatch = [contentFolderPath, "src"];
-      const filesToWatch = ["zzap.config.tsx"];
+      const fileNameAbsolute = path.join(__dirname, filename);
+      const publicDirAbsolutePath = path.join(__dirname, config.publicDir);
+      const contentDirAbsolutePath = path.join(__dirname, config.contentDir);
 
-      if (
-        filesToWatch.includes(filename) ||
-        foldersToWatch.some((folder) => filename.startsWith(folder))
-      ) {
-        logger.info(`File changed: ${filename}`);
-        generatingPromise = zzapBundler.generate();
+      const foldersToWatch = [publicDirAbsolutePath, contentDirAbsolutePath];
+      const filesToWatch = [
+        "zzap.config.tsx",
+        "tailwind.css",
+        "tailwind.config.js",
+      ];
+
+      const fileToWatchedChanged = filesToWatch.includes(filename);
+      const folderToWatchedChanged = foldersToWatch.some((folder) =>
+        fileNameAbsolute.startsWith(folder),
+      );
+
+      if (fileToWatchedChanged || folderToWatchedChanged) {
+        logger.log(`File changed: ${filename}`);
+        // logger.log("watching", {
+        //   fileNameAbsolute,
+        //   publicDirAbsolutePath,
+        //   contentDirAbsolutePath,
+        //   fileToWatchedChanged,
+        //   folderToWatchedChanged,
+        // });
+        generatingPromise = $`zzap --build`;
         generatingPromise.then(() => {
           generatingPromise = undefined;
         });
       }
     });
 
-    if (config.tailwind) {
-      runTailwind({
-        watch: true,
-      });
-    }
-
     process.on("SIGINT", function closeWatcherWhenCtrlCIsPressed() {
-      // close watcher when Ctrl-C is pressed
       watcher.close();
       process.exit(0);
     });
 
     const port = props.port || 3000;
-    logger.info(`zzap server running on http://localhost:${port}`);
+    logger.log(`zzap server running on http://localhost:${port}`);
 
     Bun.serve({
       port: port,
@@ -63,21 +66,13 @@ export const zzapCommander = {
         const pathname = new URL(url).pathname;
 
         const fileName = pathname.split(".").length > 1 ? "" : "/index.html";
-        return new Response(Bun.file(`./dist${pathname}${fileName}`));
+        const path = `${config.outputDir}${pathname}${fileName}`;
+        logger.debug(`Serving: ${path}`);
+        return new Response(Bun.file(path));
       },
     });
   },
   async build() {
-    const config = await zaapConfig.get();
-    if (config.tailwind) {
-      await runTailwind({
-        watch: false,
-      });
-    }
     await zzapBundler.generate();
   },
 };
-
-async function runTailwind(props: { watch: boolean }) {
-  await $`tailwindcss -i ./tailwind.css -o ./dist/zzap-styles/tailwind.css ${props.watch ? "--watch" : ""}`;
-}
