@@ -23,7 +23,7 @@ export const zzapBundler = {
     await Promise.all([
       publicDirTask(),
       publicFilesTask(),
-      tailwindTask(),
+      commandsTask(),
       buildClientTask(),
       buildPages(),
     ]);
@@ -52,17 +52,21 @@ export const zzapBundler = {
 
     async function buildPages() {
       let globFileCount = 0;
-      const head = (
-        <>
-          {config.features?.tailwind && (
-            <link rel="stylesheet" href="/zzap-styles/tailwind.css" />
-          )}
-        </>
+      const head = <></>;
+      const entryPointFileNames = config.entryPoints.map(
+        (entry) => entry.path.split("/").pop() as string,
       );
-
       const scripts = (
         <>
-          <script src="/zzap-scripts/zzap.client.js"></script>
+          {entryPointFileNames.map((fileName, i) => {
+            const [fileNameWithoutExtension] = fileName.split(".");
+            return (
+              <script
+                key={i}
+                src={`/__zzap-scripts/${fileNameWithoutExtension}.js`}
+              ></script>
+            );
+          })}
         </>
       );
 
@@ -128,12 +132,15 @@ window.__zzap = ${JSON.stringify({
     }
 
     async function buildClientTask() {
+      const entryPoints = config.entryPoints.map((entry) => entry.path);
+
       await Bun.build({
-        entrypoints: ["./zzap.client.tsx"],
+        entrypoints: entryPoints,
         target: "browser",
         format: "esm",
-        outdir: config.outputDir + "/zzap-scripts",
+        outdir: config.outputDir + "/__zzap-scripts",
       });
+
       logger.debug(`buildClientTask`);
     }
 
@@ -148,17 +155,23 @@ window.__zzap = ${JSON.stringify({
       }
       logger.debug(`publicDirTask`);
     }
-    async function tailwindTask() {
-      if (config.features?.tailwind) {
-        const { stdout, stderr, exitCode } =
-          await $`tailwindcss -i ./tailwind.css -o ${config.outputDir}/zzap-styles/tailwind.css`.quiet();
+    async function commandsTask() {
+      const commandPromises = config.commands.map(async (commandProps) => {
+        logger.log(`Running command: ${commandProps.command}`);
+        if (commandProps.silent) {
+          const { exitCode } =
+            await $`${{ raw: commandProps.command }}`.quiet();
 
-        if (exitCode !== 0) {
-          logger.error(Buffer.from(stdout).toString());
-          logger.error(Buffer.from(stderr).toString());
+          if (exitCode !== 0) {
+            await $`${{ raw: commandProps.command }}`;
+          }
+        } else {
+          await $`${{ raw: commandProps.command }}`;
         }
-        logger.debug(`tailwindTask`);
-      }
+      });
+
+      await Promise.all(commandPromises);
+      logger.debug(`commandsTask`);
     }
     async function publicFilesTask() {
       const promises = config.publicFiles.map(async (file) => {

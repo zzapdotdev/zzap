@@ -28,10 +28,10 @@ async function main() {
     allowPositionals: true,
   });
 
-  logger.log("Verifying zzap.config.tsx");
   if (values.debug) {
     enableDebug();
   }
+
   if (values.watch) {
     await zzapCommander.watch({
       port: Number(values.port),

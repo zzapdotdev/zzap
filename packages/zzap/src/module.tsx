@@ -38,15 +38,18 @@ const configSchema = z.object({
       }),
     )
     .default([]),
-  features: z
-    .object({
-      /**
-       * Whether to use Tailwind CSS.
-       * @default false
-       */
-      tailwind: z.boolean().default(false),
-    })
-    .optional(),
+  /**
+   * An array of custom shell commands to run during the build process.
+   */
+  commands: z
+    .array(
+      z.object({
+        command: z.string(),
+        silent: z.boolean().default(true),
+      }),
+    )
+    .default([]),
+  entryPoints: z.array(z.object({ path: z.string() })).default([]),
   deps: z.object({
     /**
      * The default React import.

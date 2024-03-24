@@ -5,15 +5,18 @@ import { Root } from "./src/Root";
 
 export default defineConfig({
   title: "zzap.dev",
-  features: {
-    tailwind: true,
-  },
+  commands: [
+    {
+      command: `tailwindcss -i ./tailwind.css -o .zzap/dist/tailwind.css`,
+    },
+  ],
   publicFiles: [
     {
       path: "../../node_modules/@picocss/pico/css/pico.css",
       name: "pico.css",
     },
   ],
+  entryPoints: [{ path: "./src/index.tsx" }],
   deps: {
     react: React,
     "react-dom/server": Server,
@@ -30,7 +33,7 @@ export default defineConfig({
               content="width=device-width, initial-scale=1.0"
             />
             <link rel="icon" href="/favicon.png" />
-
+            <link rel="stylesheet" href="/tailwind.css" />
             <link rel="stylesheet" href="/pico.css" />
             {props.head}
           </head>

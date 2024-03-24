@@ -3,3 +3,4 @@
 - [ ] Basic site (minimal config)
 - [ ] auto "react" and "react-dom" deps?
 - [ ] 404 page
+- [ ] include markdown render in "dynamic" function

@@ -13,13 +13,7 @@ export function Root(props: { children: React.ReactNode; content: string }) {
               href="/"
               className="flex items-center space-x-3 rtl:space-x-reverse"
             >
-              <ZzapText
-                className={
-                  "self-center whitespace-nowrap text-2xl font-semibold"
-                }
-              >
-                zzap {counter > 0 ? `(${counter})` : ""}
-              </ZzapText>
+              <img src="/zzap-logo-light.png" alt="" className="w-[8rem]" />
             </a>
             <button
               data-collapse-toggle="navbar-default"
@@ -68,13 +62,13 @@ export function Root(props: { children: React.ReactNode; content: string }) {
               __html: props.content,
             }}
           ></div>
-          {/* <button
+          <button
             onClick={() => {
               setCounter(counter + 1);
             }}
           >
-            Increment
-          </button> */}
+            Increment {counter}
+          </button>
         </Container>
       </main>
     </div>
@@ -105,21 +99,5 @@ export function Link(props: { children: React.ReactNode; href: string }) {
     >
       {props.children}
     </a>
-  );
-}
-
-export function ZzapText(props: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <span
-      className={clsx(
-        "bg-gradient-to-r from-yellow-500 to-yellow-300 bg-clip-text font-bold text-transparent",
-        props.className,
-      )}
-    >
-      {props.children}
-    </span>
   );
 }
