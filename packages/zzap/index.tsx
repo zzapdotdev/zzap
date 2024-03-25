@@ -16,7 +16,7 @@ logger.log(`Running "${command}"`);
 if (command === "dev") {
   const zzapCLITask = $`bun --watch build --compile ./src/cli.tsx --outfile ./dist/zzap --target node`;
   const zzapModuleTask = $`bun --watch build ./src/module.tsx --outfile ./dist/index.js --target node`;
-  const zzapClientModuleTask = $`bun --watch build ./src/client.tsx --outfile ./dist//client/index.js --target browser`;
+  const zzapClientModuleTask = $`bun --watch build ./client.tsx --outfile ./dist/client.js --target browser`;
   const typeDefinitionTask = $`tsc --watch --outDir ./dist/types --preserveWatchOutput`;
 
   await Promise.all([
@@ -31,7 +31,7 @@ if (command === "dev") {
 if (command === "package") {
   const zzapCLITask = $`bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node`;
   const zzapModuleTask = $`bun build --minify ./src/module.tsx --outfile ./dist/index.js --target node`;
-  const zzapClientModuleTask = $`bun build ./src/client.tsx --outfile ./dist//client/index.js --target browser`;
+  const zzapClientModuleTask = $`bun build ./client.tsx --outfile ./dist/client.js --target browser`;
   const typeDefinitionTask = $`tsc --outDir ./dist/types `;
 
   await Promise.all([

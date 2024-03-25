@@ -18,10 +18,8 @@ export default defineConfig({
   ],
   entryPoints: [{ path: "./src/index.tsx" }],
   deps: {
-    react: React,
     "react-dom/server": Server,
   },
-
   document(props) {
     return (
       <>

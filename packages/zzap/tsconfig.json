@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     // Enable latest features
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
@@ -27,5 +27,5 @@
     // Custom
     "declaration": true
   },
-  "include": ["src/**/*", "node", "lib"]
+  "include": ["client.tsx", "index.tsx", "src/**/*", "node", "lib", "dom"]
 }

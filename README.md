@@ -19,3 +19,5 @@
 # Maybe
 
 - [ ] rss feed?
+
+discord: https://discord.gg/3FxnevyEth

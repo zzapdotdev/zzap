@@ -1,3 +1,4 @@
+import path from "path";
 import type { zzapConfigType } from "../../module";
 
 let _rootDirectory = "./docs";
@@ -19,9 +20,9 @@ export const zzapConfig = {
     const configModule = await import(configFileLocation);
     const config: zzapConfigType = configModule.default;
 
-    config.srcDir = `${_rootDirectory}/${config.srcDir}`;
-    config.outputDir = `${_rootDirectory}/${config.outputDir}`;
-    config.publicDir = `${_rootDirectory}/${config.publicDir}`;
+    config.srcDir = path.join(`${_rootDirectory}/${config.srcDir}`);
+    config.outputDir = path.join(`${_rootDirectory}/${config.outputDir}`);
+    config.publicDir = path.join(`${_rootDirectory}/${config.publicDir}`);
 
     config.entryPoints = config.entryPoints.map((entry) => {
       return {

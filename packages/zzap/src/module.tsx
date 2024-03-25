@@ -1,6 +1,5 @@
 import z from "zod";
 
-import type { default as React } from "react";
 import type { default as Server } from "react-dom/server";
 
 const configSchema = z.object({
@@ -51,11 +50,6 @@ const configSchema = z.object({
     .default([]),
   entryPoints: z.array(z.object({ path: z.string() })).default([]),
   deps: z.object({
-    /**
-     * The default React import.
-     * e.g. `import React from "react";`
-     */
-    react: z.any() as z.ZodType<typeof React>,
     /**
      * The default ReactDOMServer import.
      * e.g. `import ReactDOMServer from "react-dom/server";`
