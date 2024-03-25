@@ -19,7 +19,7 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
 
       const infoLabel = style("INFO:").bold().blue().toString();
       const debugLabel = style("DEBUG").bold().magenta().toString();
-      const warnLabel = style("WARN:").bold().yellow().toString();
+      const warnLabel = style("WARN").bold().yellow().toString();
       const errorLabel = style("ERROR").bold().red().toString();
       const prefixLabel = style(prefix).cyan().toString();
 

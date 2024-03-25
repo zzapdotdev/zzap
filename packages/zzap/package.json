@@ -9,8 +9,8 @@
     "zzap": "./dist/zzap"
   },
   "scripts": {
-    "dev": "bun dev.ts",
-    "package": "bun package.ts"
+    "dev": "bun index.ts dev",
+    "package": "bun index.ts package"
   },
   "dependencies": {
     "bun": "1.0.35",

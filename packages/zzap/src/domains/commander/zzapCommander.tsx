@@ -2,7 +2,7 @@ import { $ } from "bun";
 import { watch } from "fs";
 import path from "path";
 import { zzapBundler } from "../bundler/zzapBundler";
-import { zaapConfig } from "../config/zzapConfig";
+import { zzapConfig } from "../config/zzapConfig";
 import { getLogger } from "../logging/getLogger";
 export let generatingPromise: ReturnType<typeof $> | undefined;
 
@@ -12,7 +12,7 @@ export const zzapCommander = {
   async watch(props: { port: number | undefined }) {
     await zzapBundler.generate();
 
-    const config = await zaapConfig.get();
+    const config = await zzapConfig.get();
 
     const watcher = watch("./", { recursive: true }, (_event, filename) => {
       if (generatingPromise || !filename) {
@@ -21,9 +21,9 @@ export const zzapCommander = {
 
       const fileNameAbsolute = path.join(__dirname, filename);
       const publicDirAbsolutePath = path.join(__dirname, config.publicDir);
-      const contentDirAbsolutePath = path.join(__dirname, config.contentDir);
+      const srcDirAbsolutePath = path.join(__dirname, config.srcDir);
 
-      const foldersToWatch = [publicDirAbsolutePath, contentDirAbsolutePath];
+      const foldersToWatch = [publicDirAbsolutePath, srcDirAbsolutePath];
       const filesToWatch = [
         "zzap.config.tsx",
         "tailwind.css",

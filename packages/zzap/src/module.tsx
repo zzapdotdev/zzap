@@ -16,7 +16,7 @@ const configSchema = z.object({
    * The directory where the markdown files to be rendered are located.
    * @default "./"
    */
-  contentDir: z.string().default("./content"),
+  srcDir: z.string().default("./src"),
   /**
    * The directory where the output files should be placed.
    * @default "./.zzap/dist"

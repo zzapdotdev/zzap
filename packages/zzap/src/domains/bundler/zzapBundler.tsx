@@ -3,11 +3,11 @@ import fs from "fs/promises";
 import markdownit from "markdown-it";
 
 import { logger } from "../../cli";
-import { zaapConfig } from "../config/zzapConfig";
+import { zzapConfig } from "../config/zzapConfig";
 
 export const zzapBundler = {
   async generate() {
-    const config = await zaapConfig.get();
+    const config = await zzapConfig.get();
     logger.log(`Building ${config.title}...`);
     const buildStartTimestamp = Date.now();
 
@@ -72,7 +72,7 @@ export const zzapBundler = {
 
       const globPatterns = ["**/*.mdx", "**/*.md"];
       for (const pattern of globPatterns) {
-        const glob = new Glob(config.contentDir + "/" + pattern);
+        const glob = new Glob(config.srcDir + "/" + pattern);
 
         const filesIterator = glob.scan({
           cwd: ".",
@@ -83,7 +83,7 @@ export const zzapBundler = {
           const pageMarkdown = await Bun.file(filePath).text();
 
           const path = filePath
-            .replace(config.contentDir, "")
+            .replace(config.srcDir, "")
             .replace(/\.mdx?$/, "")
             .replace(/\.md?$/, "")
             .replace(/\/index$/, "");
@@ -132,7 +132,9 @@ window.__zzap = ${JSON.stringify({
     }
 
     async function buildClientTask() {
-      const entryPoints = config.entryPoints.map((entry) => entry.path);
+      const entryPoints = config.entryPoints.map((entry) => {
+        return entry.path;
+      });
 
       await Bun.build({
         entrypoints: entryPoints,

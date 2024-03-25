@@ -7,7 +7,7 @@ export default defineConfig({
   title: "zzap.dev",
   commands: [
     {
-      command: `tailwindcss -i ./tailwind.css -o .zzap/dist/tailwind.css`,
+      command: `tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/tailwind.css`,
     },
   ],
   publicFiles: [
