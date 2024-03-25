@@ -1,26 +1,21 @@
 import Bun from "bun";
 import { parseArgs } from "util";
 import { zzapCommander } from "./domains/commander/zzapCommander";
-import { getLogger } from "./domains/logging/getLogger";
+import { zzapConfig } from "./domains/config/zzapConfig";
+import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
 export const logger = getLogger();
 
 await main();
 
 async function main() {
-  const { values } = parseArgs({
+  const { values, positionals } = parseArgs({
     args: Bun.argv,
     options: {
-      watch: {
-        type: "boolean",
-      },
-      build: {
-        type: "boolean",
-      },
       port: {
         type: "string",
       },
-      open: {
+      debug: {
         type: "boolean",
       },
     },
@@ -28,16 +23,29 @@ async function main() {
     allowPositionals: true,
   });
 
-  logger.info("Verifying zzap.config.tsx");
+  if (values.debug) {
+    enableDebug();
+  }
 
-  if (values.watch) {
+  const command = positionals[2];
+  const rootDirectory = positionals[3];
+  zzapConfig.setRootDirectory(rootDirectory);
+
+  logger.log(
+    `Running "zzap ${command}" for root directory "${zzapConfig.getRootDirectory()}"`,
+  );
+
+  if (command === "watch") {
     await zzapCommander.watch({
       port: Number(values.port),
-      open: values.open,
     });
+    // process.exit(0);
   }
 
-  if (values.build) {
+  if (command === "build") {
     await zzapCommander.build();
+    process.exit(0);
   }
+
+  // logger.error(`Unknown command "${command}"`);
 }

@@ -1,14 +1,36 @@
+import path from "path";
 import type { zzapConfigType } from "../../module";
 
-let counterToBustCache = 0;
-export const zaapConfig = {
-  async get() {
-    counterToBustCache++;
+let _rootDirectory = "./docs";
+let _config: zzapConfigType | undefined = undefined;
 
-    const configFileLocation = `./zzap.config.tsx?counter==${counterToBustCache}`;
-    const configModule = require(configFileLocation);
+export const zzapConfig = {
+  getRootDirectory() {
+    return _rootDirectory;
+  },
+  setRootDirectory(rootDirectory: string) {
+    rootDirectory = rootDirectory || "./docs";
+  },
+  async get() {
+    if (_config) {
+      return _config;
+    }
+
+    const configFileLocation = `${_rootDirectory}/zzap.config.tsx`;
+    const configModule = await import(configFileLocation);
     const config: zzapConfigType = configModule.default;
 
-    return config;
+    config.srcDir = path.join(`${_rootDirectory}/${config.srcDir}`);
+    config.outputDir = path.join(`${_rootDirectory}/${config.outputDir}`);
+    config.publicDir = path.join(`${_rootDirectory}/${config.publicDir}`);
+
+    config.entryPoints = config.entryPoints.map((entry) => {
+      return {
+        ...entry,
+        path: `${_rootDirectory}/${entry.path}`,
+      };
+    });
+
+    return (_config = config);
   },
 };

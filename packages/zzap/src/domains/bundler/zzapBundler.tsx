@@ -1,150 +1,223 @@
-import Bun, { Glob } from "bun";
+import Bun, { $, Glob } from "bun";
 import fs from "fs/promises";
 import markdownit from "markdown-it";
 
 import { logger } from "../../cli";
-import { zaapConfig } from "../config/zzapConfig";
+import { zzapConfig } from "../config/zzapConfig";
 
 export const zzapBundler = {
   async generate() {
-    const config = await zaapConfig.get();
-    logger.info(`Building ${config.siteTitle}...`);
+    const config = await zzapConfig.get();
+    logger.log(`Building ${config.title}...`);
+    const buildStartTimestamp = Date.now();
 
     // Clean output folder
-    const filesNotToRemoveDuringOuputFolderCleanup = [
-      config.outputFolder + "/zzap-styles/tailwind.css",
-    ];
+    // await fs.rm(config.outputDir, { recursive: true, force: true });
 
-    for await (const path of new Glob(config.outputFolder + "/**/*").scan({
-      cwd: ".",
-    })) {
-      if (!filesNotToRemoveDuringOuputFolderCleanup.includes(path)) {
-        await fs.rm(path);
-      }
-    }
-
-    const timestampMs = Date.now();
     const md = markdownit({
       html: true,
       linkify: true,
+      langPrefix: "",
     });
 
-    // Copy CSS files
-    for (const file of config.cssFiles || []) {
-      const css = await Bun.file(file.path).text();
-      const fileName = file.fileName || file.path.split("/").pop();
-      await Bun.write(`./${config.outputFolder}/zzap-styles/` + fileName, css);
-    }
+    await Promise.all([
+      publicDirTask(),
+      publicFilesTask(),
+      buildClientTask(),
+      buildPages(),
+    ]);
 
-    // Copy Favicon
-    const favicon = await Bun.file(config.favicon.path);
-    await Bun.write(`./${config.outputFolder}/${favicon.name}`, favicon);
-
-    // Make ClientJS
-    await Bun.build({
-      entrypoints: ["./zzap.content.tsx"],
-      target: "browser",
-      format: "esm",
-      outdir: "./dist/zzap-scripts",
-    });
+    const buildTime = Date.now() - buildStartTimestamp;
+    logger.log(`Site built in ${buildTime}ms.`);
+    logger.log(`Running commands...`);
+    const commandTasksStartTimestamp = Date.now();
+    await commandsTask();
+    const commandTasksTime = Date.now() - commandTasksStartTimestamp;
+    logger.log(`Commands ran in ${commandTasksTime}ms.`);
 
     // Render Pages with Glob
-    let globFileCount = 0;
-    const globPatterns = config.globPatterns || ["**/*.mdx", "**/*.md"];
+    // if (config.dynamic) {
+    //   await config.dynamic({
+    //     addPage(props) {
+    //       dynamicPages.push(props);
+    //     },
+    //   });
 
-    const head = (
-      <>
-        {config.tailwind && (
-          <link rel="stylesheet" href="/zzap-styles/tailwind.css" />
-        )}
-      </>
-    );
+    //   for (const page of dynamicPages) {
+    //     const jsx = config.document({
+    //       head: head,
+    //       children: page.children,
+    //       scripts: scripts,
+    //     });
+    //     const html = config.deps.Server.renderToString(jsx);
+    //     Bun.write(`${config.outputDir}/${page.path}/index.html`, html);
+    //   }
+    // }
 
-    const scripts = (
-      <>
-        <script src="/zzap-scripts/zzap.content.js"></script>
-      </>
-    );
+    async function buildPages() {
+      const zzapStyles = `
 
-    for (const pattern of globPatterns) {
-      const glob = new Glob(config.contentFolder + "/" + pattern);
+#zzap-root[data-zzap-shiki="false"] pre {
+  opacity: 0;
+}
 
-      const filesIterator = glob.scan({
-        cwd: ".",
-        onlyFiles: true,
-      });
+#zzap-root[data-zzap-shiki="true"] pre {
+  opacity: 1;
+  animation: fadein 0.3s;
+}
 
-      logger.info(`Rendering pages with pattern: ${pattern}`);
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
-      for await (const filePath of filesIterator) {
-        const pageMarkdown = await Bun.file(filePath).text();
-
-        const path = filePath
-          .replace(config.contentFolder, "")
-          .replace(/\.mdx?$/, "")
-          .replace(/\.md?$/, "")
-          .replace(/\/index$/, "");
-
-        const pageHTML = md.render(pageMarkdown);
-
-        const content = config.body({
-          children: (
-            <div
-              dangerouslySetInnerHTML={{
-                __html: pageHTML,
-              }}
-            ></div>
-          ),
-        });
-
-        const root = <div id="zzap-root">{content}</div>;
-
-        const jsx = config.document({
-          head: head,
-          children: root,
-          scripts: (
-            <>
+  `;
+      let globFileCount = 0;
+      const head = (
+        <>
+          <style
+            dangerouslySetInnerHTML={{
+              __html: zzapStyles,
+            }}
+          />
+        </>
+      );
+      const entryPointFileNames = config.entryPoints.map(
+        (entry) => entry.path.split("/").pop() as string,
+      );
+      const scripts = (
+        <>
+          {entryPointFileNames.map((fileName, i) => {
+            const [fileNameWithoutExtension] = fileName.split(".");
+            return (
               <script
-                dangerouslySetInnerHTML={{
-                  __html: `
-window.__zzap = ${JSON.stringify({
-                    props: content.props,
-                  })};`,
-                }}
+                key={i}
+                type="module"
+                src={`/__zzap-scripts/${fileNameWithoutExtension}.js`}
               ></script>
-              {scripts}
-            </>
-          ),
+            );
+          })}
+        </>
+      );
+
+      const globPatterns = ["**/*.mdx", "**/*.md"];
+      for (const pattern of globPatterns) {
+        const glob = new Glob(config.srcDir + "/" + pattern);
+
+        const filesIterator = glob.scan({
+          cwd: ".",
+          onlyFiles: true,
         });
-        const html = config.react.Server.renderToString(jsx);
-        Bun.write(`${config.outputFolder}/${path}/index.html`, html);
-        globFileCount++;
+
+        for await (const filePath of filesIterator) {
+          const pageMarkdown = await Bun.file(filePath).text();
+
+          const path = filePath
+            .replace(config.srcDir, "")
+            .replace(/\.mdx?$/, "")
+            .replace(/\.md?$/, "")
+            .replace(/\/index$/, "");
+
+          const pageHTML = md.render(pageMarkdown);
+          function DefaultRootComponent(props: { content: JSX.Element }) {
+            return (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: props.content,
+                }}
+              ></div>
+            );
+          }
+          const RootComponent = config.RootComponent || DefaultRootComponent;
+          const content = <RootComponent content={pageHTML}></RootComponent>;
+
+          const root = <div id="zzap-root">{content}</div>;
+
+          const jsx = config.document({
+            head: head,
+            children: root,
+            scripts: (
+              <>
+                <script
+                  type="module"
+                  dangerouslySetInnerHTML={{
+                    __html: `
+window.__zzap = ${JSON.stringify({
+                      props: content.props,
+                    })};`,
+                  }}
+                ></script>
+                {scripts}
+              </>
+            ),
+          });
+          const html = config.deps["react-dom/server"].renderToString(jsx);
+          Bun.write(`${config.outputDir}/${path}/index.html`, html);
+          globFileCount++;
+        }
       }
+
+      // Render dynamic pages
+      const dynamicPages: Array<{ path: string; children: JSX.Element }> = [];
+      return { globFileCount, dynamicPages };
     }
 
-    // Render dynamic pages
-    const dynamicPages: Array<{ path: string; children: JSX.Element }> = [];
-    if (config.dynamic) {
-      await config.dynamic({
-        addPage(props) {
-          dynamicPages.push(props);
-        },
+    async function buildClientTask() {
+      const entryPoints = config.entryPoints.map((entry) => {
+        return entry.path;
       });
 
-      for (const page of dynamicPages) {
-        const jsx = config.document({
-          head: head,
-          children: page.children,
-          scripts: scripts,
+      if (entryPoints.length) {
+        await Bun.build({
+          entrypoints: entryPoints,
+          target: "browser",
+          format: "esm",
+          outdir: config.outputDir + "/__zzap-scripts",
         });
-        const html = config.react.Server.renderToString(jsx);
-        Bun.write(`${config.outputFolder}/${page.path}/index.html`, html);
       }
+
+      logger.debug(`buildClientTask`);
     }
 
-    const timeDiff = Date.now() - timestampMs;
-    logger.info(
-      `Site built in ${timeDiff}ms with ${globFileCount} glob pages and ${dynamicPages.length} dynamic pages.`,
-    );
+    async function publicDirTask() {
+      const publicDirectoryExist = await fs
+        .access(config.publicDir)
+        .then(() => true)
+        .catch(() => false);
+
+      if (publicDirectoryExist) {
+        await fs.cp(config.publicDir, config.outputDir, { recursive: true });
+      }
+      logger.debug(`publicDirTask`);
+    }
+    async function commandsTask() {
+      const commandPromises = config.commands.map(async (commandProps) => {
+        logger.log(`  ${commandProps.command}`);
+        if (commandProps.silent) {
+          const { exitCode } =
+            await $`${{ raw: commandProps.command }}`.quiet();
+
+          if (exitCode !== 0) {
+            await $`${{ raw: commandProps.command }}`;
+          }
+        } else {
+          await $`${{ raw: commandProps.command }}`;
+        }
+      });
+
+      await Promise.all(commandPromises);
+      logger.debug(`commandsTask`);
+    }
+    async function publicFilesTask() {
+      const promises = config.publicFiles.map(async (file) => {
+        await fs.cp(file.path, `${config.outputDir}/${file.name}`);
+      });
+      await Promise.all(promises);
+      logger.debug(`publicFilesTask`);
+    }
   },
 };

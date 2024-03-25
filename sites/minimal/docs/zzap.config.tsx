@@ -1,25 +1,14 @@
 import React from "react";
 import Server from "react-dom/server";
 import { defineConfig } from "zzap";
-import { Content } from "./src/Content";
 
 export default defineConfig({
-  siteTitle: "zzap.dev",
-  contentFolder: "./content",
-  outputFolder: "./dist",
-  tailwind: true,
-  favicon: {
-    path: "./favicon.png",
+  title: "zzap.dev",
+
+  deps: {
+    "react-dom/server": Server,
   },
-  react: {
-    React: React,
-    Server: Server,
-  },
-  cssFiles: [
-    {
-      path: "../../node_modules/@picocss/pico/css/pico.css",
-    },
-  ],
+
   document(props) {
     return (
       <>
@@ -32,7 +21,7 @@ export default defineConfig({
             />
             <link rel="icon" href="/favicon.png" />
 
-            <link rel="stylesheet" href="/zzap-styles/pico.css" />
+            <link rel="stylesheet" href="/pico.css" />
             {props.head}
           </head>
           <body>{props.children}</body>
@@ -40,8 +29,5 @@ export default defineConfig({
         </html>
       </>
     );
-  },
-  body(props) {
-    return <Content>{props.children}</Content>;
   },
 });

@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "bun run package && bunx turbo dev --filter zzap.dev",
     "dev:pokedex": "bun run package && bunx turbo dev --filter pokedex",
+    "dev:minimal": "bun run package && bunx turbo dev --filter minimal",
     "dev:all": "bun run package && bunx turbo dev",
     "build": "bun run package && bunx turbo build",
     "test": "bunx turbo test",
