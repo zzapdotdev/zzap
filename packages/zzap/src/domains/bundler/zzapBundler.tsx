@@ -12,21 +12,28 @@ export const zzapBundler = {
     const buildStartTimestamp = Date.now();
 
     // Clean output folder
-    await fs.rm(config.outputDir, { recursive: true, force: true });
+    // await fs.rm(config.outputDir, { recursive: true, force: true });
 
     const md = markdownit({
       html: true,
       linkify: true,
+      langPrefix: "",
     });
 
-    logger.debug("Waiting for tasks...");
     await Promise.all([
       publicDirTask(),
       publicFilesTask(),
-      commandsTask(),
       buildClientTask(),
       buildPages(),
     ]);
+
+    const buildTime = Date.now() - buildStartTimestamp;
+    logger.log(`Site built in ${buildTime}ms.`);
+    logger.log(`Running commands...`);
+    const commandTasksStartTimestamp = Date.now();
+    await commandsTask();
+    const commandTasksTime = Date.now() - commandTasksStartTimestamp;
+    logger.log(`Commands ran in ${commandTasksTime}ms.`);
 
     // Render Pages with Glob
     // if (config.dynamic) {
@@ -47,12 +54,38 @@ export const zzapBundler = {
     //   }
     // }
 
-    const timeDiff = Date.now() - buildStartTimestamp;
-    logger.log(`Site built in ${timeDiff}ms.`);
-
     async function buildPages() {
+      const zzapStyles = `
+
+#zzap-root[data-zzap-shiki="false"] pre {
+  opacity: 0;
+}
+
+#zzap-root[data-zzap-shiki="true"] pre {
+  opacity: 1;
+  animation: fadein 0.3s;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+  `;
       let globFileCount = 0;
-      const head = <></>;
+      const head = (
+        <>
+          <style
+            dangerouslySetInnerHTML={{
+              __html: zzapStyles,
+            }}
+          />
+        </>
+      );
       const entryPointFileNames = config.entryPoints.map(
         (entry) => entry.path.split("/").pop() as string,
       );
@@ -63,6 +96,7 @@ export const zzapBundler = {
             return (
               <script
                 key={i}
+                type="module"
                 src={`/__zzap-scripts/${fileNameWithoutExtension}.js`}
               ></script>
             );
@@ -109,6 +143,7 @@ export const zzapBundler = {
             scripts: (
               <>
                 <script
+                  type="module"
                   dangerouslySetInnerHTML={{
                     __html: `
 window.__zzap = ${JSON.stringify({
@@ -136,12 +171,14 @@ window.__zzap = ${JSON.stringify({
         return entry.path;
       });
 
-      await Bun.build({
-        entrypoints: entryPoints,
-        target: "browser",
-        format: "esm",
-        outdir: config.outputDir + "/__zzap-scripts",
-      });
+      if (entryPoints.length) {
+        await Bun.build({
+          entrypoints: entryPoints,
+          target: "browser",
+          format: "esm",
+          outdir: config.outputDir + "/__zzap-scripts",
+        });
+      }
 
       logger.debug(`buildClientTask`);
     }
@@ -159,7 +196,7 @@ window.__zzap = ${JSON.stringify({
     }
     async function commandsTask() {
       const commandPromises = config.commands.map(async (commandProps) => {
-        logger.log(`Running command: ${commandProps.command}`);
+        logger.log(`  ${commandProps.command}`);
         if (commandProps.silent) {
           const { exitCode } =
             await $`${{ raw: commandProps.command }}`.quiet();

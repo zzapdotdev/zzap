@@ -10,9 +10,10 @@ export default defineConfig({
       command: `tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/tailwind.css`,
     },
   ],
+
   publicFiles: [
     {
-      path: "../../node_modules/@picocss/pico/css/pico.css",
+      path: "../../node_modules/@picocss/pico/css/pico.amber.css",
       name: "pico.css",
     },
   ],
@@ -33,7 +34,25 @@ export default defineConfig({
             <link rel="icon" href="/favicon.png" />
             <link rel="stylesheet" href="/tailwind.css" />
             <link rel="stylesheet" href="/pico.css" />
+            <link rel="stylesheet" href="/styles.css" />
             {props.head}
+            <script
+              type="module"
+              dangerouslySetInnerHTML={{
+                __html: `
+            const theme = localStorage.getItem("zzap-theme");
+            if (theme) {
+
+              document.documentElement.setAttribute("data-theme", theme);
+              if(theme === "dark"){
+                document.documentElement.classList.add("tw-dark");
+              } else{
+                document.documentElement.classList.remove("tw-dark");
+              }
+            }
+            `,
+              }}
+            ></script>
           </head>
           <body>{props.children}</body>
           {props.scripts}

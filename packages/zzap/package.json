@@ -17,7 +17,6 @@
     "lightningcss": "1.24.1",
     "markdown-it": "14.1.0",
     "minisearch": "6.3.0",
-    "shiki": "1.2.0",
     "typescript": "5.4.3",
     "zod": "^3.22.4"
   },

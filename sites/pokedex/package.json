@@ -1,9 +1,6 @@
 {
   "name": "pokedex",
-  "scripts": {
-    "dev": "bun zzap --watch --port 3000",
-    "build": "bun zzap --build"
-  },
+  "scripts": {},
   "dependencies": {
     "@picocss/pico": "^2.0.6"
   },

@@ -6,7 +6,6 @@ export default defineConfig({
   title: "zzap.dev",
 
   deps: {
-    react: React,
     "react-dom/server": Server,
   },
 

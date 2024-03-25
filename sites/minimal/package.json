@@ -1,8 +1,8 @@
 {
   "name": "minimal",
   "scripts": {
-    "dev": "bun zzap --watch --port 3000",
-    "build": "bun zzap --build"
+    "dev": "bun zzap watch --port 3000",
+    "build": "bun zzap build"
   },
   "devDependencies": {
     "react": "18.2.0",

@@ -2,102 +2,128 @@ import clsx from "clsx";
 import React from "react";
 
 export function Root(props: { children: React.ReactNode; content: string }) {
-  const [counter, setCounter] = React.useState(0);
+  const [themeMode, setThemeMode] = React.useState<"light" | "dark" | "auto">(
+    () => {
+      if (typeof window === "undefined") return "auto";
+
+      if (document.documentElement.classList.contains("tw-dark")) {
+        return "dark";
+      }
+      return "light";
+    },
+  );
+
+  function toggleTheme() {
+    const newMode = themeMode === "light" ? "dark" : "light";
+    setThemeMode(newMode);
+    localStorage.setItem("zzap-theme", newMode);
+
+    document.documentElement.setAttribute("data-theme", newMode);
+    if (newMode === "dark") {
+      document.documentElement.classList.add("tw-dark");
+    } else {
+      document.documentElement.classList.remove("tw-dark");
+    }
+  }
 
   return (
-    <div className="bg-white text-black dark:bg-zinc-900 dark:text-white">
-      <main className="container mx-auto">
-        <nav className="mb-16  border-zinc-600 bg-white dark:bg-zinc-900">
-          <Container className="border-b">
-            <a
-              href="/"
-              className="flex items-center space-x-3 rtl:space-x-reverse"
-            >
-              <img src="/zzap-logo-light.png" alt="" className="w-[8rem]" />
-            </a>
-            <button
-              data-collapse-toggle="navbar-default"
-              type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg p-2 text-sm text-zinc-500 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-200 md:hidden dark:text-zinc-400 dark:hover:bg-zinc-700 dark:focus:ring-zinc-600"
-              aria-controls="navbar-default"
-              aria-expanded="false"
-            >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className="h-5 w-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 17 14"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M1 1h15M1 7h15M1 13h15"
+    <div
+      style={{
+        minHeight: "100vh",
+        paddingBottom: "20vh",
+        background: "var(--pico-background-color)",
+      }}
+    >
+      <main className="container">
+        <nav className="tw-mb-[6rem]">
+          <ul>
+            <li>
+              <a href="/">
+                <img
+                  src="/zzap-logo-light.png"
+                  alt=""
+                  className="tw-w-[8rem] tw-pt-[1rem] tw-block dark:tw-hidden"
                 />
-              </svg>
-            </button>
-            <div
-              className="hidden w-full md:block md:w-auto"
-              id="navbar-default"
-            >
-              <ul className="mt-4 flex flex-col rounded-lg border border-zinc-100 bg-zinc-50 p-4 font-medium md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-white md:p-0 rtl:space-x-reverse dark:border-zinc-700 dark:bg-zinc-800 md:dark:bg-zinc-900">
-                <li>
-                  <Link href="/" aria-current="page">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/guide/getting-started">Getting Started</Link>
-                </li>
-              </ul>
-            </div>
-          </Container>
+                <img
+                  src="/zzap-logo-dark.png"
+                  alt=""
+                  className="tw-w-[8rem] tw-pt-[1rem] tw-hidden dark:tw-block"
+                />
+              </a>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <a href="/docs" className="contrast">
+                Docs
+              </a>
+            </li>
+            <li>
+              <a href="/guides" className="contrast">
+                Guides
+              </a>
+            </li>
+            <li>
+              <a
+                className="tw-flex tw-cursor-pointer contrast "
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleTheme();
+                }}
+              >
+                <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
+                <SunIcon className="tw-hidden dark:tw-block" />
+              </a>
+            </li>
+          </ul>
         </nav>
-        <Container className="prose prose-xl dark:prose-invert">
+
+        <div className="">
           <div
             dangerouslySetInnerHTML={{
               __html: props.content,
             }}
           ></div>
-          <button
-            onClick={() => {
-              setCounter(counter + 1);
-            }}
-          >
-            Increment {counter}
-          </button>
-        </Container>
+        </div>
       </main>
     </div>
   );
 }
 
-export function Container(props: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function SunIcon(props: { className?: string }) {
   return (
-    <div
-      className={clsx(
-        "mx-auto flex w-full max-w-screen-xl flex-wrap items-center justify-between p-4",
-        props.className,
-      )}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className={clsx("tw-h-6 tw-w-6", props.className)}
     >
-      {props.children}
-    </div>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+      />
+    </svg>
   );
 }
 
-export function Link(props: { children: React.ReactNode; href: string }) {
+function MoonIcon(props: { className?: string }) {
   return (
-    <a
-      href={props.href}
-      className="block rounded px-3 py-2 text-zinc-900 hover:bg-zinc-100 md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-yellow-600 dark:text-white dark:hover:bg-zinc-700 dark:hover:text-white md:dark:hover:bg-transparent md:dark:hover:text-yellow-500"
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className={clsx("tw-h-6 tw-w-6", props.className)}
     >
-      {props.children}
-    </a>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+      />
+    </svg>
   );
 }

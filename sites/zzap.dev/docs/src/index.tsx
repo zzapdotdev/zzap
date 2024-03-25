@@ -1,4 +1,7 @@
-import { registerRoot } from "zzap/client";
+import { zzapClient } from "zzap/client";
 import { Root } from "./Root";
 
-registerRoot(Root);
+zzapClient.shiki({
+  theme: "vitesse-dark",
+});
+zzapClient.registerRoot(Root);
