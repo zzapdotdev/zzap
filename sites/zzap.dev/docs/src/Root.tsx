@@ -6,10 +6,11 @@ export function Root(props: { children: React.ReactNode; content: string }) {
     () => {
       if (typeof window === "undefined") return "auto";
 
-      if (document.documentElement.classList.contains("tw-dark")) {
-        return "dark";
-      }
-      return "light";
+      const mode = document.documentElement.getAttribute("zzap-theme") as
+        | "light"
+        | "dark"
+        | null;
+      return mode || "auto";
     },
   );
 
@@ -29,7 +30,6 @@ export function Root(props: { children: React.ReactNode; content: string }) {
   return (
     <div
       style={{
-        minHeight: "100vh",
         paddingBottom: "20vh",
         background: "var(--pico-background-color)",
       }}
