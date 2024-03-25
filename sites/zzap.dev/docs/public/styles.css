@@ -5,6 +5,7 @@ body {
 /**
  * Pico Override
  */
-pre {
-  margin-bottom: 0;
+
+html[data-zzap-theme="dark"] pre code {
+  background: #333333;
 }

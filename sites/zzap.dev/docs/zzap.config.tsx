@@ -40,18 +40,13 @@ export default defineConfig({
               type="module"
               dangerouslySetInnerHTML={{
                 __html: `
-            const themeModePreferences = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
-            const themeMode = localStorage.getItem("zzap-theme") || themeModePreferences
-            if (themeMode) {
-
-              document.documentElement.setAttribute("zzap-theme", themeMode);
-              document.documentElement.setAttribute("data-theme", themeMode);
-              if(themeMode === "dark"){
-                document.documentElement.classList.add("tw-dark");
-              } else{
-                document.documentElement.classList.remove("tw-dark");
-              }
-            }
+                const zzapTheme = document.documentElement.getAttribute("data-zzap-theme");
+                document.documentElement.setAttribute("data-theme", zzapTheme);
+                if(zzapTheme === "dark"){
+                  document.documentElement.classList.add("tw-dark");
+                } else{
+                  document.documentElement.classList.remove("tw-dark");
+                }
             `,
               }}
             ></script>

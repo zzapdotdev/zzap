@@ -14,9 +14,9 @@ const logger = getLogger("lib");
 logger.log(`Running "${command}"`);
 
 if (command === "dev") {
-  const zzapCLITask = $`bun --watch build --compile ./src/cli.tsx --outfile ./dist/zzap --target node`;
-  const zzapModuleTask = $`bun --watch build ./src/module.tsx --outfile ./dist/index.js --target node`;
-  const zzapClientModuleTask = $`bun --watch build ./client.tsx --outfile ./dist/client.js --target browser`;
+  const zzapCLITask = $`bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node --watch `;
+  const zzapModuleTask = $`bun build ./src/module.tsx --outfile ./dist/index.js --target node --watch `;
+  const zzapClientModuleTask = $`bun build ./client.tsx --outfile ./dist/client.js --target browser --watch `;
   const typeDefinitionTask = $`tsc --watch --outDir ./dist/types --preserveWatchOutput`;
 
   await Promise.all([

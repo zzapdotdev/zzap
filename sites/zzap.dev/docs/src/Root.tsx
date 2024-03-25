@@ -1,29 +1,20 @@
 import clsx from "clsx";
 import React from "react";
+import { zzapClient } from "zzap/client";
 
 export function Root(props: { children: React.ReactNode; content: string }) {
-  const [themeMode, setThemeMode] = React.useState<"light" | "dark" | "auto">(
-    () => {
-      if (typeof window === "undefined") return "auto";
-
-      const mode = document.documentElement.getAttribute("zzap-theme") as
-        | "light"
-        | "dark"
-        | null;
-      return mode || "auto";
-    },
-  );
-
   function toggleTheme() {
-    const newMode = themeMode === "light" ? "dark" : "light";
-    setThemeMode(newMode);
-    localStorage.setItem("zzap-theme", newMode);
+    const theme = zzapClient.getTheme();
+    const newTheme = theme === "light" ? "dark" : "light";
+    zzapClient.setTheme(newTheme);
 
-    document.documentElement.setAttribute("data-theme", newMode);
-    if (newMode === "dark") {
+    document.documentElement.setAttribute("data-theme", newTheme);
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
       document.documentElement.classList.add("tw-dark");
     } else {
       document.documentElement.classList.remove("tw-dark");
+      document.documentElement.classList.remove("dark");
     }
   }
 
@@ -87,8 +78,44 @@ export function Root(props: { children: React.ReactNode; content: string }) {
           </ul>
         </nav>
 
-        <div className="">
+        <div className="tw-flex tw-flex-row tw-gap-16">
+          <aside className="tw-flex-grow tw-flex-shrink-0 lg:tw-flex tw-hidden ">
+            <nav>
+              <details open>
+                <summary className="tw-font-bold tw-mb-2 tw-text-black dark:tw-text-white">
+                  Introduction
+                </summary>
+                <ul className="tw-border-l-2 ">
+                  <li>
+                    <a
+                      className="secondary tw-py-2 tw-ml-0 tw-border-l-2 tw-border-t-0 tw-border-r-0 tw-border-b-0 tw-border-zinc-200 tw-border-solid tw-rounded-none"
+                      href="/docs"
+                    >
+                      What is zzap
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      className="secondary tw-py-2 tw-ml-0 tw-border-l-2 tw-border-t-0 tw-border-r-0 tw-border-b-0 tw-border-zinc-200 tw-border-solid tw-rounded-none"
+                      href="/docs/installation"
+                    >
+                      Installation
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      className="secondary tw-py-2 tw-ml-0 tw-border-l-2 tw-border-t-0 tw-border-r-0 tw-border-b-0 tw-border-zinc-200 tw-border-solid tw-rounded-none"
+                      href="/docs/quick-start"
+                    >
+                      Quick Start
+                    </a>
+                  </li>
+                </ul>
+              </details>
+            </nav>
+          </aside>
           <div
+            className="lg:tw-w-[75%] tw-w-[100%]"
             dangerouslySetInnerHTML={{
               __html: props.content,
             }}

@@ -84,6 +84,16 @@ export const zzapBundler = {
               __html: zzapStyles,
             }}
           />
+          <script
+            type="module"
+            dangerouslySetInnerHTML={{
+              __html: `
+            const themeModePreferences = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
+            const themeMode = localStorage.getItem("zzap-theme") || themeModePreferences
+              document.documentElement.setAttribute("data-zzap-theme", themeMode);
+            `,
+            }}
+          ></script>
         </>
       );
       const entryPointFileNames = config.entryPoints.map(

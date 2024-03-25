@@ -9,6 +9,15 @@ export const zzapClient = {
       hydrateRoot(root, <RootComponent {...window.__zzap.props} />);
     }
   },
+  getTheme() {
+    const currentTheme =
+      document.documentElement.getAttribute("data-zzap-theme");
+    return currentTheme as "light" | "dark";
+  },
+  setTheme(theme: "light" | "dark") {
+    document.documentElement.setAttribute("data-zzap-theme", theme);
+    localStorage.setItem("zzap-theme", theme);
+  },
 
   async shiki(props?: {
     /**

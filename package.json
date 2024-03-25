@@ -2,7 +2,7 @@
   "name": "zzap",
   "private": true,
   "scripts": {
-    "dev": "bun run package && bunx turbo dev --filter zzap.dev",
+    "dev": "bun run package && bunx turbo dev --filter zzap.dev --filter zzap",
     "dev:pokedex": "bun run package && bunx turbo dev --filter pokedex",
     "dev:minimal": "bun run package && bunx turbo dev --filter minimal",
     "dev:all": "bun run package && bunx turbo dev",
