@@ -1,7 +1,7 @@
 <div
   class="tw-mb-16 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4"
 >
-  <h3>React and TypeScript powered site buidler</h3>
+  <h3 class="tw-text-[20pt] tw-text-center">React and TypeScript powered site buidler</h3>
   <h2
     class="tw-mt-0 tw-text-center tw-text-[50pt] tw-font-extrabold tw-leading-none"
   >
