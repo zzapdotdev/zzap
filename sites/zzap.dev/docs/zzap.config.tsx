@@ -1,21 +1,33 @@
 import React from "react";
 import Server from "react-dom/server";
 import { defineConfig } from "zzap";
+import { zzapPluginPicoCSS } from "zzap/plugins/zzapPluginPicoCSS";
+import { zzapPluginTailwind } from "zzap/plugins/zzapPluginTailwind";
+import { zzapPluginVercelJSON } from "zzap/plugins/zzapPluginVercelJSON";
+
 import { Root } from "./src/Root";
+
+import path from "path";
 
 export default defineConfig({
   title: "zzap.dev",
-  commands: [
-    {
-      command: `tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/tailwind.css`,
-    },
-  ],
-
-  publicFiles: [
-    {
-      path: "../../node_modules/@picocss/pico/css/pico.amber.css",
-      name: "pico.css",
-    },
+  plugins: [
+    zzapPluginTailwind(),
+    zzapPluginPicoCSS({
+      color: "amber",
+      module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
+    }),
+    zzapPluginVercelJSON({
+      json: {
+        redirects: [
+          {
+            source: "/discord",
+            destination: "https://discord.gg/3FxnevyEth",
+            permanent: true,
+          },
+        ],
+      },
+    }),
   ],
   entryPoints: [{ path: "./src/index.tsx" }],
   deps: {
@@ -32,24 +44,8 @@ export default defineConfig({
               content="width=device-width, initial-scale=1.0"
             />
             <link rel="icon" href="/favicon.png" />
-            <link rel="stylesheet" href="/tailwind.css" />
-            <link rel="stylesheet" href="/pico.css" />
             <link rel="stylesheet" href="/styles.css" />
             {props.head}
-            <script
-              type="module"
-              dangerouslySetInnerHTML={{
-                __html: `
-                const zzapTheme = document.documentElement.getAttribute("data-zzap-theme");
-                document.documentElement.setAttribute("data-theme", zzapTheme);
-                if(zzapTheme === "dark"){
-                  document.documentElement.classList.add("tw-dark");
-                } else{
-                  document.documentElement.classList.remove("tw-dark");
-                }
-            `,
-              }}
-            ></script>
           </head>
           <body>{props.children}</body>
           {props.scripts}

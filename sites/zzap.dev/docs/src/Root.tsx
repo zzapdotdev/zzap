@@ -26,17 +26,17 @@ export function Root(props: { children: React.ReactNode; content: string }) {
       }}
     >
       <main className="container">
-        <nav className="tw-mb-[6rem]">
+        <nav className="tw-mb-[3rem] md:tw-mb-[6rem]">
           <ul>
             <li>
               <a href="/">
                 <img
-                  src="/zzap-logo-light.png"
+                  src="/images/zzap-logo-light.png"
                   alt=""
                   className="tw-w-[8rem] tw-pt-[1rem] tw-block dark:tw-hidden"
                 />
                 <img
-                  src="/zzap-logo-dark.png"
+                  src="/images/zzap-logo-dark.png"
                   alt=""
                   className="tw-w-[8rem] tw-pt-[1rem] tw-hidden dark:tw-block"
                 />

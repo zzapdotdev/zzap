@@ -4,13 +4,13 @@
   "authors": "René-Pier Deshaies-Géllinas",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/types/module.d.ts",
+  "types": "./dist/types/src",
   "bin": {
     "zzap": "./dist/zzap"
   },
   "scripts": {
-    "dev": "bun index.tsx dev",
-    "package": "bun index.tsx package"
+    "dev": "bun package.tsx dev",
+    "package": "bun package.tsx package"
   },
   "dependencies": {
     "bun": "1.0.35",

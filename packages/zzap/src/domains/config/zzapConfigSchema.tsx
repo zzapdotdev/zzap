@@ -1,8 +1,9 @@
 import z from "zod";
 
 import type { default as Server } from "react-dom/server";
+import type { zzapPluginType } from "../plugin/definePlugin";
 
-const configSchema = z.object({
+export const configSchema = z.object({
   /**
    * The title of the site.
    */
@@ -44,11 +45,11 @@ const configSchema = z.object({
     .array(
       z.object({
         command: z.string(),
-        silent: z.boolean().default(true),
       }),
     )
     .default([]),
   entryPoints: z.array(z.object({ path: z.string() })).default([]),
+  plugins: z.array(z.any()).default([]) as z.ZodType<Array<zzapPluginType>>,
   deps: z.object({
     /**
      * The default ReactDOMServer import.
@@ -71,7 +72,3 @@ const configSchema = z.object({
 
 export type zzapConfigType = z.infer<typeof configSchema>;
 export type zzapConfigInputType = z.input<typeof configSchema>;
-
-export function defineConfig(config: zzapConfigInputType) {
-  return configSchema.parse(config);
-}

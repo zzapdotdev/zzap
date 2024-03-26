@@ -25,6 +25,8 @@ export const zzapCommander = {
           return;
         }
 
+        logger.log(`File changed: ${filename}`);
+
         generatingPromise = $`zzap build`;
         generatingPromise.then(() => {
           generatingPromise = undefined;

@@ -2,7 +2,9 @@
 
 # Todo
 
-- [ ] feat: /client module for `registerRoot` with zzap
+- [ ] Plugins
+  - [ ] vercel redirects
+- [ ] index.tsx loader.
 - [ ] feat: dynamic pages
 - [ ] fix: pokedex
 - [ ] feat: Better default `root component`

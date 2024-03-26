@@ -1,5 +1,5 @@
 import path from "path";
-import type { zzapConfigType } from "../../module";
+import type { zzapConfigType } from "./zzapConfigSchema";
 
 let _rootDirectory = "./docs";
 let _config: zzapConfigType | undefined = undefined;

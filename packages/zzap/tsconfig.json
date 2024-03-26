@@ -27,5 +27,13 @@
     // Custom
     "declaration": true
   },
-  "include": ["client.tsx", "index.tsx", "src/**/*", "node", "lib", "dom"]
+  "include": [
+    "src/**/*",
+    "node",
+    "lib",
+    "dom",
+    "index.tsx",
+    "client.tsx",
+    "plugins/**/*"
+  ]
 }
