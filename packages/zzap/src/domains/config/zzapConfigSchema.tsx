@@ -48,7 +48,6 @@ export const configSchema = z.object({
       }),
     )
     .default([]),
-  entryPoints: z.array(z.object({ path: z.string() })).default([]),
   plugins: z.array(z.any()).default([]) as z.ZodType<Array<zzapPluginType>>,
   deps: z.object({
     /**

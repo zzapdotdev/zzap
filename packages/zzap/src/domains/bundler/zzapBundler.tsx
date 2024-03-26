@@ -5,6 +5,10 @@ import React from "react";
 import { logger } from "../../cli";
 import { zzapConfig } from "../config/zzapConfig";
 import { getLogger } from "../logging/getLogger";
+import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
+import { zzapPluginPublicDir } from "./core-plugins/zzapPluginPublicDir";
+import { zzapPluginPublicFiles } from "./core-plugins/zzapPluginPublicFiles";
+import { zzapPluginScript } from "./core-plugins/zzapPluginScript";
 
 // Clean output folder
 // await fs.rm(config.outputDir, { recursive: true, force: true });
@@ -28,19 +32,7 @@ export const zzapBundler = {
         }}
       ></script>,
     ];
-    const entryPointFileNames = config.entryPoints.map(
-      (entry) => entry.path.split("/").pop() as string,
-    );
-    const scripts = entryPointFileNames.map((fileName, i) => {
-      const [fileNameWithoutExtension] = fileName.split(".");
-      return (
-        <script
-          key={i}
-          type="module"
-          src={`/__zzap-scripts/${fileNameWithoutExtension}.js`}
-        ></script>
-      );
-    });
+    const scripts: Array<JSX.Element> = [];
 
     const md = markdownit({
       html: true,
@@ -48,24 +40,7 @@ export const zzapBundler = {
       langPrefix: "",
     });
 
-    const [
-      publicDirTaskTime,
-      publicFilesTaskTime,
-      buildClientTaskTime,
-      _pluginsTaskTime,
-      commandsTaskTime,
-    ] = await Promise.all([
-      publicDirTask(),
-      publicFilesTask(),
-      buildClientTask(),
-      pluginsTask(),
-      commandsTask(),
-    ]);
-
-    logger.log(`Copied public directory in ${publicDirTaskTime}ms.`);
-    logger.log(`Copied public files in ${publicFilesTaskTime}ms.`);
-    logger.log(`Built client scripts in ${buildClientTaskTime}ms.`);
-    logger.log(`Ran commands in ${commandsTaskTime}ms.`);
+    await pluginsTask();
 
     const buildPagesTaskResult = await buildPages();
     logger.log(
@@ -111,7 +86,9 @@ export const zzapBundler = {
 
           const RootComponent =
             CustomRootComponentModule.default || DefaultRootComponent;
-          const content = <RootComponent content={pageHTML}></RootComponent>;
+          const content = (
+            <RootComponent content={pageHTML} path={path}></RootComponent>
+          );
 
           const root = <div id="zzap-root">{content}</div>;
 
@@ -152,63 +129,16 @@ window.__zzap = ${JSON.stringify({
       return { globFileCount, dynamicPages, time: Date.now() - timestamp };
     }
 
-    async function buildClientTask() {
-      const timestamp = Date.now();
-      const entryPoints = config.entryPoints.map((entry) => {
-        return entry.path;
-      });
-
-      if (entryPoints.length) {
-        await Bun.build({
-          entrypoints: entryPoints,
-          target: "browser",
-          format: "esm",
-          outdir: config.outputDir + "/__zzap-scripts",
-        });
-      }
-      return Date.now() - timestamp;
-    }
-
-    async function publicDirTask() {
-      const timestamp = Date.now();
-      const publicGlob = new Glob(config.publicDir + "/**/*");
-
-      const publicFiles = publicGlob.scan({
-        cwd: ".",
-        onlyFiles: true,
-      });
-
-      for await (const file of publicFiles) {
-        const path = file.replace(config.publicDir, "");
-        const bunFile = Bun.file(file);
-        await Bun.write(`${config.outputDir}/${path}`, bunFile);
-      }
-
-      return Date.now() - timestamp;
-    }
-    async function commandsTask() {
-      const timestamp = Date.now();
-      const commandPromises = config.commands.map(async (commandProps) => {
-        logger.log(`  ${commandProps.command}`);
-        await $`${{ raw: commandProps.command }}`;
-      });
-
-      await Promise.all(commandPromises);
-      return Date.now() - timestamp;
-    }
-    async function publicFilesTask() {
-      const timestamp = Date.now();
-      const promises = config.publicFiles.map(async (file) => {
-        const bunFile = Bun.file(file.path);
-        await Bun.write(`${config.outputDir}/${file.name}`, bunFile);
-      });
-      await Promise.all(promises);
-
-      return Date.now() - timestamp;
-    }
-
     async function pluginsTask() {
-      const pluginPromises = config.plugins.map(async (plugin) => {
+      const allPlugins = [
+        zzapPluginScript(),
+        zzapPluginCommands(),
+        zzapPluginPublicDir(),
+        zzapPluginPublicFiles(),
+        ...config.plugins,
+      ];
+      const pluginDoneLogs: Array<{ name: string; log: () => void }> = [];
+      const pluginPromises = allPlugins.map(async (plugin) => {
         const timestamp = Date.now();
         const pluginLogger = getLogger(plugin.name);
         const loaderResult = await plugin.loader({
@@ -221,11 +151,29 @@ window.__zzap = ${JSON.stringify({
         const newScripts = loaderResult?.scripts || [];
         heads.push(...newHeads);
         scripts.push(...newScripts);
-        pluginLogger.log(`Done in ${Date.now() - timestamp}ms.`);
-        return Date.now() - timestamp;
+        const doneTimestamp = Date.now() - timestamp;
+
+        pluginDoneLogs.sort((a, b) => {
+          if (a.name.startsWith("core-") && b.name.startsWith("core-"))
+            return a.name.localeCompare(b.name);
+
+          if (a.name.startsWith("core-")) return -1;
+          if (b.name.startsWith("core-")) return 1;
+          return a.name.localeCompare(b.name);
+        });
+        pluginDoneLogs.push({
+          name: plugin.name,
+          log: () => {
+            pluginLogger.log(`Done in ${doneTimestamp}ms.`);
+          },
+        });
       });
 
       await Promise.all(pluginPromises);
+
+      pluginDoneLogs.forEach(({ log }) => {
+        log();
+      });
     }
   },
 };

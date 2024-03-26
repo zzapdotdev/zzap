@@ -3,7 +3,7 @@ import { definePlugin } from "../src/domains/plugin/definePlugin";
 export const zzapPluginTailwind = definePlugin({
   plugin() {
     return {
-      name: "zzap-plugin-tailwind",
+      name: "tailwind",
       async loader(ctx) {
         await ctx.$`tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/zzap-plugin-tailwind.css`;
 

@@ -23,12 +23,6 @@ export const zzapConfig = {
     config.publicDir =
       "./" + path.join(`${_rootDirectory}/${config.publicDir}`);
 
-    config.entryPoints = config.entryPoints.map((entry) => {
-      return {
-        ...entry,
-        path: `${_rootDirectory}/${entry.path}`,
-      };
-    });
     config.rootDir = _rootDirectory;
 
     return (_config = config);

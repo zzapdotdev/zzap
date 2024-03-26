@@ -15,7 +15,6 @@ export default defineConfig({
       module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
     }),
   ],
-  entryPoints: [{ path: "./src/index.tsx" }],
   deps: {
     "react-dom/server": Server,
   },

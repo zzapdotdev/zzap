@@ -9,6 +9,7 @@ export function definePlugin<TArgs extends any[]>(props: {
     loader(context: {
       $: typeof $;
       Bun: typeof Bun;
+
       logger: ReturnType<typeof getLogger>;
       config: {
         title: string;

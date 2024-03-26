@@ -13,6 +13,7 @@ inject();
 injectSpeedInsights();
 
 export default function Root(props: {
+  path: string;
   children: React.ReactNode;
   content: string;
 }) {
@@ -99,7 +100,12 @@ export default function Root(props: {
         </header>
 
         <div className="tw-flex tw-flex-row tw-gap-16">
-          <aside className="tw-flex-grow tw-flex-shrink-0 lg:tw-flex tw-hidden ">
+          <aside
+            className={clsx("tw-flex-grow tw-flex-shrink-0", {
+              "tw-hidden": props.path == "",
+              "lg:tw-flex tw-hidden": props.path !== "",
+            })}
+          >
             <nav>
               <details open>
                 <summary className="tw-font-bold tw-mb-2 tw-text-black dark:tw-text-white tw-text-sm">
@@ -143,8 +149,12 @@ export default function Root(props: {
               </details>
             </nav>
           </aside>
+
           <div
-            className="lg:tw-w-[75%] tw-w-[100%]"
+            className={clsx({
+              "tw-w-[100%]": props.path == "",
+              "lg:tw-w-[75%] tw-w-[100%]": props.path !== "",
+            })}
             dangerouslySetInnerHTML={{
               __html: props.content,
             }}
