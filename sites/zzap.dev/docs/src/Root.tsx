@@ -1,3 +1,5 @@
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import clsx from "clsx";
 import React from "react";
 import { zzapClient } from "zzap/client";
@@ -25,6 +27,8 @@ export function Root(props: { children: React.ReactNode; content: string }) {
         background: "var(--pico-background-color)",
       }}
     >
+      <SpeedInsights></SpeedInsights>
+      <Analytics></Analytics>
       <main className="container">
         <header>
           <nav
