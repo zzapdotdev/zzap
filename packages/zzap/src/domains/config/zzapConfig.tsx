@@ -18,7 +18,9 @@ export const zzapConfig = {
 
     const configFileLocation = `${_rootDirectory}/zzap.config.tsx`;
     const configModule = await import(configFileLocation);
-    const config: zzapConfigType = configModule.default;
+    const config = { ...configModule.default } as zzapConfigType & {
+      rootDir: string;
+    };
 
     config.srcDir = path.join(`${_rootDirectory}/${config.srcDir}`);
     config.outputDir = path.join(`${_rootDirectory}/${config.outputDir}`);
@@ -30,6 +32,7 @@ export const zzapConfig = {
         path: `${_rootDirectory}/${entry.path}`,
       };
     });
+    config.rootDir = _rootDirectory;
 
     return (_config = config);
   },

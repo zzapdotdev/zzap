@@ -13,6 +13,7 @@ export function definePlugin<TArgs extends any[]>(props: {
       config: {
         title: string;
         description: string;
+        rootDir: string;
         srcDir: string;
         outputDir: string;
         publicDir: string;

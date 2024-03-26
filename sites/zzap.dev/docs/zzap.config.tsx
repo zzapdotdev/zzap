@@ -27,6 +27,7 @@ export default defineConfig({
           },
         ],
       },
+      dir: path.join(__dirname, "../../../"),
     }),
   ],
   entryPoints: [{ path: "./src/index.tsx" }],
