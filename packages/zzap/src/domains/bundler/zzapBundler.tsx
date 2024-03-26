@@ -105,7 +105,12 @@ export const zzapBundler = {
               ></div>
             );
           }
-          const RootComponent = config.RootComponent || DefaultRootComponent;
+
+          const configFileLocation = `${config.srcDir}/index.tsx`;
+          const CustomRootComponentModule = await import(configFileLocation);
+
+          const RootComponent =
+            CustomRootComponentModule.default || DefaultRootComponent;
           const content = <RootComponent content={pageHTML}></RootComponent>;
 
           const root = <div id="zzap-root">{content}</div>;

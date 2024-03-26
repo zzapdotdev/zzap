@@ -2,11 +2,11 @@
   "name": "minimal",
   "scripts": {
     "dev": "bun zzap watch --port 1337",
-    "build": "bun zzap build"
+    "build": "NODE_ENV=production zzap build"
   },
   "devDependencies": {
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "zzap": "workspace:*"
+    "@zzapdotdev/zzap": "workspace:*"
   }
 }

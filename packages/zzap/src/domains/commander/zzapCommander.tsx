@@ -14,7 +14,7 @@ export const zzapCommander = {
     const config = await zzapConfig.get();
 
     const watcher = watch(
-      zzapConfig.getRootDirectory(),
+      config.rootDir,
       { recursive: true },
       (_event, filename) => {
         if (generatingPromise || !filename) {

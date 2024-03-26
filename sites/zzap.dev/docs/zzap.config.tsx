@@ -1,10 +1,8 @@
+import { defineConfig } from "@zzapdotdev/zzap";
+import { zzapPluginPicoCSS } from "@zzapdotdev/zzap/plugins/zzapPluginPicoCSS";
+import { zzapPluginTailwind } from "@zzapdotdev/zzap/plugins/zzapPluginTailwind";
 import React from "react";
 import Server from "react-dom/server";
-import { defineConfig } from "zzap";
-import { zzapPluginPicoCSS } from "zzap/plugins/zzapPluginPicoCSS";
-import { zzapPluginTailwind } from "zzap/plugins/zzapPluginTailwind";
-
-import { Root } from "./src/Root";
 
 import path from "path";
 
@@ -41,5 +39,4 @@ export default defineConfig({
       </>
     );
   },
-  RootComponent: Root,
 });

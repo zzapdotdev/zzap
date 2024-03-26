@@ -30,22 +30,19 @@ async function main() {
   const command = positionals[2];
   const rootDirectory = positionals[3];
   zzapConfig.setRootDirectory(rootDirectory);
-
+  const config = await zzapConfig.get();
   logger.log(
-    `Running "zzap ${command}" for root directory "${zzapConfig.getRootDirectory()}"`,
+    `Running "zzap ${command}" for root directory "${config.rootDir}"`,
   );
 
   if (command === "watch") {
     await zzapCommander.watch({
       port: Number(values.port),
     });
-    // process.exit(0);
   }
 
   if (command === "build") {
     await zzapCommander.build();
     process.exit(0);
   }
-
-  // logger.error(`Unknown command "${command}"`);
 }

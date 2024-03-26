@@ -67,8 +67,9 @@ export const configSchema = z.object({
       }),
     )
     .returns(z.any() as z.ZodType<JSX.Element>),
-  RootComponent: z.any() as any,
 });
 
-export type zzapConfigType = z.infer<typeof configSchema>;
+export type zzapConfigType = z.infer<typeof configSchema> & {
+  rootDir: string;
+};
 export type zzapConfigInputType = z.input<typeof configSchema>;

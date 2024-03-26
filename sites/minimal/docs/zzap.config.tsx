@@ -1,6 +1,6 @@
+import { defineConfig } from "@zzapdotdev/zzap";
 import React from "react";
 import Server from "react-dom/server";
-import { defineConfig } from "zzap";
 
 export default defineConfig({
   title: "zzap.dev",

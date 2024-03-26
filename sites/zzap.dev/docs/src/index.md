@@ -14,7 +14,7 @@
   </h2>
 
 ```sh
-sh $ zzap build
+$ zzap build
 $ Building zzap.dev...
 $ Site built in 23ms.
 ```
