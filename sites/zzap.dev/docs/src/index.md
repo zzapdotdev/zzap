@@ -1,9 +1,9 @@
 <div
-  class="tw-mb-16 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4"
+  class="tw-mb-16 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-6"
 >
-  <h3 class="tw-text-[20pt] tw-text-center">React and TypeScript powered site buidler</h3>
+  <h3 class="tw-m-0 tw-text-[20pt] tw-text-center">Content driven site generator</h3>
   <h2
-    class="tw-mt-0 tw-text-center tw-text-[50pt] tw-font-extrabold tw-leading-none"
+    class="tw-m-0  tw-text-center tw-text-[50pt] tw-font-extrabold tw-leading-none"
   >
     but like...
     <span
@@ -13,13 +13,17 @@
     fast
   </h2>
 
+<div class="[&_*]:tw-m-0">
+
 ```sh
 $ zzap build
 $ Building zzap.dev...
 $ Site built in 23ms.
 ```
 
-  <span class="tw-text-sm tw-text-center tw-w-8/12">
+</div>
+
+  <span class="tw-text-sm tw-text-center tw-w-8/12 ">
     This is the real build time of building this entire documentation website
     with zzap, excluding the time it took for Tailwind CSS to generate the
     styles (~300-500ms)

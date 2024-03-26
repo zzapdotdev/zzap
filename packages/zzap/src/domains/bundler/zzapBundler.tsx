@@ -71,21 +71,9 @@ export const zzapBundler = {
             .replace(/\/index$/, "");
 
           const pageHTML = md.render(pageMarkdown);
-          function DefaultRootComponent(props: { content: JSX.Element }) {
-            return (
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: props.content,
-                }}
-              ></div>
-            );
-          }
 
-          const configFileLocation = `${config.srcDir}/index.tsx`;
-          const CustomRootComponentModule = await import(configFileLocation);
-
-          const RootComponent =
-            CustomRootComponentModule.default || DefaultRootComponent;
+          const module = await getIndexModule();
+          const RootComponent = module?.default || DefaultRootComponent;
           const content = (
             <RootComponent content={pageHTML} path={path}></RootComponent>
           );
@@ -174,6 +162,35 @@ window.__zzap = ${JSON.stringify({
       pluginDoneLogs.forEach(({ log }) => {
         log();
       });
+    }
+
+    function DefaultRootComponent(props: {
+      content: JSX.Element | string;
+      path: string;
+    }) {
+      return (
+        <div
+          dangerouslySetInnerHTML={{
+            __html: props.content,
+          }}
+        ></div>
+      );
+    }
+
+    async function getIndexModule(): Promise<
+      { default: typeof DefaultRootComponent } | undefined
+    > {
+      try {
+        const location = `${config.srcDir}/index.tsx`;
+        const module = await import(location);
+        return module;
+      } catch (error) {}
+      try {
+        const location = `${config.srcDir}/index.jsx`;
+        const module = await import(location);
+        return module;
+      } catch (error) {}
+      return undefined;
     }
   },
 };
