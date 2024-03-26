@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "bun run package && bunx turbo dev --filter zzap.dev --filter zzap",
     "build": "bun run package && bunx turbo build",
+    "build:zzap.dev": "bun run package && bunx turbo build --filter zzap.dev",
     "distribute": "bun run package && bunx turbo distribute",
     "test": "bunx turbo test",
     "package": "bunx turbo package",
