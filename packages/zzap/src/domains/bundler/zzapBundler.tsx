@@ -52,7 +52,7 @@ export const zzapBundler = {
       publicDirTaskTime,
       publicFilesTaskTime,
       buildClientTaskTime,
-      pluginsTaskTime,
+      _pluginsTaskTime,
       commandsTaskTime,
     ] = await Promise.all([
       publicDirTask(),
@@ -65,7 +65,6 @@ export const zzapBundler = {
     logger.log(`Copied public directory in ${publicDirTaskTime}ms.`);
     logger.log(`Copied public files in ${publicFilesTaskTime}ms.`);
     logger.log(`Built client scripts in ${buildClientTaskTime}ms.`);
-    logger.log(`Ran plugins in ${pluginsTaskTime}ms.`);
     logger.log(`Ran commands in ${commandsTaskTime}ms.`);
 
     const buildPagesTaskResult = await buildPages();
@@ -204,8 +203,8 @@ window.__zzap = ${JSON.stringify({
     }
 
     async function pluginsTask() {
-      const timestamp = Date.now();
       const pluginPromises = config.plugins.map(async (plugin) => {
+        const timestamp = Date.now();
         const pluginLogger = getLogger(plugin.name);
         const loaderResult = await plugin.loader({
           $,
@@ -217,10 +216,11 @@ window.__zzap = ${JSON.stringify({
         const newScripts = loaderResult?.scripts || [];
         heads.push(...newHeads);
         scripts.push(...newScripts);
+        pluginLogger.log(`Done in ${Date.now() - timestamp}ms.`);
+        return Date.now() - timestamp;
       });
 
       await Promise.all(pluginPromises);
-      return Date.now() - timestamp;
     }
   },
 };

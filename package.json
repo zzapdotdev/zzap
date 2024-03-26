@@ -7,6 +7,7 @@
     "dev:minimal": "bun run package && bunx turbo dev --filter minimal",
     "dev:all": "bun run package && bunx turbo dev",
     "build": "bun run package && bunx turbo build",
+    "distribute": "bun run package && bunx turbo distribute",
     "test": "bunx turbo test",
     "package": "bunx turbo package",
     "build:zzap.dev": "bun run package && bunx turbo build --filter zzap.dev",

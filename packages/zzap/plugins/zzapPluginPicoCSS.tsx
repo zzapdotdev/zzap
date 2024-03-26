@@ -8,7 +8,6 @@ export const zzapPluginPicoCSS = definePlugin({
         ctx.logger.log("Copying Pico CSS");
         const cssFile = Bun.file(`${props.module}/css/pico.${props.color}.css`);
         await Bun.write(ctx.config.outputDir + "/pico.css", cssFile);
-        ctx.logger.log("Copied Pico CSS");
 
         return {
           heads: [<link rel="stylesheet" href="/pico.css" />],

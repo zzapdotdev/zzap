@@ -1,6 +1,7 @@
 {
-  "name": "zzap",
+  "name": "@zzapdotdev/zzap",
   "description": "All-in-one static site generator",
+  "version": "0.0.2",
   "authors": "René-Pier Deshaies-Géllinas",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -10,7 +11,8 @@
   },
   "scripts": {
     "dev": "bun package.tsx dev",
-    "package": "bun package.tsx package"
+    "package": "bun package.tsx package",
+    "distribute": "npm version patch && npm publish --access=public"
   },
   "dependencies": {
     "bun": "1.0.35",

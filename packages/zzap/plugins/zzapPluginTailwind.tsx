@@ -5,18 +5,8 @@ export const zzapPluginTailwind = definePlugin({
     return {
       name: "zzap-plugin-tailwind",
       async loader(ctx) {
-        ctx.logger.log("Running Tailwind CSS...");
-        const { stderr } =
-          await ctx.$`tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/zzap-plugin-tailwind.css`.quiet();
+        await ctx.$`tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/zzap-plugin-tailwind.css`;
 
-        Buffer.from(stderr)
-          .toString()
-          .split("\n")
-          .forEach((line) => {
-            ctx.logger.log(line);
-          });
-
-        ctx.logger.log("Finish running Tailwind CSS");
         return {
           heads: [
             <link rel="stylesheet" href="/zzap-plugin-tailwind.css" />,

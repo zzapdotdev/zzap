@@ -2,7 +2,6 @@
   "name": "zzap.dev",
   "description": "Documentation website for zzap",
   "authors": "René-Pier Deshaies-Géllinas",
-  "version": "1.0.0",
   "scripts": {
     "dev": "zzap watch --port 3000 --debug",
     "build": "NODE_ENV=production zzap build"
@@ -18,6 +17,5 @@
     "@vercel/speed-insights": "1.0.10",
     "@vercel/analytics": "1.2.2",
     "zzap": "workspace:*"
-  },
-  "devDependencies": {}
+  }
 }

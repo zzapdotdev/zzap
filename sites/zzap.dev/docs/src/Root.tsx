@@ -37,14 +37,14 @@ export function Root(props: { children: React.ReactNode; content: string }) {
               <li>
                 <a href="/">
                   <img
-                    src="/images/zzap-logo-light.png"
+                    src="/images/zzap-logo-light-w500.jpg"
                     alt=""
-                    className="tw-w-[8rem] tw-pt-[1rem] tw-block dark:tw-hidden"
+                    className="tw-w-[8rem] tw-block dark:tw-hidden"
                   />
                   <img
-                    src="/images/zzap-logo-dark.png"
+                    src="/images/zzap-logo-dark-w500.jpg"
                     alt=""
-                    className="tw-w-[8rem] tw-pt-[1rem] tw-hidden dark:tw-block"
+                    className="tw-w-[8rem] tw-hidden dark:tw-block"
                   />
                 </a>
               </li>
