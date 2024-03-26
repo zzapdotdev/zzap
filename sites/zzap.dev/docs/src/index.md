@@ -35,6 +35,8 @@ $ Site built in 23ms.
   </div>
 </div>
 
+<div class="tw-container tw-max-w-[960px] tw-mx-auto">
+
 ## In a nutshell
 
 Consectetur enim elit aliqua aute nulla esse exercitation occaecat veniam. Magna est consequat consectetur laboris ut nulla nostrud qui ullamco nostrud. Sint exercitation irure excepteur incididunt aute culpa duis cupidatat duis. Ad aliquip exercitation labore consectetur ea eu labore sint esse.
@@ -68,3 +70,5 @@ Commodo laborum aliqua nisi aliqua est aute cillum ad laborum incididunt magna c
 Sunt ullamco exercitation excepteur ea adipisicing aliqua magna voluptate nulla incididunt elit. Culpa et nostrud voluptate non pariatur sunt nisi exercitation. Labore eu amet duis dolore incididunt. Ex deserunt qui voluptate duis excepteur cupidatat voluptate dolor ut. Sit ex proident fugiat nulla dolor velit anim incididunt nisi proident ullamco laboris anim. Incididunt proident tempor officia ex ut sunt non sit est culpa.
 
 Commodo laborum aliqua nisi aliqua est aute cillum ad laborum incididunt magna cupidatat sint eiusmod. Commodo anim officia pariatur non nostrud laboris. Ea nostrud ad dolor. Labore laboris tempor labore pariatur irure voluptate. Duis excepteur ea fugiat commodo adipisicing eu adipisicing occaecat enim deserunt.
+
+</div>
