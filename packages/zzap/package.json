@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "bun package.tsx dev",
     "package": "bun package.tsx package",
-    "distribute": "npm version patch && npm publish --access=public"
+    "distribute": "npm publish --access=public"
   },
   "dependencies": {
     "bun": "1.0.35",
