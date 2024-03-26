@@ -16,6 +16,15 @@
     },
     "distribute": {
       "cache": false
+    },
+    "patch": {
+      "cache": false
+    },
+    "minor": {
+      "cache": false
+    },
+    "major": {
+      "cache": false
     }
   }
 }
