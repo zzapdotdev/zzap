@@ -1,27 +1,38 @@
-<div class="tw-mb-16 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4 ">
+<div
+  class="tw-mb-16 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-4"
+>
   <h3>React and TypeScript powered site buidler</h3>
-  <h2 class="tw-mt-0 tw-text-center tw-text-[50pt] tw-font-extrabold tw-leading-none ">
-     but like... <span class="tw-bg-gradient-to-r tw-from-yellow-400 tw-to-amber-200 tw-bg-clip-text tw-text-transparent">really</span> fast
+  <h2
+    class="tw-mt-0 tw-text-center tw-text-[50pt] tw-font-extrabold tw-leading-none"
+  >
+    but like...
+    <span
+      class="tw-bg-gradient-to-r tw-from-yellow-400 tw-to-amber-200 tw-bg-clip-text tw-text-transparent"
+      >really</span
+    >
+    fast
   </h2>
 
 ```sh
-$ zzap build
+sh $ zzap build
 $ Building zzap.dev...
 $ Site built in 23ms.
 ```
 
-<small>
-  This is the real build time of building this entire documentation website.
-</small>
-<div class="tw-flex tw-gap-4">
-  <a href="/docs/installation" class="tw-flex" role="button">
-    Install zzap
-  </a>
-  <a href="/docs" class="tw-flex contrast outline" role="button">
-    What is zzap
-  </a>
-</div>
+  <span class="tw-text-sm tw-text-center tw-w-8/12">
+    This is the real build time of building this entire documentation website
+    with zzap, excluding the time it took for Tailwind CSS to generate the
+    styles (~300-500ms)
+  </span>
 
+  <div class="tw-flex tw-gap-4">
+    <a href="/docs/installation" class="tw-flex" role="button">
+      Install zzap
+    </a>
+    <a href="/docs" class="tw-flex contrast outline" role="button">
+      What is zzap
+    </a>
+  </div>
 </div>
 
 ## In a nutshell

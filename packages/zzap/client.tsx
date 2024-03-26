@@ -42,6 +42,7 @@ export const zzapClient = {
     async function colorize(node: HTMLPreElement) {
       const lang = node.querySelector("code")?.className;
       const nodeText = node.textContent;
+
       node.outerHTML = await codeToHtml(nodeText, {
         lang: lang,
         theme: props?.theme || "github-dark",

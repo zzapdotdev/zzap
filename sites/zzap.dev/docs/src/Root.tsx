@@ -26,69 +26,87 @@ export function Root(props: { children: React.ReactNode; content: string }) {
       }}
     >
       <main className="container">
-        <nav className="tw-mb-[3rem] md:tw-mb-[6rem]">
-          <ul>
-            <li>
-              <a href="/">
-                <img
-                  src="/images/zzap-logo-light.png"
-                  alt=""
-                  className="tw-w-[8rem] tw-pt-[1rem] tw-block dark:tw-hidden"
-                />
-                <img
-                  src="/images/zzap-logo-dark.png"
-                  alt=""
-                  className="tw-w-[8rem] tw-pt-[1rem] tw-hidden dark:tw-block"
-                />
-              </a>
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <a href="/docs" className="contrast">
-                Docs
-              </a>
-            </li>
-            <li>
-              <a href="/guides" className="contrast">
-                Guides
-              </a>
-            </li>
-            <li>
-              <a
-                className="tw-flex tw-cursor-pointer contrast"
-                href="https://github.com/zzapdotdev/zzap"
-                target="_blank"
-              >
-                <GitHubIcon></GitHubIcon>
-              </a>
-            </li>
-            <li>
-              <a
-                className="tw-flex tw-cursor-pointer contrast "
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleTheme();
-                }}
-              >
-                <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
-                <SunIcon className="tw-hidden dark:tw-block" />
-              </a>
-            </li>
-          </ul>
-        </nav>
+        <header>
+          <nav
+            className="tw-mb-[3rem] tw-border tw-border-zinc-200 dark:tw-border-zinc-600"
+            style={{
+              borderBottom: "1px solid ",
+            }}
+          >
+            <ul>
+              <li>
+                <a href="/">
+                  <img
+                    src="/images/zzap-logo-light.png"
+                    alt=""
+                    className="tw-w-[8rem] tw-pt-[1rem] tw-block dark:tw-hidden"
+                  />
+                  <img
+                    src="/images/zzap-logo-dark.png"
+                    alt=""
+                    className="tw-w-[8rem] tw-pt-[1rem] tw-hidden dark:tw-block"
+                  />
+                </a>
+              </li>
+            </ul>
+            <ul>
+              <li>
+                <a href="/docs" className="contrast">
+                  Docs
+                </a>
+              </li>
+              <li>
+                <a href="/guides" className="contrast">
+                  Guides
+                </a>
+              </li>
+              <li>
+                <a
+                  className="tw-flex tw-cursor-pointer contrast"
+                  href="https://zzap.dev/discord"
+                >
+                  <DiscordIcon></DiscordIcon>
+                </a>
+              </li>
+              <li>
+                <a
+                  className="tw-flex tw-cursor-pointer contrast"
+                  href="https://github.com/zzapdotdev/zzap"
+                  target="_blank"
+                >
+                  <GitHubIcon></GitHubIcon>
+                </a>
+              </li>
+              <li>
+                <a
+                  className="tw-flex tw-cursor-pointer contrast "
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleTheme();
+                  }}
+                >
+                  <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
+                  <SunIcon className="tw-hidden dark:tw-block" />
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </header>
 
         <div className="tw-flex tw-flex-row tw-gap-16">
           <aside className="tw-flex-grow tw-flex-shrink-0 lg:tw-flex tw-hidden ">
             <nav>
               <details open>
-                <summary className="tw-font-bold tw-mb-2 tw-text-black dark:tw-text-white">
+                <summary className="tw-font-bold tw-mb-2 tw-text-black dark:tw-text-white tw-text-sm">
                   Introduction
                 </summary>
-                <ul className="tw-border-l-2 ">
+                <ul className="tw-border-l-2  ">
                   <li>
                     <a
-                      className="secondary tw-py-2 tw-ml-0 tw-border-l-2 tw-border-t-0 tw-border-r-0 tw-border-b-0 tw-border-zinc-200 tw-border-solid tw-rounded-none"
+                      className="secondary tw-text-sm tw-py-2 tw-ml-0 tw-border-zinc-200 tw-rounded-none"
+                      style={{
+                        borderLeft: "1px solid",
+                      }}
                       href="/docs"
                     >
                       What is zzap
@@ -96,7 +114,10 @@ export function Root(props: { children: React.ReactNode; content: string }) {
                   </li>
                   <li>
                     <a
-                      className="secondary tw-py-2 tw-ml-0 tw-border-l-2 tw-border-t-0 tw-border-r-0 tw-border-b-0 tw-border-zinc-200 tw-border-solid tw-rounded-none"
+                      className="secondary tw-text-sm tw-py-2 tw-ml-0 tw-border-zinc-200 tw-rounded-none"
+                      style={{
+                        borderLeft: "1px solid",
+                      }}
                       href="/docs/installation"
                     >
                       Installation
@@ -104,7 +125,10 @@ export function Root(props: { children: React.ReactNode; content: string }) {
                   </li>
                   <li>
                     <a
-                      className="secondary tw-py-2 tw-ml-0 tw-border-l-2 tw-border-t-0 tw-border-r-0 tw-border-b-0 tw-border-zinc-200 tw-border-solid tw-rounded-none"
+                      className="secondary tw-text-sm tw-py-2 tw-ml-0 tw-border-zinc-200 tw-rounded-none"
+                      style={{
+                        borderLeft: "1px solid",
+                      }}
                       href="/docs/quick-start"
                     >
                       Quick Start
@@ -126,21 +150,28 @@ export function Root(props: { children: React.ReactNode; content: string }) {
   );
 }
 
+function DiscordIcon(props: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 127.14 96.36"
+      stroke="currentColor"
+      className={clsx("tw-h-6 tw-w-6", props.className)}
+    >
+      <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+    </svg>
+  );
+}
+
 function SunIcon(props: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
       viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
+      fill="currentColor"
       className={clsx("tw-h-6 tw-w-6", props.className)}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-      />
+      <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
     </svg>
   );
 }
@@ -149,16 +180,14 @@ function MoonIcon(props: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      fill="none"
       viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
+      fill="currentColor"
       className={clsx("tw-h-6 tw-w-6", props.className)}
     >
       <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+        fillRule="evenodd"
+        d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z"
+        clipRule="evenodd"
       />
     </svg>
   );
@@ -167,19 +196,20 @@ function MoonIcon(props: { className?: string }) {
 function GitHubIcon(props: { className?: string }) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
+      width="1024"
+      height="1024"
+      viewBox="0 0 1024 1024"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      xmlns="http://www.w3.org/2000/svg"
       className={clsx("tw-h-6 tw-w-6", props.className)}
     >
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z"
+        transform="scale(64)"
+        fill="currentColor"
+      />
     </svg>
   );
 }
