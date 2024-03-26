@@ -1,7 +1,7 @@
 {
   "name": "@zzapdotdev/zzap",
   "description": "All-in-one static site generator",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "authors": "René-Pier Deshaies-Géllinas",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
