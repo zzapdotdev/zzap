@@ -8,11 +8,7 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
     enableDebug() {
       includeDebugStatements = true;
     },
-    getLogger(serviceName: string = "", props?: { pretty?: boolean }) {
-      const pretty =
-        props?.pretty !== undefined
-          ? props?.pretty
-          : process.env.NODE_ENV === "development";
+    getLogger(serviceName: string = "") {
       const prefix = serviceName
         ? `${appName} ▶ ${serviceName} ▶`
         : `${appName} ▶`;
@@ -26,37 +22,19 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
       let debugTimestamp: number;
       const childLogger = {
         log(message: string, data?: Record<string, any>) {
-          const prettyData = getPrettyData(data, pretty);
+          const prettyData = getPrettyData(data);
 
-          deps.console.info(
-            pretty
-              ? `${prefixLabel} ${message}${prettyData}`
-              : getJSONLog({
-                  level: "info",
-                  appName,
-                  serviceName,
-                  message,
-                  data,
-                }),
-          );
+          deps.console.info(`${prefixLabel} ${message}${prettyData}`);
         },
         info(message: string, data?: Record<string, any>) {
-          const prettyData = getPrettyData(data, pretty);
+          const prettyData = getPrettyData(data);
 
           deps.console.info(
-            pretty
-              ? `${prefixLabel} ${infoLabel} ${message}${prettyData}`
-              : getJSONLog({
-                  level: "info",
-                  appName,
-                  serviceName,
-                  message,
-                  data,
-                }),
+            `${prefixLabel} ${infoLabel} ${message}${prettyData}`,
           );
         },
         debug(message: string, data?: Record<string, any>) {
-          const prettyData = getPrettyData(data, pretty);
+          const prettyData = getPrettyData(data);
 
           const currentTimestamp = new Date().getTime();
           const timeDiff = debugTimestamp
@@ -66,31 +44,15 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
 
           if (includeDebugStatements) {
             deps.console.debug(
-              pretty
-                ? `${prefixLabel} ${debugLabel}${timeDiff} ${message}${prettyData}`
-                : getJSONLog({
-                    level: "debug",
-                    appName,
-                    serviceName,
-                    message,
-                    data,
-                  }),
+              `${prefixLabel} ${debugLabel}${timeDiff} ${message}${prettyData}`,
             );
           }
         },
         warn(message: string, data?: Record<string, any>) {
-          const prettyData = getPrettyData(data, pretty);
+          const prettyData = getPrettyData(data);
 
           deps.console.warn(
-            pretty
-              ? `${prefixLabel} ${warnLabel} ${message}${prettyData}`
-              : getJSONLog({
-                  level: "warn",
-                  appName,
-                  serviceName,
-                  message,
-                  data,
-                }),
+            `${prefixLabel} ${warnLabel} ${message}${prettyData}`,
           );
         },
         error(message: string, data?: Record<string, any> & { error?: any }) {
@@ -109,18 +71,10 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
           const dataWithError = hasDataOrError
             ? { ...data, error: errorObject }
             : undefined;
-          const prettyData = getPrettyData(dataWithError, pretty);
+          const prettyData = getPrettyData(dataWithError);
 
           deps.console.error(
-            pretty
-              ? `${prefixLabel} ${errorLabel} ${message}${prettyData}`
-              : getJSONLog({
-                  level: "error",
-                  appName,
-                  serviceName,
-                  message,
-                  data: dataWithError,
-                }),
+            `${prefixLabel} ${errorLabel} ${message}${prettyData}`,
           );
         },
       };
@@ -130,32 +84,11 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
   };
 }
 
-function getJSONLog(props: {
-  level: string;
-  appName: string;
-  serviceName: string;
-  message: string;
-  data?: Record<string, any>;
-}) {
-  return JSON.stringify({
-    timestamp: getTimestamp(),
-    level: props.level,
-    appName: props.appName,
-    serviceName: props.serviceName,
-    message: props.message,
-    data: props.data,
-  });
-}
-
 function getPrettyData(data?: Record<string, any>, pretty?: boolean) {
   if (!data) {
     return "";
   }
   return pretty ? ` \n${style(JSON.stringify(data, null, 2)).dim()}` : "";
-}
-
-function getTimestamp() {
-  return new Date().toISOString();
 }
 
 function style(msg: string) {
