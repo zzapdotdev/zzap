@@ -3,7 +3,6 @@ import Server from "react-dom/server";
 import { defineConfig } from "zzap";
 import { zzapPluginPicoCSS } from "zzap/plugins/zzapPluginPicoCSS";
 import { zzapPluginTailwind } from "zzap/plugins/zzapPluginTailwind";
-import { zzapPluginVercelJSON } from "zzap/plugins/zzapPluginVercelJSON";
 
 import { Root } from "./src/Root";
 
@@ -16,18 +15,6 @@ export default defineConfig({
     zzapPluginPicoCSS({
       color: "amber",
       module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
-    }),
-    zzapPluginVercelJSON({
-      json: {
-        redirects: [
-          {
-            source: "/discord",
-            destination: "https://discord.gg/3FxnevyEth",
-            permanent: true,
-          },
-        ],
-      },
-      dir: path.join(__dirname, "../../../"),
     }),
   ],
   entryPoints: [{ path: "./src/index.tsx" }],

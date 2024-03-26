@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "zzap watch --port 3000 --debug",
-    "build": "zzap build"
+    "build": "NODE_ENV=production zzap build"
   },
   "dependencies": {
     "@picocss/pico": "^2.0.6",
