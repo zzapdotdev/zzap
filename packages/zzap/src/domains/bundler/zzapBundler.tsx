@@ -1,17 +1,14 @@
 import Bun, { $, Glob } from "bun";
-import markdownit from "markdown-it";
 
 import React from "react";
 import { logger } from "../../cli";
 import { zzapConfig } from "../config/zzapConfig";
 import { getLogger } from "../logging/getLogger";
+import { PageBuilder, type PageType } from "../page/PageBuilder";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
 import { zzapPluginPublicDir } from "./core-plugins/zzapPluginPublicDir";
 import { zzapPluginPublicFiles } from "./core-plugins/zzapPluginPublicFiles";
 import { zzapPluginScript } from "./core-plugins/zzapPluginScript";
-
-// Clean output folder
-// await fs.rm(config.outputDir, { recursive: true, force: true });
 
 export const zzapBundler = {
   async generate() {
@@ -33,12 +30,6 @@ export const zzapBundler = {
       ></script>,
     ];
     const scripts: Array<JSX.Element> = [];
-
-    const md = markdownit({
-      html: true,
-      linkify: true,
-      langPrefix: "",
-    });
 
     await pluginsTask();
 
@@ -70,13 +61,14 @@ export const zzapBundler = {
             .replace(/\.md?$/, "")
             .replace(/\/index$/, "");
 
-          const pageHTML = md.render(pageMarkdown);
+          const [page] = PageBuilder.fromMarkdown({
+            path: path,
+            markdown: pageMarkdown,
+          });
 
           const module = await getIndexModule();
           const RootComponent = module?.default || DefaultRootComponent;
-          const content = (
-            <RootComponent content={pageHTML} path={path}></RootComponent>
-          );
+          const content = <RootComponent page={page}></RootComponent>;
 
           const root = <div id="zzap-root">{content}</div>;
 
@@ -164,14 +156,11 @@ window.__zzap = ${JSON.stringify({
       });
     }
 
-    function DefaultRootComponent(props: {
-      content: JSX.Element | string;
-      path: string;
-    }) {
+    function DefaultRootComponent(props: { page: PageType }) {
       return (
         <div
           dangerouslySetInnerHTML={{
-            __html: props.content,
+            __html: props.page.type === "markdown" ? props.page.html : "",
           }}
         ></div>
       );

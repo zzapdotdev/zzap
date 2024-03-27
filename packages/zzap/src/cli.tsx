@@ -36,6 +36,9 @@ async function main() {
   );
 
   if (command === "watch") {
+    logger.log(`Cleaning ${config.outputDir}`);
+    await zzapCommander.clean();
+    logger.log(`Watching ${config.srcDir}`);
     await zzapCommander.watch({
       port: Number(values.port),
     });

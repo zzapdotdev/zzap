@@ -1,6 +1,6 @@
 import { inject } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
-import { zzapClient } from "@zzapdotdev/zzap/client";
+import { PageType, zzapClient } from "@zzapdotdev/zzap/client";
 import clsx from "clsx";
 import React from "react";
 
@@ -12,11 +12,14 @@ zzapClient.interactive(Root);
 inject();
 injectSpeedInsights();
 
-export default function Root(props: {
-  path: string;
-  children: React.ReactNode;
-  content: string;
-}) {
+// if (zzapClient.isBrowser) {
+//   const algoliasearch = await import(
+//     "https://cdn.jsdelivr.net/npm/algoliasearch@4.23.1/dist/algoliasearch-lite.esm.browser.js"
+//   );
+//   console.log("algoliasearch", algoliasearch);
+// }
+
+export default function Root(props: { page: PageType<"home-page"> }) {
   function toggleTheme() {
     const theme = zzapClient.getTheme();
     const newTheme = theme === "light" ? "dark" : "light";
@@ -32,137 +35,179 @@ export default function Root(props: {
     }
   }
 
+  const isHomePage = props.page.template === "home-page";
+
   return (
-    <div
+    <main
+      className="container"
       style={{
         paddingBottom: "20vh",
-        background: "var(--pico-background-color)",
       }}
     >
-      <main className="container">
-        <header>
-          <nav
-            className="tw-mb-[3rem] tw-border tw-border-zinc-200 dark:tw-border-zinc-600"
-            style={{
-              borderBottom: "1px solid ",
-            }}
-          >
-            <ul>
-              <li>
-                <a href="/">
-                  <ZzapIcon className="tw-w-[10rem] tw-pt-2  tw-text-black dark:tw-text-white tw-block dark:tw-hidden"></ZzapIcon>
-                  <ZzapIconGradient className="tw-w-[10rem] tw-pt-2  tw-text-black dark:tw-text-white tw-hidden dark:tw-block"></ZzapIconGradient>
-                </a>
-              </li>
-            </ul>
-            <ul>
-              <li>
-                <a href="/docs" className="contrast">
-                  Docs
-                </a>
-              </li>
-              <li>
-                <a href="/guides" className="contrast">
-                  Guides
-                </a>
-              </li>
-              <li>
-                <a
-                  className="tw-flex tw-cursor-pointer contrast"
-                  href="https://zzap.dev/discord"
-                >
-                  <DiscordIcon></DiscordIcon>
-                </a>
-              </li>
-              <li>
-                <a
-                  className="tw-flex tw-cursor-pointer contrast"
-                  href="https://github.com/zzapdotdev/zzap"
-                  target="_blank"
-                >
-                  <GitHubIcon></GitHubIcon>
-                </a>
-              </li>
-              <li>
-                <a
-                  className="tw-flex tw-cursor-pointer contrast "
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toggleTheme();
-                  }}
-                >
-                  <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
-                  <SunIcon className="tw-hidden dark:tw-block" />
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </header>
-
-        <div className="tw-flex tw-flex-row tw-gap-16">
-          <aside
-            className={clsx("tw-flex-grow tw-flex-shrink-0", {
-              "tw-hidden": props.path == "",
-              "lg:tw-flex tw-hidden": props.path !== "",
-            })}
-          >
-            <nav>
-              <details open>
-                <summary className="tw-font-bold tw-mb-2 tw-text-black dark:tw-text-white tw-text-sm">
-                  Introduction
-                </summary>
-                <ul className="tw-border-l-2  ">
-                  <li>
-                    <a
-                      className="secondary tw-text-sm tw-py-2 tw-ml-0 tw-border-zinc-200 tw-rounded-none"
-                      style={{
-                        borderLeft: "1px solid",
-                      }}
-                      href="/docs"
-                    >
-                      What is zzap
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="secondary tw-text-sm tw-py-2 tw-ml-0 tw-border-zinc-200 tw-rounded-none"
-                      style={{
-                        borderLeft: "1px solid",
-                      }}
-                      href="/docs/installation"
-                    >
-                      Installation
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="secondary tw-text-sm tw-py-2 tw-ml-0 tw-border-zinc-200 tw-rounded-none"
-                      style={{
-                        borderLeft: "1px solid",
-                      }}
-                      href="/docs/quick-start"
-                    >
-                      Quick Start
-                    </a>
-                  </li>
-                </ul>
-              </details>
-            </nav>
-          </aside>
-
-          <div
-            className={clsx({
-              "tw-w-[100%]": props.path == "",
-              "lg:tw-w-[75%] tw-w-[100%]": props.path !== "",
-            })}
-            dangerouslySetInnerHTML={{
-              __html: props.content,
-            }}
-          ></div>
-        </div>
-      </main>
-    </div>
+      {renderHeader()}
+      <div className="tw-flex tw-flex-row tw-gap-16">
+        {renderSidebar()}
+        {renderContent()}
+      </div>
+    </main>
   );
+
+  function renderContent() {
+    return (
+      <div
+        className={clsx({
+          "tw-w-[100%]": isHomePage,
+          "tw-w-[100%] lg:tw-w-[75%]": !isHomePage,
+        })}
+        dangerouslySetInnerHTML={{
+          __html: props.page.type === "markdown" ? props.page.html : "",
+        }}
+      ></div>
+    );
+  }
+
+  function renderSidebar() {
+    if (isHomePage) {
+      return null;
+    }
+
+    const items = [
+      {
+        title: "What is zzap",
+        href: "/docs",
+      },
+      {
+        title: "Installation",
+        href: "/docs/installation",
+      },
+      {
+        title: "Quick Start",
+        href: "/docs/quick-start",
+      },
+    ];
+
+    return (
+      <aside
+        className={clsx("tw-hidden tw-flex-shrink-0 tw-flex-grow lg:tw-flex")}
+      >
+        <nav>
+          <details open>
+            <summary className="tw-mb-2 tw-text-sm tw-font-bold tw-text-black dark:tw-text-white">
+              Introduction
+            </summary>
+            <ul className="">
+              {items.map((item) => {
+                const isCurrent = item.href === props.page.path;
+                return (
+                  <li key={item.href}>
+                    <a
+                      className={clsx(
+                        "secondary tw-ml-0 tw-rounded-none tw-border-2 tw-py-2 tw-text-sm",
+                        {
+                          "tw-border-black tw-font-medium tw-text-black":
+                            isCurrent,
+                          "tw-border-zinc-200 ": !isCurrent,
+                        },
+                      )}
+                      style={{
+                        borderLeft: "1px solid",
+                      }}
+                      href={item.href}
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        </nav>
+      </aside>
+    );
+  }
+
+  function renderHeader() {
+    return (
+      <header>
+        <nav
+          className="tw-mb-[3rem] tw-border tw-border-zinc-200 dark:tw-border-zinc-600"
+          style={{
+            borderBottom: "1px solid ",
+          }}
+        >
+          <ul>
+            <li>
+              <a href="/">
+                <ZzapIcon className="tw-block tw-w-[5rem] tw-pt-2 tw-text-black  lg:tw-w-[10rem] dark:tw-hidden dark:tw-text-white "></ZzapIcon>
+                <ZzapIconGradient className=" tw-hidden tw-w-[5rem] tw-pt-2  tw-text-black lg:tw-w-[10rem] dark:tw-block dark:tw-text-white"></ZzapIconGradient>
+              </a>
+            </li>
+          </ul>
+          <ul>
+            {renderNavItems({
+              className: "tw-hidden lg:tw-block",
+            })}
+
+            <li>
+              <a
+                className="contrast tw-flex tw-cursor-pointer "
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleTheme();
+                }}
+              >
+                <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
+                <SunIcon className="tw-hidden dark:tw-block" />
+              </a>
+            </li>
+            <li className="tw-block lg:tw-hidden">
+              <details className="dropdown tw-m-0 tw-p-0">
+                <summary className="tw-border-0 tw-bg-transparent after:tw-hidden">
+                  <HamburgerIcon></HamburgerIcon>
+                </summary>
+                <ul dir="rtl">{renderNavItems({})}</ul>
+              </details>
+            </li>
+          </ul>
+        </nav>
+      </header>
+    );
+  }
+  function renderNavItems(pprops: { className?: string }) {
+    return (
+      <>
+        <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
+          <a href="/docs" className="contrast">
+            Docs
+          </a>
+        </li>
+        <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
+          <a href="/guides" className="contrast">
+            Guides
+          </a>
+        </li>
+        <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
+          <a
+            className="contrast tw-flex tw-cursor-pointer"
+            href="https://zzap.dev/discord"
+          >
+            <DiscordIcon className="tw-hidden lg:tw-block"></DiscordIcon>
+            <span className="tw-block lg:tw-hidden">Discord</span>
+          </a>
+        </li>
+        <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
+          <a
+            className="contrast tw-flex tw-cursor-pointer"
+            href="https://github.com/zzapdotdev/zzap"
+            target="_blank"
+          >
+            <GitHubIcon className="tw-hidden lg:tw-block"></GitHubIcon>
+            <span className="tw-block lg:tw-hidden">GitHub</span>
+          </a>
+        </li>
+      </>
+    );
+  }
 }
 
 function DiscordIcon(props: { className?: string }) {
@@ -418,6 +463,25 @@ function ZzapIconGradient(props: { className?: string }) {
           <stop offset="1" stopColor="#FDE68A"></stop>
         </linearGradient>
       </defs>
+    </svg>
+  );
+}
+
+function HamburgerIcon(props: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className={clsx("tw-h-6 tw-w-6", props.className)}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+      />
     </svg>
   );
 }

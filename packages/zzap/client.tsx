@@ -1,3 +1,5 @@
+export type { PageType } from "./src/domains/page/PageBuilder";
+
 export const zzapClient = {
   isBrowser: typeof window !== "undefined",
   async interactive(RootComponent: any) {

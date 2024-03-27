@@ -1,13 +1,17 @@
 import { $ } from "bun";
 import { watch } from "fs";
+import fs from "fs/promises";
 import { zzapBundler } from "../bundler/zzapBundler";
 import { zzapConfig } from "../config/zzapConfig";
 import { getLogger } from "../logging/getLogger";
 export let generatingPromise: ReturnType<typeof $> | undefined;
-
 const logger = getLogger();
 
 export const zzapCommander = {
+  async clean() {
+    const config = await zzapConfig.get();
+    await fs.rm(config.outputDir, { recursive: true, force: true });
+  },
   async watch(props: { port: number | undefined }) {
     await zzapBundler.generate();
 

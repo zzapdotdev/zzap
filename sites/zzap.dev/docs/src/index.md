@@ -1,3 +1,9 @@
+---
+title: zzap
+description: Content driven site generator but like... really fast
+template: home-page
+---
+
 <div
   class="tw-mb-16 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-6"
 >
