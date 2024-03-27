@@ -220,13 +220,14 @@ export default function App(props: { page: PageType<"home-page"> }) {
 
     const html = props.page.type === "markdown" && props.page.html;
     return (
-      <div>
+      <div
+        className={clsx({
+          "tw-w-[100%]": isHomePage,
+          "tw-w-[100%] lg:tw-w-[75%]": !isHomePage,
+        })}
+      >
         {html && (
           <div
-            className={clsx({
-              "tw-w-[100%]": isHomePage,
-              "tw-w-[100%] lg:tw-w-[75%]": !isHomePage,
-            })}
             dangerouslySetInnerHTML={{
               __html: html,
             }}
