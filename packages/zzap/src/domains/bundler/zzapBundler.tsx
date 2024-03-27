@@ -35,16 +35,17 @@ export const zzapBundler = {
 
     const buildPagesTaskResult = await buildPages();
     logger.log(
-      `Generated ${buildPagesTaskResult.globFileCount} pages in ${buildPagesTaskResult.time}ms.`,
+      `Generated ${buildPagesTaskResult.count} pages in ${buildPagesTaskResult.time}ms.`,
     );
     logger.log(`Finished in ${Date.now() - generateTimestamp}ms.`);
 
     async function buildPages() {
       const pages: Array<PageType> = [];
       const timestamp = Date.now();
-      let globFileCount = 0;
 
       const globPatterns = ["**/*.mdx", "**/*.md"];
+      const promises: Array<ReturnType<typeof generatePage>> = [];
+
       for (const pattern of globPatterns) {
         const glob = new Bun.Glob(config.srcDir + "/" + pattern);
 
@@ -54,75 +55,11 @@ export const zzapBundler = {
         });
 
         for await (const filePath of filesIterator) {
-          const pageMarkdown = await Bun.file(filePath).text();
-
-          const path = filePath
-            .replace(config.srcDir, "")
-            .replace(/\.mdx?$/, "")
-            .replace(/\.md?$/, "")
-            .replace(/\/index$/, "");
-
-          const [page] = await PageBuilder.fromMarkdown({
-            path: path,
-            markdown: pageMarkdown,
-          });
-
-          const module = await getIndexModule();
-          const AppComponent = module?.default;
-
-          if (!AppComponent) {
-            logger.error(
-              `while loading index.tsx or index.jsx in ${config.srcDir}.`,
-            );
-            process.exit(0);
-          }
-
-          const content = <AppComponent page={page}></AppComponent>;
-
-          const root = <div id="zzap-root">{content}</div>;
-
-          const jsx = config.document({
-            head: (
-              <>
-                {heads.map((head, i) => {
-                  return <React.Fragment key={i}>{head}</React.Fragment>;
-                })}
-                <title>{page.titleWithSiteTitle}</title>
-                <meta name="og:title" content={page.titleWithSiteTitle} />
-                <meta name="og:description" content={page.description} />
-                <meta property="og:type" content="website" />
-                <meta property="og:site_name" content={config.title} />
-                {/* <meta name="og:image" content=""></meta> */}
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={page.titleWithSiteTitle} />
-                {/* <meta name="twitter:image" content=""></meta> */}
-              </>
-            ),
-            children: root,
-            scripts: (
-              <>
-                <script
-                  type="module"
-                  dangerouslySetInnerHTML={{
-                    __html: `
-window.__zzap = ${JSON.stringify({
-                      props: content.props,
-                    })};`,
-                  }}
-                ></script>
-                {scripts.map((script, i) => {
-                  return <React.Fragment key={i}>{script}</React.Fragment>;
-                })}
-              </>
-            ),
-          });
-          const html = config.deps["react-dom/server"].renderToString(jsx);
-          Bun.write(`${config.outputDir}/${path}/index.html`, html);
-          globFileCount++;
-          pages.push(page);
+          promises.push(generatePage(filePath));
         }
       }
 
+      await Promise.all(promises);
       const siteMap = `
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${pages
         .map((page) => {
@@ -138,8 +75,84 @@ window.__zzap = ${JSON.stringify({
       Bun.write(`${config.outputDir}/sitemap.xml`, siteMap);
 
       // Render dynamic pages
-      const dynamicPages: Array<{ path: string; children: JSX.Element }> = [];
-      return { globFileCount, dynamicPages, time: Date.now() - timestamp };
+      return { time: Date.now() - timestamp, count: pages.length };
+
+      async function generatePage(filePath: string) {
+        const pageMarkdown = await Bun.file(filePath).text();
+
+        const path = filePath
+          .replace(config.srcDir, "")
+          .replace(/\.mdx?$/, "")
+          .replace(/\.md?$/, "")
+          .replace(/\/index$/, "");
+
+        const [page] = await PageBuilder.fromMarkdown({
+          path: path,
+          markdown: pageMarkdown,
+        });
+
+        const module = await getIndexModule();
+        const AppComponent = module?.default;
+
+        if (!AppComponent) {
+          logger.error(
+            `while loading index.tsx or index.jsx in ${config.srcDir}.`,
+          );
+          process.exit(0);
+        }
+
+        const content = <AppComponent page={page}></AppComponent>;
+
+        const root = <div id="zzap-root">{content}</div>;
+
+        const jsx = config.document({
+          head: (
+            <>
+              {heads.map((head, i) => {
+                return <React.Fragment key={i}>{head}</React.Fragment>;
+              })}
+              <title>{page.titleWithSiteTitle}</title>
+              <meta name="og:title" content={page.titleWithSiteTitle} />
+              <meta name="og:description" content={page.description} />
+              <meta property="og:type" content="website" />
+              <meta property="og:site_name" content={config.title} />
+              {/* <meta name="og:image" content=""></meta> */}
+              <meta name="twitter:card" content="summary_large_image" />
+              <meta name="twitter:title" content={page.titleWithSiteTitle} />
+              {/* <meta name="twitter:image" content=""></meta> */}
+            </>
+          ),
+          children: root,
+          scripts: (
+            <>
+              <script
+                type="module"
+                dangerouslySetInnerHTML={{
+                  __html: `
+window.__zzap = ${JSON.stringify({
+                    props: content.props,
+                  })};`,
+                }}
+              ></script>
+              {scripts.map((script, i) => {
+                return <React.Fragment key={i}>{script}</React.Fragment>;
+              })}
+            </>
+          ),
+        });
+        const html = config.deps["react-dom/server"].renderToString(jsx);
+
+        const is404Page = path === "/404";
+
+        if (is404Page) {
+          await Bun.write(`${config.outputDir}/${path}.html`, html);
+          await Bun.write(`${config.outputDir}/${path}/index.html`, html);
+        } else {
+          await Bun.write(`${config.outputDir}/${path}/index.html`, html);
+        }
+
+        pages.push(page);
+      }
     }
 
     async function pluginsTask() {

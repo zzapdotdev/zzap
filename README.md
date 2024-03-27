@@ -2,24 +2,17 @@
 
 # Todo
 
-- [ ] Plugins
-  - [ ] vercel redirects
-- [ ] index.tsx loader.
+- [x] Plugins
+  - [x] Pico CSS
+  - [x] Tailwind
+- [x] index.tsx loader.
 - [ ] feat: dynamic pages
-- [ ] fix: pokedex
-- [ ] feat: Better default `root component`
 
 # Features
 
-- [ ] Basic site (minimal config)
 - [ ] auto "react" and "react-dom" deps?
 - [ ] 404 page
-- [ ] sitemap
-- [ ] include markdown render in "dynamic" function
+- [x] sitemap
 - [ ] Bun shell output
-
-# Maybe
-
-- [ ] rss feed?
 
 discord: https://discord.gg/3FxnevyEth

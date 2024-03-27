@@ -51,7 +51,8 @@ export const zzapCommander = {
       async fetch(request) {
         const url = request.url;
         const pathname = new URL(url).pathname;
-        const fileName = pathname.split(".").length > 1 ? "" : "/index.html";
+        const hasFileExtension = pathname.split(".").length > 1;
+        const fileName = hasFileExtension ? "" : "/index.html";
         const path = `${config.outputDir}${pathname}${fileName}`;
         try {
           const file = Bun.file(path);
@@ -67,7 +68,11 @@ export const zzapCommander = {
               status: 404,
             });
           }
-          return new Response(Bun.file(path));
+          return new Response(Bun.file(path), {
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+            },
+          });
         } catch (error) {
           return htmlToReponse({
             html: `
