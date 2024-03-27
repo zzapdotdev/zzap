@@ -57,25 +57,22 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
         },
         error(message: string, data?: Record<string, any> & { error?: any }) {
           const error = data?.error;
-          const errorObject =
-            error instanceof Error
-              ? {
-                  name: error.name,
-                  message: error.message,
-                  stack: error.stack,
-                  cause: error.cause,
-                }
-              : error;
 
           const hasDataOrError = error || data;
-          const dataWithError = hasDataOrError
-            ? { ...data, error: errorObject }
-            : undefined;
+          const dataWithError = hasDataOrError ? { ...data } : undefined;
           const prettyData = getPrettyData(dataWithError);
 
           deps.console.error(
             `${prefixLabel} ${errorLabel} ${message}${prettyData}`,
+            error,
           );
+        },
+        terminate(
+          message: string,
+          data?: Record<string, any> & { error?: any },
+        ) {
+          this.error(message, data);
+          process.exit(0);
         },
       };
 

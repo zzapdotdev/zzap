@@ -1,7 +1,6 @@
 import { defineConfig } from "@zzapdotdev/zzap";
 import React from "react";
 import Server from "react-dom/server";
-
 export default defineConfig({
   title: "zzap.dev",
   plugins: [],
@@ -18,7 +17,6 @@ export default defineConfig({
               name="viewport"
               content="width=device-width, initial-scale=1.0"
             />
-            <link rel="icon" href="/favicon.png" />
             {props.head}
           </head>
           <body>{props.children}</body>

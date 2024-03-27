@@ -65,6 +65,61 @@ $ bun install zzap
 
 ---
 
+## Quick Setup
+
+```tsx
+import { defineConfig } from "@zzapdotdev/zzap";
+import React from "react";
+import Server from "react-dom/server";
+
+export default defineConfig({
+  title: "My Website",
+  deps: {
+    "react-dom/server": Server,
+  },
+  document(props) {
+    return (
+      <>
+        <html lang="en">
+          <head>
+            <meta charSet="UTF-8" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1.0"
+            />
+            {props.head}
+          </head>
+          <body>{props.children}</body>
+          {props.scripts}
+        </html>
+      </>
+    );
+  },
+});
+```
+
+```tsx
+import { PageType } from "@zzapdotdev/zzap/client";
+import React from "react";
+
+type PageTypes = "home-page";
+
+export default function App(props: { page: PageType<PageTypes> }) {
+  return (
+    <main>
+      <h1>{props.page.title}</h1>
+      <pre>
+        <code>{JSON.stringify(props, null, 2)}</code>
+      </pre>
+    </main>
+  );
+}
+```
+
+```md
+# Home Page
+```
+
 ## Features
 
 Consectetur enim elit aliqua aute nulla esse exercitation occaecat veniam. Magna est consequat consectetur laboris ut nulla nostrud qui ullamco nostrud. Sint exercitation irure excepteur incididunt aute culpa duis cupidatat duis. Ad aliquip exercitation labore consectetur ea eu labore sint esse.

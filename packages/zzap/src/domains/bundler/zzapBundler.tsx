@@ -1,4 +1,4 @@
-import Bun, { $, Glob } from "bun";
+import Bun, { $ } from "bun";
 
 import React from "react";
 import { logger } from "../../cli";
@@ -40,12 +40,13 @@ export const zzapBundler = {
     logger.log(`Finished in ${Date.now() - generateTimestamp}ms.`);
 
     async function buildPages() {
+      const pages: Array<PageType> = [];
       const timestamp = Date.now();
       let globFileCount = 0;
 
       const globPatterns = ["**/*.mdx", "**/*.md"];
       for (const pattern of globPatterns) {
-        const glob = new Glob(config.srcDir + "/" + pattern);
+        const glob = new Bun.Glob(config.srcDir + "/" + pattern);
 
         const filesIterator = glob.scan({
           cwd: ".",
@@ -67,7 +68,15 @@ export const zzapBundler = {
           });
 
           const module = await getIndexModule();
-          const AppComponent = module?.default || DefaultAppComponent;
+          const AppComponent = module?.default;
+
+          if (!AppComponent) {
+            logger.error(
+              `while loading index.tsx or index.jsx in ${config.srcDir}.`,
+            );
+            process.exit(0);
+          }
+
           const content = <AppComponent page={page}></AppComponent>;
 
           const root = <div id="zzap-root">{content}</div>;
@@ -78,14 +87,14 @@ export const zzapBundler = {
                 {heads.map((head, i) => {
                   return <React.Fragment key={i}>{head}</React.Fragment>;
                 })}
-                <title>{page.title}</title>
-                <meta name="og:title" content={page.title} />
+                <title>{page.titleWithSiteTitle}</title>
+                <meta name="og:title" content={page.titleWithSiteTitle} />
                 <meta name="og:description" content={page.description} />
                 <meta property="og:type" content="website" />
                 <meta property="og:site_name" content={config.title} />
                 {/* <meta name="og:image" content=""></meta> */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={page.title} />
+                <meta name="twitter:title" content={page.titleWithSiteTitle} />
                 {/* <meta name="twitter:image" content=""></meta> */}
               </>
             ),
@@ -110,8 +119,23 @@ window.__zzap = ${JSON.stringify({
           const html = config.deps["react-dom/server"].renderToString(jsx);
           Bun.write(`${config.outputDir}/${path}/index.html`, html);
           globFileCount++;
+          pages.push(page);
         }
       }
+
+      const siteMap = `
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${pages
+        .map((page) => {
+          return `  
+  <url>
+    <loc>${page.path || "/"}</loc>
+    <changefreq>weekly</changefreq>
+  </url>`;
+        })
+        .join("")}
+</urlset>
+`;
+      Bun.write(`${config.outputDir}/sitemap.xml`, siteMap);
 
       // Render dynamic pages
       const dynamicPages: Array<{ path: string; children: JSX.Element }> = [];
@@ -178,17 +202,36 @@ window.__zzap = ${JSON.stringify({
     async function getIndexModule(): Promise<
       { default: typeof DefaultAppComponent } | undefined
     > {
-      try {
-        const location = `${config.srcDir}/index.tsx`;
-        const module = await import(location);
-        return module;
-      } catch (error) {}
-      try {
-        const location = `${config.srcDir}/index.jsx`;
-        const module = await import(location);
-        return module;
-      } catch (error) {}
-      return undefined;
+      const indexTsxExists = await Bun.file(
+        `${config.srcDir}/index.tsx`,
+      ).exists();
+      const indexJsxExists = await Bun.file(
+        `${config.srcDir}/index.jsx`,
+      ).exists();
+
+      if (indexTsxExists) {
+        try {
+          const location = `${config.srcDir}/index.tsx`;
+          const module = await import(location);
+          return module;
+        } catch (error) {
+          logger.terminate(`loading index.tsx`, { error });
+        }
+      }
+
+      if (indexJsxExists) {
+        try {
+          const location = `${config.srcDir}/index.jsx`;
+          const module = await import(location);
+          return module;
+        } catch (error) {
+          logger.terminate(`loading index.jsx`, { error });
+        }
+      }
+
+      logger.terminate(
+        `no index.tsx or index.jsx was found in ${config.srcDir}.`,
+      );
     }
   },
 };

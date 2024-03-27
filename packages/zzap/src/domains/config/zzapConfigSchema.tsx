@@ -48,7 +48,11 @@ export const configSchema = z.object({
       }),
     )
     .default([]),
-  plugins: z.array(z.any()).default([]) as z.ZodType<Array<zzapPluginType>>,
+  plugins: z.array(z.any()).default([]) as z.ZodType<
+    Array<zzapPluginType>,
+    z.ZodDefaultDef,
+    undefined | Array<zzapPluginType>
+  >,
   deps: z.object({
     /**
      * The default ReactDOMServer import.

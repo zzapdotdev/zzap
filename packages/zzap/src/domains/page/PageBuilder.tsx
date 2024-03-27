@@ -33,7 +33,8 @@ export const PageBuilder = {
     const page: MarkdownPage = {
       type: "markdown",
       template: template,
-      title: `${title} • ${config.title}`,
+      title: title,
+      titleWithSiteTitle: `${title} • ${config.title}`,
       description: description,
       data: {
         ...rest,
@@ -48,9 +49,10 @@ export const PageBuilder = {
 
 type CorePageType<TTemplateType extends string = ""> = {
   title: string;
+  titleWithSiteTitle: string;
   description: string;
   path: string;
-  template: TTemplateType;
+  template: TTemplateType | "default";
   data: any;
 };
 

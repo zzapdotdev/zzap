@@ -3,9 +3,10 @@ import { injectSpeedInsights } from "@vercel/speed-insights";
 import { PageType, zzapClient } from "@zzapdotdev/zzap/client";
 import clsx from "clsx";
 import React, { useEffect } from "react";
+import { sidebars } from "./sidebars";
 
 zzapClient.shiki({
-  theme: "vitesse-dark",
+  theme: "rose-pine",
 });
 zzapClient.interactive(App);
 
@@ -14,20 +15,16 @@ if (zzapClient.isBrowser) {
   injectSpeedInsights();
 }
 
-const items = [
-  {
-    title: "What is zzap",
-    href: "/docs",
-  },
-  {
-    title: "Installation",
-    href: "/docs/installation",
-  },
-  {
-    title: "Quick Start",
-    href: "/docs/quick-start",
-  },
-];
+type SidebarType = {
+  name: string;
+  startsWith: string;
+  items: SidebarItemType[];
+};
+
+type SidebarItemType = {
+  title: string;
+  href: string;
+};
 
 export default function App(props: { page: PageType<"home-page"> }) {
   function toggleTheme() {
@@ -52,9 +49,9 @@ export default function App(props: { page: PageType<"home-page"> }) {
 
       docsearch({
         container: "#docsearch",
-        appId: "R2IYF7ETH7",
-        apiKey: "599cec31baffa4868cae4e79f180729b",
-        indexName: "docsearch",
+        appId: "IXJOX9MAXK",
+        apiKey: "a2c40fcb6b525276ff29463b163b4f46",
+        indexName: "zzap",
       });
     }
   }, []);
@@ -151,6 +148,14 @@ export default function App(props: { page: PageType<"home-page"> }) {
       return null;
     }
 
+    const [sidebar] = sidebars.filter((sidebar) => {
+      return props.page.path.startsWith(sidebar.startsWith);
+    });
+
+    if (!sidebar) {
+      return null;
+    }
+
     return (
       <aside
         className={clsx("tw-hidden tw-flex-shrink-0 tw-flex-grow lg:tw-flex")}
@@ -158,10 +163,10 @@ export default function App(props: { page: PageType<"home-page"> }) {
         <nav>
           <details open>
             <summary className="tw-mb-2 tw-text-sm tw-font-bold tw-text-black dark:tw-text-white">
-              Introduction
+              {sidebar.name}
             </summary>
             <ul className="">
-              {items.map((item) => {
+              {sidebar.items.map((item) => {
                 const isCurrent = item.href === props.page.path;
                 return (
                   <li key={item.href}>
