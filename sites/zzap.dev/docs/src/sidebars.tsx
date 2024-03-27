@@ -1,6 +1,6 @@
 export const sidebars: SidebarType = [
   {
-    name: "Docs",
+    name: "Intro",
     startsWith: "/docs",
     items: [
       {
@@ -17,6 +17,26 @@ export const sidebars: SidebarType = [
       },
     ],
   },
+
+  {
+    name: "Plugins",
+    startsWith: "/docs",
+    items: [
+      {
+        title: "What is a Plugin",
+        href: "/docs/plugins",
+      },
+      {
+        title: "Official Plugins",
+        href: "/docs/plugins/official-plugins",
+      },
+      {
+        title: "Creating a Plugin",
+        href: "/docs/plugins/creating-a-plugin",
+      },
+    ],
+  },
+
   {
     name: "Guides",
     startsWith: "/guides",

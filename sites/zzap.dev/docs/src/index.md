@@ -102,7 +102,7 @@ export default defineConfig({
 import { PageType } from "@zzapdotdev/zzap/client";
 import React from "react";
 
-type PageTypes = "home-page";
+type PageTypes = "";
 
 export default function App(props: { page: PageType<PageTypes> }) {
   return (

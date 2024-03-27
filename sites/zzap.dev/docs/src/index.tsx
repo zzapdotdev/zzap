@@ -99,9 +99,9 @@ export default function App(props: { page: PageType<"home-page"> }) {
               </a>
             </li>
             <li onClick={handleSearchClick} className="tw-hidden md:tw-block">
-              <div className="tw-flex tw-items-center tw-gap-2 tw-rounded tw-bg-zinc-100 tw-py-2 tw-pl-2 tw-pr-3 tw-text-sm dark:tw-bg-zinc-700">
+              <div className="tw-flex tw-min-w-[250px] tw-items-center tw-gap-2 tw-rounded tw-bg-zinc-100 tw-py-1 tw-pl-2 tw-pr-2 tw-text-xs dark:tw-bg-zinc-700">
                 <span>
-                  <SearchIcon className="tw-w-[1.25rem]"></SearchIcon>
+                  <SearchIcon className="tw-w-[1.25em]"></SearchIcon>
                 </span>
                 <span>Search the doc...</span>
               </div>
@@ -148,11 +148,11 @@ export default function App(props: { page: PageType<"home-page"> }) {
       return null;
     }
 
-    const [sidebar] = sidebars.filter((sidebar) => {
+    const visibleSidebars = sidebars.filter((sidebar) => {
       return props.page.path.startsWith(sidebar.startsWith);
     });
 
-    if (!sidebar) {
+    if (!visibleSidebars.length) {
       return null;
     }
 
@@ -161,36 +161,43 @@ export default function App(props: { page: PageType<"home-page"> }) {
         className={clsx("tw-hidden tw-flex-shrink-0 tw-flex-grow lg:tw-flex")}
       >
         <nav>
-          <details open>
-            <summary className="tw-mb-2 tw-text-sm tw-font-bold tw-text-black dark:tw-text-white">
-              {sidebar.name}
-            </summary>
-            <ul className="">
-              {sidebar.items.map((item) => {
-                const isCurrent = item.href === props.page.path;
-                return (
-                  <li key={item.href}>
-                    <a
-                      className={clsx(
-                        "secondary tw-ml-0 tw-rounded-none tw-border-2 tw-py-2 tw-text-sm",
-                        {
-                          "tw-border-black tw-font-medium tw-text-black":
-                            isCurrent,
-                          "tw-border-zinc-200 ": !isCurrent,
-                        },
-                      )}
-                      style={{
-                        borderLeft: "1px solid",
-                      }}
-                      href={item.href}
-                    >
-                      {item.title}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </details>
+          {visibleSidebars.map((sidebar, i) => {
+            const isOpen = sidebar.items.some(
+              (item) => item.href === props.page.path,
+            );
+            return (
+              <details open={isOpen} key={i}>
+                <summary className="tw-mb-2 tw-text-sm tw-font-bold tw-text-black dark:tw-text-white">
+                  {sidebar.name}
+                </summary>
+                <ul className="">
+                  {sidebar.items.map((item) => {
+                    const isCurrent = item.href === props.page.path;
+                    return (
+                      <li key={item.href}>
+                        <a
+                          className={clsx(
+                            "secondary tw-ml-0 tw-rounded-none tw-border-2 tw-py-2 tw-text-sm",
+                            {
+                              "tw-border-black tw-font-medium tw-text-black":
+                                isCurrent,
+                              "tw-border-zinc-200 ": !isCurrent,
+                            },
+                          )}
+                          style={{
+                            borderLeft: "1px solid",
+                          }}
+                          href={item.href}
+                        >
+                          {item.title}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </details>
+            );
+          })}
         </nav>
       </aside>
     );
