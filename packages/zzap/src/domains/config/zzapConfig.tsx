@@ -23,6 +23,7 @@ export const zzapConfig = {
       "./" + path.join(`${_rootDirectory}/${config.publicDir}`);
 
     config.rootDir = _rootDirectory;
+    config.isProduction = process.env.NODE_ENV === "production";
 
     return (_config = config);
 

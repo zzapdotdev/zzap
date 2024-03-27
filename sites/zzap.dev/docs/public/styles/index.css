@@ -9,3 +9,9 @@ body {
 html[data-zzap-theme="dark"] pre code {
   background: #333333;
 }
+
+/* Docsearch */
+
+#docsearch button {
+  display: none;
+}

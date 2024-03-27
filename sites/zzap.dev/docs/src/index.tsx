@@ -2,24 +2,34 @@ import { inject } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
 import { PageType, zzapClient } from "@zzapdotdev/zzap/client";
 import clsx from "clsx";
-import React from "react";
+import React, { useEffect } from "react";
 
 zzapClient.shiki({
   theme: "vitesse-dark",
 });
-zzapClient.interactive(Root);
+zzapClient.interactive(App);
 
-inject();
-injectSpeedInsights();
+if (zzapClient.isBrowser) {
+  inject();
+  injectSpeedInsights();
+}
 
-// if (zzapClient.isBrowser) {
-//   const algoliasearch = await import(
-//     "https://cdn.jsdelivr.net/npm/algoliasearch@4.23.1/dist/algoliasearch-lite.esm.browser.js"
-//   );
-//   console.log("algoliasearch", algoliasearch);
-// }
+const items = [
+  {
+    title: "What is zzap",
+    href: "/docs",
+  },
+  {
+    title: "Installation",
+    href: "/docs/installation",
+  },
+  {
+    title: "Quick Start",
+    href: "/docs/quick-start",
+  },
+];
 
-export default function Root(props: { page: PageType<"home-page"> }) {
+export default function App(props: { page: PageType<"home-page"> }) {
   function toggleTheme() {
     const theme = zzapClient.getTheme();
     const newTheme = theme === "light" ? "dark" : "light";
@@ -35,16 +45,39 @@ export default function Root(props: { page: PageType<"home-page"> }) {
     }
   }
 
+  useEffect(() => {
+    main();
+    async function main() {
+      const { default: docsearch } = await import("@docsearch/js");
+
+      docsearch({
+        container: "#docsearch",
+        appId: "R2IYF7ETH7",
+        apiKey: "599cec31baffa4868cae4e79f180729b",
+        indexName: "docsearch",
+      });
+    }
+  }, []);
+
   const isHomePage = props.page.template === "home-page";
+
+  function handleSearchClick() {
+    const docSearchButton = document.querySelector(
+      "#docsearch button",
+    ) as HTMLButtonElement;
+    docSearchButton?.click();
+  }
 
   return (
     <main
-      className="container"
+      className="container pico"
       style={{
         paddingBottom: "20vh",
       }}
     >
       {renderHeader()}
+      <div id="docsearch"></div>
+
       <div className="tw-flex tw-flex-row tw-gap-16">
         {renderSidebar()}
         {renderContent()}
@@ -52,17 +85,64 @@ export default function Root(props: { page: PageType<"home-page"> }) {
     </main>
   );
 
-  function renderContent() {
+  function renderHeader() {
     return (
-      <div
-        className={clsx({
-          "tw-w-[100%]": isHomePage,
-          "tw-w-[100%] lg:tw-w-[75%]": !isHomePage,
-        })}
-        dangerouslySetInnerHTML={{
-          __html: props.page.type === "markdown" ? props.page.html : "",
-        }}
-      ></div>
+      <header>
+        <nav
+          className="tw-mb-[3rem] tw-border tw-border-zinc-200 dark:tw-border-zinc-600"
+          style={{
+            borderBottom: "1px solid ",
+          }}
+        >
+          <ul>
+            <li>
+              <a href="/">
+                <ZzapIcon className="tw-block tw-w-[5rem] tw-pt-1 tw-text-black md:tw-w-[10rem]  md:tw-pt-2 dark:tw-hidden dark:tw-text-white "></ZzapIcon>
+                <ZzapIconGradient className=" tw-hidden tw-w-[5rem] tw-pt-1 tw-text-black  md:tw-w-[10rem] md:tw-pt-2 dark:tw-block dark:tw-text-white"></ZzapIconGradient>
+              </a>
+            </li>
+            <li onClick={handleSearchClick} className="tw-hidden md:tw-block">
+              <div className="tw-flex tw-items-center tw-gap-2 tw-rounded tw-bg-zinc-100 tw-py-2 tw-pl-2 tw-pr-3 tw-text-sm dark:tw-bg-zinc-700">
+                <span>
+                  <SearchIcon className="tw-w-[1.25rem]"></SearchIcon>
+                </span>
+                <span>Search the doc...</span>
+              </div>
+            </li>
+          </ul>
+          <ul>
+            {renderNavItems({
+              className: "tw-hidden lg:tw-block",
+            })}
+            <li
+              onClick={handleSearchClick}
+              className="tw-block tw-cursor-pointer md:tw-hidden"
+            >
+              <SearchIcon className="tw-w-[1.25rem]"></SearchIcon>
+            </li>
+            <li>
+              <a
+                className="contrast tw-flex tw-cursor-pointer "
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleTheme();
+                }}
+              >
+                <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
+                <SunIcon className="tw-hidden dark:tw-block" />
+              </a>
+            </li>
+            <li className="tw-block lg:tw-hidden">
+              <details className="dropdown tw-m-0 tw-p-0">
+                <summary className="tw-border-0 tw-bg-transparent after:tw-hidden">
+                  <HamburgerIcon></HamburgerIcon>
+                </summary>
+                <ul dir="rtl">{renderNavItems({})}</ul>
+              </details>
+            </li>
+          </ul>
+        </nav>
+      </header>
     );
   }
 
@@ -70,21 +150,6 @@ export default function Root(props: { page: PageType<"home-page"> }) {
     if (isHomePage) {
       return null;
     }
-
-    const items = [
-      {
-        title: "What is zzap",
-        href: "/docs",
-      },
-      {
-        title: "Installation",
-        href: "/docs/installation",
-      },
-      {
-        title: "Quick Start",
-        href: "/docs/quick-start",
-      },
-    ];
 
     return (
       <aside
@@ -126,53 +191,20 @@ export default function Root(props: { page: PageType<"home-page"> }) {
     );
   }
 
-  function renderHeader() {
+  function renderContent() {
     return (
-      <header>
-        <nav
-          className="tw-mb-[3rem] tw-border tw-border-zinc-200 dark:tw-border-zinc-600"
-          style={{
-            borderBottom: "1px solid ",
-          }}
-        >
-          <ul>
-            <li>
-              <a href="/">
-                <ZzapIcon className="tw-block tw-w-[5rem] tw-pt-2 tw-text-black  lg:tw-w-[10rem] dark:tw-hidden dark:tw-text-white "></ZzapIcon>
-                <ZzapIconGradient className=" tw-hidden tw-w-[5rem] tw-pt-2  tw-text-black lg:tw-w-[10rem] dark:tw-block dark:tw-text-white"></ZzapIconGradient>
-              </a>
-            </li>
-          </ul>
-          <ul>
-            {renderNavItems({
-              className: "tw-hidden lg:tw-block",
-            })}
-
-            <li>
-              <a
-                className="contrast tw-flex tw-cursor-pointer "
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleTheme();
-                }}
-              >
-                <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
-                <SunIcon className="tw-hidden dark:tw-block" />
-              </a>
-            </li>
-            <li className="tw-block lg:tw-hidden">
-              <details className="dropdown tw-m-0 tw-p-0">
-                <summary className="tw-border-0 tw-bg-transparent after:tw-hidden">
-                  <HamburgerIcon></HamburgerIcon>
-                </summary>
-                <ul dir="rtl">{renderNavItems({})}</ul>
-              </details>
-            </li>
-          </ul>
-        </nav>
-      </header>
+      <div
+        className={clsx({
+          "tw-w-[100%]": isHomePage,
+          "tw-w-[100%] lg:tw-w-[75%]": !isHomePage,
+        })}
+        dangerouslySetInnerHTML={{
+          __html: props.page.type === "markdown" ? props.page.html : "",
+        }}
+      ></div>
     );
   }
+
   function renderNavItems(pprops: { className?: string }) {
     return (
       <>
@@ -481,6 +513,25 @@ function HamburgerIcon(props: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+      />
+    </svg>
+  );
+}
+
+function SearchIcon(props: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth="1.5"
+      stroke="currentColor"
+      className={clsx("tw-h-6 tw-w-6", props.className)}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
       />
     </svg>
   );

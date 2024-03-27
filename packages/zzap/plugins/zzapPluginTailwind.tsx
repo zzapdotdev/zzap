@@ -5,11 +5,11 @@ export const zzapPluginTailwind = definePlugin({
     return {
       name: "tailwind",
       async loader(ctx) {
-        await ctx.$`tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/zzap-plugin-tailwind.css`;
+        await ctx.$`tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/styles/zzap-plugin-tailwind.css`;
 
         return {
           heads: [
-            <link rel="stylesheet" href="/zzap-plugin-tailwind.css" />,
+            <link rel="stylesheet" href="/styles/zzap-plugin-tailwind.css" />,
             <script
               type="module"
               dangerouslySetInnerHTML={{

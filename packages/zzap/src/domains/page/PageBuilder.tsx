@@ -1,8 +1,13 @@
 import yaml from "js-yaml";
 import markdownit from "markdown-it";
+import { zzapConfig } from "../config/zzapConfig";
 
 export const PageBuilder = {
-  fromMarkdown(props: { path: string; markdown: string }): Array<MarkdownPage> {
+  async fromMarkdown(props: {
+    path: string;
+    markdown: string;
+  }): Promise<Array<MarkdownPage>> {
+    const config = await zzapConfig.get();
     const frontmatterRegex = /---\n(.*?)\n---/s;
     const frontMatter = props.markdown.match(frontmatterRegex)?.[1];
     const data: any = yaml.load(frontMatter || "") || {};
@@ -28,7 +33,7 @@ export const PageBuilder = {
     const page: MarkdownPage = {
       type: "markdown",
       template: template,
-      title: title,
+      title: `${title} • ${config.title}`,
       description: description,
       data: {
         ...rest,
@@ -37,7 +42,7 @@ export const PageBuilder = {
       html,
     };
 
-    return [page];
+    return [page] as const;
   },
 };
 

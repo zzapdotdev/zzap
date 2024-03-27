@@ -12,6 +12,7 @@ export function definePlugin<TArgs extends any[]>(props: {
 
       logger: ReturnType<typeof getLogger>;
       config: {
+        isProduction: boolean;
         title: string;
         description: string;
         rootDir: string;

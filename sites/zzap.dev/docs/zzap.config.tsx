@@ -12,8 +12,18 @@ export default defineConfig({
     zzapPluginTailwind(),
     zzapPluginPicoCSS({
       color: "amber",
+      conditional: true,
       module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
     }),
+  ],
+  publicFiles: [
+    {
+      path: path.join(
+        __dirname,
+        "../../../node_modules/@docsearch/css/dist/style.css",
+      ),
+      name: "styles/docsearch.css",
+    },
   ],
   deps: {
     "react-dom/server": Server,
@@ -29,7 +39,9 @@ export default defineConfig({
               content="width=device-width, initial-scale=1.0"
             />
             <link rel="icon" href="/favicon.png" />
-            <link rel="stylesheet" href="/styles.css" />
+            <link rel="stylesheet" href="/styles/index.css" />
+            <link rel="stylesheet" href="/styles/docsearch.css" />
+
             {props.head}
           </head>
           <body>{props.children}</body>

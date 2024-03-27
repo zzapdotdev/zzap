@@ -15,6 +15,7 @@ export const zzapPluginScript = definePlugin({
           entrypoints: [ctx.config.srcDir + `/index.${extension}`],
           target: "browser",
           format: "esm",
+          minify: ctx.config.isProduction,
           outdir: ctx.config.outputDir + "/__zzap-scripts",
         });
 

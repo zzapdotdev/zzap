@@ -61,14 +61,14 @@ export const zzapBundler = {
             .replace(/\.md?$/, "")
             .replace(/\/index$/, "");
 
-          const [page] = PageBuilder.fromMarkdown({
+          const [page] = await PageBuilder.fromMarkdown({
             path: path,
             markdown: pageMarkdown,
           });
 
           const module = await getIndexModule();
-          const RootComponent = module?.default || DefaultRootComponent;
-          const content = <RootComponent page={page}></RootComponent>;
+          const AppComponent = module?.default || DefaultAppComponent;
+          const content = <AppComponent page={page}></AppComponent>;
 
           const root = <div id="zzap-root">{content}</div>;
 
@@ -78,6 +78,15 @@ export const zzapBundler = {
                 {heads.map((head, i) => {
                   return <React.Fragment key={i}>{head}</React.Fragment>;
                 })}
+                <title>{page.title}</title>
+                <meta name="og:title" content={page.title} />
+                <meta name="og:description" content={page.description} />
+                <meta property="og:type" content="website" />
+                <meta property="og:site_name" content={config.title} />
+                {/* <meta name="og:image" content=""></meta> */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={page.title} />
+                {/* <meta name="twitter:image" content=""></meta> */}
               </>
             ),
             children: root,
@@ -156,7 +165,7 @@ window.__zzap = ${JSON.stringify({
       });
     }
 
-    function DefaultRootComponent(props: { page: PageType }) {
+    function DefaultAppComponent(props: { page: PageType }) {
       return (
         <div
           dangerouslySetInnerHTML={{
@@ -167,7 +176,7 @@ window.__zzap = ${JSON.stringify({
     }
 
     async function getIndexModule(): Promise<
-      { default: typeof DefaultRootComponent } | undefined
+      { default: typeof DefaultAppComponent } | undefined
     > {
       try {
         const location = `${config.srcDir}/index.tsx`;

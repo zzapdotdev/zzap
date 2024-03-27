@@ -1,13 +1,13 @@
 ---
-title: zzap
-description: Content driven site generator but like... really fast
+title: zzap — Content driven site generator for React, but like... really fast
+description: Add zzap to your project, include some markdown files, and trust zzap to build your site in milliseconds.
 template: home-page
 ---
 
 <div
   class="tw-mb-16 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-6"
 >
-  <h3 class="tw-m-0 tw-text-[20pt] tw-text-center">Content driven site generator</h3>
+  <h3 class="tw-m-0 tw-text-[20pt] tw-text-center">Content driven site generator for &lt;React/&gt;</h3>
   <h2
     class="tw-m-0  tw-text-center tw-text-[50pt] tw-font-extrabold tw-leading-none"
   >
