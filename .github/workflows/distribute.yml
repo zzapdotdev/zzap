@@ -1,9 +1,9 @@
-name: Publish Package to npmjs
+name: Distribute (zzap)
 on:
   release:
     types: [published]
 jobs:
-  build:
+  distribute:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install
-      - name: Build
+      - name: Distribute
         run: bun run distribute
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
