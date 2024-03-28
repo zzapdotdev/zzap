@@ -1,5 +1,5 @@
-import { ZzapClientPageType } from "@zzapdotdev/zzap/client";
 import React from "react";
+import { ZzapClientPageType } from "zzap/client";
 
 export default function App(props: { page: ZzapClientPageType }) {
   return (

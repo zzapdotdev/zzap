@@ -5,6 +5,6 @@
     "@picocss/pico": "^2.0.6"
   },
   "devDependencies": {
-    "@zzapdotdev/zzap": "workspace:*"
+    "zzap": "workspace:*"
   }
 }

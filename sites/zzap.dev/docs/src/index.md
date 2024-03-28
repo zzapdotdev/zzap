@@ -67,7 +67,7 @@ $ bun install zzap
 ## Quick Setup
 
 ```tsx
-import { defineConfig } from "@zzapdotdev/zzap";
+import { defineConfig } from "zzap";
 import React from "react";
 import Server from "react-dom/server";
 
@@ -98,12 +98,10 @@ export default defineConfig({
 ```
 
 ```tsx
-import { PageType } from "@zzapdotdev/zzap/client";
+import { ZzapClientPageType } from "zzap/client";
 import React from "react";
 
-type PageTypes = "";
-
-export default function App(props: { page: PageType<PageTypes> }) {
+export default function App(props: { page: ZzapClientPageType }) {
   return (
     <main>
       <h1>{props.page.title}</h1>

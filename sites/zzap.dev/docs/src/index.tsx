@@ -1,8 +1,8 @@
 import { inject } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
-import { ZzapClient, ZzapClientPageType } from "@zzapdotdev/zzap/client";
 import clsx from "clsx";
 import React, { useEffect } from "react";
+import { ZzapClient, ZzapClientPageType } from "zzap/client";
 import { sidebars } from "./sidebars";
 
 ZzapClient.shiki({

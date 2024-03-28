@@ -1,6 +1,6 @@
-import { defineConfig, plugins } from "@zzapdotdev/zzap";
 import React from "react";
 import Server from "react-dom/server";
+import { defineConfig, plugins } from "zzap";
 
 import path from "path";
 
