@@ -1,6 +1,6 @@
 import { definePlugin } from "../src/domains/plugin/definePlugin";
 
-export const ZzapPluginTailwind = definePlugin({
+export const zzapPluginTailwind = definePlugin({
   plugin() {
     return {
       name: "tailwind",

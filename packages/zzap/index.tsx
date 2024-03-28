@@ -1,10 +1,10 @@
-import { ZzapPluginPicoCSS } from "./plugins/pico";
-import { ZzapPluginTailwind } from "./plugins/tailwind";
+import { zzapPluginPicoCSS } from "./plugins/zzapPluginPicoCSS";
+import { zzapPluginTailwind } from "./plugins/zzapPluginTailwind";
 
 export { defineConfig } from "./src/domains/config/zzapConfigSchema";
 export { definePlugin } from "./src/domains/plugin/definePlugin";
 
 export const plugins = {
-  tailwind: ZzapPluginTailwind,
-  picoCSS: ZzapPluginPicoCSS,
+  tailwind: zzapPluginTailwind,
+  picoCSS: zzapPluginPicoCSS,
 };

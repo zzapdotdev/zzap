@@ -1,6 +1,6 @@
 import { definePlugin } from "../src/domains/plugin/definePlugin";
 
-export const ZzapPluginPicoCSS = definePlugin({
+export const zzapPluginPicoCSS = definePlugin({
   plugin(props: {
     color: string;
     module: string;
