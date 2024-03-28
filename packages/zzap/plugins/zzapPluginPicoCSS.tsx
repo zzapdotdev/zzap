@@ -1,6 +1,6 @@
 import { definePlugin } from "../src/domains/plugin/definePlugin";
 
-export const zzapPluginPicoCSS = definePlugin({
+export const ZzapPluginPicoCSS = definePlugin({
   plugin(props: {
     color: string;
     module: string;
@@ -19,7 +19,9 @@ export const zzapPluginPicoCSS = definePlugin({
         await Bun.write(ctx.config.outputDir + "/pico.css", cssFile);
 
         return {
-          heads: [<link rel="stylesheet" href="/pico.css" />],
+          heads: [
+            <link rel="stylesheet" href={`${ctx.config.base}pico.css`} />,
+          ],
           scripts: [],
         };
       },

@@ -56,16 +56,20 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
           );
         },
         error(message: string, data?: Record<string, any> & { error?: any }) {
-          const error = data?.error;
+          const { error, ...rest } = data || {};
 
-          const hasDataOrError = error || data;
-          const dataWithError = hasDataOrError ? { ...data } : undefined;
-          const prettyData = getPrettyData(dataWithError);
+          const prettyData = getPrettyData(rest);
 
-          deps.console.error(
-            `${prefixLabel} ${errorLabel} ${message}${prettyData}`,
-            error,
-          );
+          if (error) {
+            deps.console.error(
+              `${prefixLabel} ${errorLabel} ${message}${prettyData}`,
+              error,
+            );
+          } else {
+            deps.console.error(
+              `${prefixLabel} ${errorLabel} ${message}${prettyData}`,
+            );
+          }
         },
         terminate(
           message: string,

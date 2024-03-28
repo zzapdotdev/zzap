@@ -3,7 +3,7 @@ import z from "zod";
 import type { default as Server } from "react-dom/server";
 import type { zzapPluginType } from "../plugin/definePlugin";
 
-export const configSchema = z.object({
+export const zzapConfigSchema = z.object({
   /**
    * The title of the site.
    */
@@ -12,6 +12,10 @@ export const configSchema = z.object({
    * The description of the site.
    */
   description: z.string().default(""),
+  /**
+   * The base URL of the site.
+   */
+  base: z.string().startsWith("/").endsWith("/").default("/"),
   /**
    * The directory where the markdown files to be rendered are located.
    * @default "./"
@@ -72,8 +76,13 @@ export const configSchema = z.object({
     .returns(z.any() as z.ZodType<JSX.Element>),
 });
 
-export type zzapConfigType = z.infer<typeof configSchema> & {
+export type zzapConfigType = z.infer<typeof zzapConfigSchema> & {
   rootDir: string;
   isProduction: boolean;
 };
-export type zzapConfigInputType = z.input<typeof configSchema>;
+export type zzapConfigInputType = z.input<typeof zzapConfigSchema>;
+
+export function defineConfig(config: zzapConfigInputType) {
+  const parsedConfig = zzapConfigSchema.parse(config);
+  return parsedConfig;
+}

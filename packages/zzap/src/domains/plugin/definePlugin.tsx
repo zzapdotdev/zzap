@@ -2,6 +2,7 @@ import Bun, { $ } from "bun";
 import type { getLogger } from "../logging/getLogger";
 
 import type { default as Server } from "react-dom/server";
+import type { ZzapPluginPageType } from "../page/PageBuilder";
 
 export function definePlugin<TArgs extends any[]>(props: {
   plugin(...args: TArgs): {
@@ -15,6 +16,7 @@ export function definePlugin<TArgs extends any[]>(props: {
         isProduction: boolean;
         title: string;
         description: string;
+        base: string;
         rootDir: string;
         srcDir: string;
         outputDir: string;
@@ -43,6 +45,7 @@ export function definePlugin<TArgs extends any[]>(props: {
       | {
           heads?: Array<JSX.Element>;
           scripts?: Array<JSX.Element>;
+          pages?: Array<ZzapPluginPageType>;
         }
       | undefined
       | void

@@ -1,6 +1,6 @@
-export type { PageType } from "./src/domains/page/PageBuilder";
+export type { ZzapClientPageType } from "./src/domains/page/PageBuilder";
 
-export const zzapClient = {
+export const ZzapClient = {
   isBrowser: typeof window !== "undefined",
   async interactive(RootComponent: any) {
     if (!this.isBrowser) return;
@@ -25,7 +25,6 @@ export const zzapClient = {
     document.documentElement.setAttribute("data-zzap-theme", theme);
     localStorage.setItem("zzap-theme", theme);
   },
-
   async shiki(props?: {
     /**
      * Theme id from https://shiki.matsu.io/themes

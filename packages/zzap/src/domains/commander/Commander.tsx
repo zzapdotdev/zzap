@@ -1,24 +1,22 @@
 import { $ } from "bun";
 import { watch } from "fs";
 import fs from "fs/promises";
-import { zzapBundler } from "../bundler/zzapBundler";
-import { zzapConfig } from "../config/zzapConfig";
+import { zzapBundler } from "../bundler/Bundler";
+import type { zzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 export let generatingPromise: ReturnType<typeof $> | undefined;
 const logger = getLogger();
 
-export const zzapCommander = {
-  async clean() {
-    const config = await zzapConfig.get();
-    await fs.rm(config.outputDir, { recursive: true, force: true });
-  },
-  async watch(props: { port: number | undefined }) {
-    await zzapBundler.generate();
+export const ZzapCommander = {
+  async watch(props: {
+    port: number | undefined;
 
-    const config = await zzapConfig.get();
+    config: zzapConfigType;
+  }) {
+    await zzapBundler.generate({ config: props.config });
 
     const watcher = watch(
-      config.rootDir,
+      props.config.rootDir,
       { recursive: true },
       (_event, filename) => {
         if (generatingPromise || !filename) {
@@ -49,11 +47,26 @@ export const zzapCommander = {
     Bun.serve({
       port: port,
       async fetch(request) {
+        const basePAth = props.config.base;
+
         const url = request.url;
         const pathname = new URL(url).pathname;
-        const hasFileExtension = pathname.split(".").length > 1;
+
+        if (props.config.base !== "/" && pathname === "/") {
+          return new Response("", {
+            status: 301,
+            headers: {
+              Location: basePAth,
+            },
+          });
+        }
+
+        const pathNameForBasepath = pathname.replace(props.config.base, "/");
+
+        const hasFileExtension = pathNameForBasepath.split(".").length > 1;
         const fileName = hasFileExtension ? "" : "/index.html";
-        const path = `${config.outputDir}${pathname}${fileName}`;
+        const path = `${props.config.outputDir}${pathNameForBasepath}${fileName}`;
+
         try {
           const file = Bun.file(path);
           const exists = await file.exists();
@@ -62,7 +75,7 @@ export const zzapCommander = {
             return htmlToReponse({
               html: `
                 <h1>zzap watch - 404</h1>
-                <p>File not found: <code>${pathname}</code></p>
+                <p>File not found: <code>${pathNameForBasepath}</code></p>
                 <p>Looked at: <code>${path}</code></p>
             `,
               status: 404,
@@ -77,7 +90,7 @@ export const zzapCommander = {
           return htmlToReponse({
             html: `
               <h1>zzap watch - 500</h1>
-              <p>Error loading <code>${pathname}</code></p>
+              <p>Error loading <code>${pathNameForBasepath}</code></p>
               <p>Looked at: <code>${path}</code></p>
               <p>Erro: <code>${error}</code></p>
           `,
@@ -87,8 +100,11 @@ export const zzapCommander = {
       },
     });
   },
-  async build() {
-    await zzapBundler.generate();
+  async build(props: { config: zzapConfigType }) {
+    await zzapBundler.generate({ config: props.config });
+  },
+  async clean(props: { config: zzapConfigType }) {
+    await fs.rm(props.config.outputDir, { recursive: true, force: true });
   },
 };
 

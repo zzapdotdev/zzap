@@ -1,6 +1,6 @@
 import { definePlugin } from "../../plugin/definePlugin";
 
-export const zzapPluginScript = definePlugin({
+export const ZzapPluginScripts = definePlugin({
   plugin() {
     return {
       name: "core-script",
@@ -20,7 +20,12 @@ export const zzapPluginScript = definePlugin({
         });
 
         return {
-          scripts: [<script type="module" src="/__zzap-scripts/index.js" />],
+          scripts: [
+            <script
+              type="module"
+              src={`${ctx.config.base}__zzap-scripts/index.js`}
+            />,
+          ],
         };
 
         async function getExtension() {

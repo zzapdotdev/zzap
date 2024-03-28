@@ -1,7 +1,7 @@
 import Bun from "bun";
 import { parseArgs } from "util";
-import { zzapCommander } from "./domains/commander/zzapCommander";
-import { zzapConfig } from "./domains/config/zzapConfig";
+import { ZzapCommander } from "./domains/commander/Commander";
+import { ZzapConfig } from "./domains/config/Config";
 import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
 export const logger = getLogger();
@@ -28,24 +28,32 @@ async function main() {
   }
 
   const command = positionals[2];
-  const rootDirectory = positionals[3];
-  zzapConfig.setRootDirectory(rootDirectory);
-  const config = await zzapConfig.get();
+  const rootDir = positionals[3];
+
+  const config = await ZzapConfig.get({
+    rootDir: rootDir,
+  });
+
   logger.log(
     `Running "zzap ${command}" for root directory "${config.rootDir}"`,
   );
 
   if (command === "watch") {
     logger.log(`Cleaning ${config.outputDir}`);
-    await zzapCommander.clean();
+    await ZzapCommander.clean({
+      config,
+    });
+
     logger.log(`Watching ${config.srcDir}`);
-    await zzapCommander.watch({
+    await ZzapCommander.watch({
+      config,
       port: Number(values.port),
     });
   }
 
   if (command === "build") {
-    await zzapCommander.build();
-    process.exit(0);
+    await ZzapCommander.build({
+      config,
+    });
   }
 }

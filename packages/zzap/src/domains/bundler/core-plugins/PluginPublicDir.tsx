@@ -1,6 +1,6 @@
 import { definePlugin } from "../../plugin/definePlugin";
 
-export const zzapPluginPublicDir = definePlugin({
+export const ZzapPluginPublicDir = definePlugin({
   plugin() {
     return {
       name: "core-public-dir",

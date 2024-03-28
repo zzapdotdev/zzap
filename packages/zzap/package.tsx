@@ -15,25 +15,19 @@ logger.log(`Running "${command}"`);
 
 if (command === "dev") {
   const NODE_ENV = "development";
-  const zzapCLITask = $`NODE_ENV=${NODE_ENV} bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node --watch `;
+  const ZzapCLITask = $`NODE_ENV=${NODE_ENV} bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node --watch `;
   const typeDefinitionTask = $`NODE_ENV=${NODE_ENV} tsc --watch --outDir ./dist --preserveWatchOutput`;
 
-  await Promise.all([
-    zzapCLITask,
-    typeDefinitionTask,
-  ]);
+  await Promise.all([ZzapCLITask, typeDefinitionTask]);
   process.exit(0);
 }
 
 if (command === "package") {
   const NODE_ENV = "production";
-  const zzapCLITask = $`NODE_ENV=${NODE_ENV} bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node`;
+  const ZzapCLITask = $`NODE_ENV=${NODE_ENV} bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node`;
   const typeDefinitionTask = $`NODE_ENV=${NODE_ENV} tsc --outDir ./dist `;
 
-  await Promise.all([
-    zzapCLITask,
-    typeDefinitionTask,
-  ]);
+  await Promise.all([ZzapCLITask, typeDefinitionTask]);
   process.exit(0);
 }
 

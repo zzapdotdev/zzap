@@ -1,9 +1,10 @@
-import {
-  configSchema,
-  type zzapConfigInputType,
-} from "./src/domains/config/zzapConfigSchema";
+import { ZzapPluginPicoCSS } from "./plugins/zzapPluginPicoCSS";
+import { ZzapPluginTailwind } from "./plugins/zzapPluginTailwind";
 
-export function defineConfig(config: zzapConfigInputType) {
-  const parsedConfig = configSchema.parse(config);
-  return parsedConfig;
-}
+export { defineConfig } from "./src/domains/config/zzapConfigSchema";
+export { definePlugin } from "./src/domains/plugin/definePlugin";
+
+export const plugins = {
+  tailwind: ZzapPluginTailwind,
+  picoCSS: ZzapPluginPicoCSS,
+};

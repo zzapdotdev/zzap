@@ -1,6 +1,4 @@
-import { defineConfig } from "@zzapdotdev/zzap";
-import { zzapPluginPicoCSS } from "@zzapdotdev/zzap/plugins/zzapPluginPicoCSS";
-import { zzapPluginTailwind } from "@zzapdotdev/zzap/plugins/zzapPluginTailwind";
+import { defineConfig, plugins } from "@zzapdotdev/zzap";
 import React from "react";
 import Server from "react-dom/server";
 
@@ -9,8 +7,8 @@ import path from "path";
 export default defineConfig({
   title: "zzap.dev",
   plugins: [
-    zzapPluginTailwind(),
-    zzapPluginPicoCSS({
+    plugins.tailwind(),
+    plugins.picoCSS({
       color: "amber",
       conditional: true,
       module: path.join(__dirname, "../../../node_modules/@picocss/pico"),

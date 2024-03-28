@@ -1,6 +1,6 @@
 import { definePlugin } from "../src/domains/plugin/definePlugin";
 
-export const zzapPluginTailwind = definePlugin({
+export const ZzapPluginTailwind = definePlugin({
   plugin() {
     return {
       name: "tailwind",
@@ -9,7 +9,10 @@ export const zzapPluginTailwind = definePlugin({
 
         return {
           heads: [
-            <link rel="stylesheet" href="/styles/zzap-plugin-tailwind.css" />,
+            <link
+              rel="stylesheet"
+              href={`${ctx.config.base}styles/zzap-plugin-tailwind.css`}
+            />,
             <script
               type="module"
               dangerouslySetInnerHTML={{

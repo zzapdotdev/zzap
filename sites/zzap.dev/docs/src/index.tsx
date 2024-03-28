@@ -149,32 +149,37 @@ export default function App(props: { page: PageType<"home-page"> }) {
     }
 
     const visibleSidebars = sidebars.filter((sidebar) => {
-      return props.page.path.startsWith(sidebar.startsWith);
+      return props.page.path.startsWith(sidebar.path);
     });
 
     if (!visibleSidebars.length) {
       return null;
     }
 
+    const chapters = visibleSidebars.flatMap((sidebar) => sidebar.chapters);
+
     return (
       <aside
         className={clsx("tw-hidden tw-flex-shrink-0 tw-flex-grow lg:tw-flex")}
       >
         <nav>
-          {visibleSidebars.map((sidebar, i) => {
-            const isOpen = sidebar.items.some(
-              (item) => item.href === props.page.path,
-            );
+          {chapters.map((chapter, i) => {
+            const items = props.page.sitemap?.filter((item) => {
+              return item.path.startsWith(chapter.path);
+            });
+            // const isOpen = sidebar.items.some(
+            //   (item) => item.href === props.page.path,
+            // );
             return (
-              <details open={isOpen} key={i}>
+              <details open key={i}>
                 <summary className="tw-mb-2 tw-text-sm tw-font-bold tw-text-black dark:tw-text-white">
-                  {sidebar.name}
+                  {chapter.name}
                 </summary>
                 <ul className="">
-                  {sidebar.items.map((item) => {
-                    const isCurrent = item.href === props.page.path;
+                  {items?.map((item) => {
+                    const isCurrent = item.path === props.page.path;
                     return (
-                      <li key={item.href}>
+                      <li key={item.path}>
                         <a
                           className={clsx(
                             "secondary tw-ml-0 tw-rounded-none tw-border-2 tw-py-2 tw-text-sm",
@@ -187,7 +192,7 @@ export default function App(props: { page: PageType<"home-page"> }) {
                           style={{
                             borderLeft: "1px solid",
                           }}
-                          href={item.href}
+                          href={item.path}
                         >
                           {item.title}
                         </a>
