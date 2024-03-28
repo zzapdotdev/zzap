@@ -6,11 +6,9 @@
     "build": "bun run package && bunx turbo build --log-order grouped",
     "build:zzap.dev": "bun run package && bunx turbo build --filter zzap.dev --log-order grouped",
     "distribute": "bun run package && bunx turbo distribute",
+    "bump": "bunx turbo bump",
     "test": "bunx turbo test --log-order grouped",
-    "package": "bunx turbo package --log-order grouped",
-    "patch": "bunx turbo patch --log-order grouped",
-    "minor": "bunx turbo minor --log-order grouped",
-    "major": "bunx turbo major --log-order grouped"
+    "package": "bunx turbo package --log-order grouped"
   },
   "workspaces": [
     "packages/*",

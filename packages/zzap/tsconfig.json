@@ -34,6 +34,7 @@
     "dom",
     "index.tsx",
     "client.tsx",
-    "plugins/**/*"
+    "plugins/**/*",
+    "scripts/**/*"
   ]
 }

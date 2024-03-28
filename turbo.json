@@ -17,13 +17,7 @@
     "distribute": {
       "cache": false
     },
-    "patch": {
-      "cache": false
-    },
-    "minor": {
-      "cache": false
-    },
-    "major": {
+    "bump": {
       "cache": false
     }
   }
