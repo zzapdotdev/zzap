@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import { watch } from "fs";
 import fs from "fs/promises";
-import { zzapBundler } from "../bundler/Bundler";
+import { ZzapBundler } from "../bundler/ZzapBundler";
 import type { zzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 export let generatingPromise: ReturnType<typeof $> | undefined;
@@ -13,7 +13,7 @@ export const ZzapCommander = {
 
     config: zzapConfigType;
   }) {
-    await zzapBundler.generate({ config: props.config });
+    await ZzapBundler.generate({ config: props.config });
 
     const watcher = watch(
       props.config.rootDir,
@@ -101,7 +101,7 @@ export const ZzapCommander = {
     });
   },
   async build(props: { config: zzapConfigType }) {
-    await zzapBundler.generate({ config: props.config });
+    await ZzapBundler.generate({ config: props.config });
   },
   async clean(props: { config: zzapConfigType }) {
     await fs.rm(props.config.outputDir, { recursive: true, force: true });

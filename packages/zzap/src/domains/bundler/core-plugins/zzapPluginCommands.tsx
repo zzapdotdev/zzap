@@ -1,6 +1,6 @@
 import { definePlugin } from "../../plugin/definePlugin";
 
-export const ZzapPluginCommands = definePlugin({
+export const zzapPluginCommands = definePlugin({
   plugin() {
     return {
       name: "core-commands",

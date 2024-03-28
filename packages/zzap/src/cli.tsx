@@ -1,7 +1,7 @@
 import Bun from "bun";
 import { parseArgs } from "util";
-import { ZzapCommander } from "./domains/commander/Commander";
-import { ZzapConfig } from "./domains/config/Config";
+import { ZzapCommander } from "./domains/commander/ZzapCommander";
+import { ZzapConfig } from "./domains/config/ZzapConfig";
 import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
 export const logger = getLogger();

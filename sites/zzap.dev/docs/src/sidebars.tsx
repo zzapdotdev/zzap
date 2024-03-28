@@ -1,13 +1,11 @@
 export const sidebars: SidebarType = [
   {
-    name: "Intro",
+    name: "Documentation Sidebar",
     path: "/docs",
-    chapters: [{ name: "Intro", path: "/docs/intro" }],
-  },
-  {
-    name: "Plugins",
-    path: "/docs",
-    chapters: [{ name: "Plugins", path: "/docs/plugins" }],
+    chapters: [
+      { name: "Intro", path: "/docs/intro" },
+      { name: "Plugins", path: "/docs/plugins" },
+    ],
   },
 ];
 

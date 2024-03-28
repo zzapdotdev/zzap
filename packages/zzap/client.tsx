@@ -1,9 +1,11 @@
-export type { ZzapClientPageType } from "./src/domains/page/PageBuilder";
+export type { ZzapClientPageType } from "./src/domains/page/ZzapPageBuilder";
 
 export const ZzapClient = {
   isBrowser: typeof window !== "undefined",
   async interactive(RootComponent: any) {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser) {
+      return;
+    }
 
     const ReactDOMClient = await import("react-dom/client");
     const hydrateRoot = ReactDOMClient.hydrateRoot;
@@ -15,13 +17,17 @@ export const ZzapClient = {
     }
   },
   getTheme() {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser) {
+      return;
+    }
     const currentTheme =
       document.documentElement.getAttribute("data-zzap-theme");
     return currentTheme as "light" | "dark";
   },
   setTheme(theme: "light" | "dark") {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser) {
+      return;
+    }
     document.documentElement.setAttribute("data-zzap-theme", theme);
     localStorage.setItem("zzap-theme", theme);
   },
@@ -31,9 +37,10 @@ export const ZzapClient = {
      */
     theme: string;
   }) {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser) {
+      return;
+    }
     const zzapRoot = document.querySelector("#zzap-root");
-    zzapRoot?.setAttribute("data-zzap-shiki", "false");
 
     const shikiCDN = "https://esm.sh/shiki@1.0.0";
     const { codeToHtml } = await import(shikiCDN);

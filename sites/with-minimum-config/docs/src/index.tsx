@@ -1,9 +1,7 @@
-import { PageType } from "@zzapdotdev/zzap/client";
+import { ZzapClientPageType } from "@zzapdotdev/zzap/client";
 import React from "react";
 
-type PageTypes = "home-page";
-
-export default function App(props: { page: PageType<PageTypes> }) {
+export default function App(props: { page: ZzapClientPageType }) {
   return (
     <main>
       <h1>{props.page.title}</h1>

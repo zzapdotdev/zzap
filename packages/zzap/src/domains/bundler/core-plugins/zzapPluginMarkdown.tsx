@@ -1,7 +1,10 @@
-import { PageBuilder, type ZzapPluginPageType } from "../../page/PageBuilder";
+import {
+  PageBuilder,
+  type ZzapPluginPageType,
+} from "../../page/ZzapPageBuilder";
 import { definePlugin } from "../../plugin/definePlugin";
 
-export const ZzapPluginMarkdown = definePlugin({
+export const zzapPluginMarkdown = definePlugin({
   plugin() {
     return {
       name: "core-markdown",

@@ -1,46 +1,26 @@
 import { inject } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
-import { PageType, zzapClient } from "@zzapdotdev/zzap/client";
+import { ZzapClient, ZzapClientPageType } from "@zzapdotdev/zzap/client";
 import clsx from "clsx";
 import React, { useEffect } from "react";
 import { sidebars } from "./sidebars";
 
-zzapClient.shiki({
+ZzapClient.shiki({
   theme: "rose-pine",
 });
-zzapClient.interactive(App);
+ZzapClient.interactive(App);
 
-if (zzapClient.isBrowser) {
+if (ZzapClient.isBrowser) {
   inject();
   injectSpeedInsights();
 }
 
-type SidebarType = {
-  name: string;
-  startsWith: string;
-  items: SidebarItemType[];
-};
-
-type SidebarItemType = {
-  title: string;
-  href: string;
-};
-
-export default function App(props: { page: PageType<"home-page"> }) {
-  function toggleTheme() {
-    const theme = zzapClient.getTheme();
-    const newTheme = theme === "light" ? "dark" : "light";
-    zzapClient.setTheme(newTheme);
-
-    window?.document?.documentElement?.setAttribute("data-theme", newTheme);
-    if (newTheme === "dark") {
-      window?.document?.documentElement?.classList.add("dark");
-      window?.document?.documentElement?.classList.add("tw-dark");
-    } else {
-      window?.document?.documentElement?.classList.remove("tw-dark");
-      window?.document?.documentElement?.classList.remove("dark");
-    }
-  }
+export default function App(props: { page: ZzapClientPageType }) {
+  const visibleSidebars = sidebars.filter((sidebar) => {
+    return props.page.path.startsWith(sidebar.path);
+  });
+  const chapters = visibleSidebars.flatMap((sidebar) => sidebar.chapters);
+  const hasSidebar = chapters.length > 0;
 
   useEffect(() => {
     main();
@@ -56,13 +36,26 @@ export default function App(props: { page: PageType<"home-page"> }) {
     }
   }, []);
 
-  const isHomePage = props.page.template === "home-page";
-
   function handleSearchClick() {
     const docSearchButton = document.querySelector(
       "#docsearch button",
     ) as HTMLButtonElement;
     docSearchButton?.click();
+  }
+
+  function handleToggleTheme() {
+    const theme = ZzapClient.getTheme();
+    const newTheme = theme === "light" ? "dark" : "light";
+    ZzapClient.setTheme(newTheme);
+
+    window?.document?.documentElement?.setAttribute("data-theme", newTheme);
+    if (newTheme === "dark") {
+      window?.document?.documentElement?.classList.add("dark");
+      window?.document?.documentElement?.classList.add("tw-dark");
+    } else {
+      window?.document?.documentElement?.classList.remove("tw-dark");
+      window?.document?.documentElement?.classList.remove("dark");
+    }
   }
 
   return (
@@ -122,7 +115,7 @@ export default function App(props: { page: PageType<"home-page"> }) {
                 className="contrast tw-flex tw-cursor-pointer "
                 onClick={(e) => {
                   e.preventDefault();
-                  toggleTheme();
+                  handleToggleTheme();
                 }}
               >
                 <MoonIcon className="tw-block dark:tw-hidden"></MoonIcon>
@@ -144,19 +137,9 @@ export default function App(props: { page: PageType<"home-page"> }) {
   }
 
   function renderSidebar() {
-    if (isHomePage) {
-      return null;
-    }
-
-    const visibleSidebars = sidebars.filter((sidebar) => {
-      return props.page.path.startsWith(sidebar.path);
-    });
-
     if (!visibleSidebars.length) {
       return null;
     }
-
-    const chapters = visibleSidebars.flatMap((sidebar) => sidebar.chapters);
 
     return (
       <aside
@@ -227,8 +210,8 @@ export default function App(props: { page: PageType<"home-page"> }) {
     return (
       <div
         className={clsx({
-          "tw-w-[100%]": isHomePage,
-          "tw-w-[100%] lg:tw-w-[75%]": !isHomePage,
+          "tw-w-[100%]": !hasSidebar,
+          "tw-w-[100%] lg:tw-w-[75%]": hasSidebar,
         })}
       >
         {html && (
@@ -247,7 +230,7 @@ export default function App(props: { page: PageType<"home-page"> }) {
     return (
       <>
         <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
-          <a href="/docs" className="contrast">
+          <a href="/docs/intro/what-is-zzap" className="contrast">
             Docs
           </a>
         </li>

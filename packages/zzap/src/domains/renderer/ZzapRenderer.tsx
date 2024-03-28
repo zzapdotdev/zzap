@@ -4,7 +4,7 @@ import { getLogger } from "../logging/getLogger";
 import {
   type SitemapItemType,
   type ZzapClientPageType,
-} from "../page/PageBuilder";
+} from "../page/ZzapPageBuilder";
 
 export const ZzapRenderer = {
   async renderAndWritePages(props: {
@@ -30,7 +30,11 @@ export const ZzapRenderer = {
 
       const content = <AppComponent page={page}></AppComponent>;
 
-      const root = <div id="zzap-root">{content}</div>;
+      const root = (
+        <div id="zzap-root" data-zzap-shiki="false">
+          {content}
+        </div>
+      );
 
       const jsx = props.config.document({
         head: (

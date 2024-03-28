@@ -1,5 +1,5 @@
-import { ZzapPluginPicoCSS } from "./plugins/zzapPluginPicoCSS";
-import { ZzapPluginTailwind } from "./plugins/zzapPluginTailwind";
+import { ZzapPluginPicoCSS } from "./plugins/ZzapPluginPicoCSS";
+import { ZzapPluginTailwind } from "./plugins/ZzapPluginTailwind";
 
 export { defineConfig } from "./src/domains/config/zzapConfigSchema";
 export { definePlugin } from "./src/domains/plugin/definePlugin";

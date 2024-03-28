@@ -1,7 +1,6 @@
 ---
 title: zzap The content site generator for React, and it's... really fast
 description: Add zzap to your project, include some markdown files, and trust zzap to build your site in milliseconds.
-template: home-page
 ---
 
 <div
@@ -36,10 +35,10 @@ $ Site built in 23ms.
   </span>
 
   <div class="tw-flex tw-gap-4">
-    <a href="/docs/installation" class="tw-flex" role="button">
+    <a href="/docs/intro/installation" class="tw-flex" role="button">
       Install zzap
     </a>
-    <a href="/docs" class="tw-flex contrast outline" role="button">
+    <a href="/docs/intro/what-is-zzap" class="tw-flex contrast outline" role="button">
       What is zzap
     </a>
   </div>

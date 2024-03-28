@@ -48,6 +48,8 @@ export const PageBuilder = {
     } else {
       const lines = markdown.split("\n");
 
+      const idCounter: Record<string, number> = {};
+
       let currentDocument: DocumentType | null = null;
       for (const line of lines) {
         if (line.startsWith("# ")) {
@@ -56,7 +58,15 @@ export const PageBuilder = {
           }
 
           const title = `${line}`.replace("# ", "");
-          const id = kebabCase(title);
+          let id = kebabCase(title);
+          const count = idCounter[id] || 0;
+          const newCount = count + 1;
+          idCounter[id] = newCount;
+
+          if (count !== 0) {
+            id = `${id}-${count}`;
+          }
+
           const pathWithoutLastPart = props.path
             .split("/")
             .slice(0, -1)

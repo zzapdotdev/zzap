@@ -7,15 +7,16 @@ import {
   type SitemapItemType,
   type ZzapClientPageType,
   type ZzapPluginPageType,
-} from "../page/PageBuilder";
-import { ZzapRenderer } from "../renderer/Renderer";
-import { ZzapPluginCommands } from "./core-plugins/PluginCommands";
-import { ZzapPluginMarkdown } from "./core-plugins/PluginMarkdown";
-import { ZzapPluginPublicDir } from "./core-plugins/PluginPublicDir";
-import { ZzapPluginPublicFiles } from "./core-plugins/PluginPublicFiles";
-import { ZzapPluginScripts } from "./core-plugins/PluginScripts";
+} from "../page/ZzapPageBuilder";
+import { ZzapRenderer } from "../renderer/ZzapRenderer";
+import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
+import { zzapPluginHeads } from "./core-plugins/zzapPluginHeads";
+import { zzapPluginMarkdown } from "./core-plugins/zzapPluginMarkdown";
+import { zzapPluginPublicDir } from "./core-plugins/zzapPluginPublicDir";
+import { zzapPluginPublicFiles } from "./core-plugins/zzapPluginPublicFiles";
+import { zzapPluginScripts } from "./core-plugins/zzapPluginScripts";
 
-export const zzapBundler = {
+export const ZzapBundler = {
   async generate(props: { config: zzapConfigType }) {
     logger.log(`Building ${props.config.title}...`);
     const timetamp = Date.now();
@@ -49,6 +50,7 @@ export const zzapBundler = {
         data: p.data,
         type: p.type,
         description: p.description,
+        html: p.html,
         sitemap: sitemapItems,
         titleWithSiteTitle: `${p.title} • ${props.config.title}`,
       };
@@ -80,11 +82,12 @@ async function runPlugins(props: { config: zzapConfigType }) {
   const pages: Array<ZzapPluginPageType> = [];
 
   const allPlugins = [
-    ZzapPluginScripts(),
-    ZzapPluginCommands(),
-    ZzapPluginPublicDir(),
-    ZzapPluginPublicFiles(),
-    ZzapPluginMarkdown(),
+    zzapPluginHeads(),
+    zzapPluginScripts(),
+    zzapPluginCommands(),
+    zzapPluginPublicDir(),
+    zzapPluginPublicFiles(),
+    zzapPluginMarkdown(),
     ...props.config.plugins,
   ];
   const pluginDoneLogs: Array<{ name: string; log: () => void }> = [];

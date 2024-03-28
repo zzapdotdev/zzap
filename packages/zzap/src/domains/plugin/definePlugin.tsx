@@ -2,7 +2,7 @@ import Bun, { $ } from "bun";
 import type { getLogger } from "../logging/getLogger";
 
 import type { default as Server } from "react-dom/server";
-import type { ZzapPluginPageType } from "../page/PageBuilder";
+import type { ZzapPluginPageType } from "../page/ZzapPageBuilder";
 
 export function definePlugin<TArgs extends any[]>(props: {
   plugin(...args: TArgs): {

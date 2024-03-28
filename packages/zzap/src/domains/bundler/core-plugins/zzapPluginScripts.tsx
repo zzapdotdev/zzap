@@ -1,6 +1,6 @@
 import { definePlugin } from "../../plugin/definePlugin";
 
-export const ZzapPluginScripts = definePlugin({
+export const zzapPluginScripts = definePlugin({
   plugin() {
     return {
       name: "core-script",
