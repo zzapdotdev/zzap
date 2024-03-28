@@ -26,6 +26,6 @@ await $`git push origin v${newVersion}`;
 
 logger.log("Committing");
 await $`git add .`;
-await $`git commit -m "generated"`;
+await $`git commit -m "chore: bump package.json to ${newVersion}"`;
 logger.log("Pushing");
 await $`git push`;
