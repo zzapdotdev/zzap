@@ -13,6 +13,28 @@ export default defineConfig({
       conditional: true,
       module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
     }),
+    plugins.dynamic({
+      name: "README.md",
+      async loader(ctx) {
+        const res = await fetch(
+          "https://raw.githubusercontent.com/zzapdotdev/zzap/main/README.md",
+        );
+        const text = await res.text();
+        console.log("TEXT", text);
+        return {
+          pages: [
+            {
+              title: "README",
+              description: "README",
+              path: "/readme",
+              template: "default",
+              type: "dynamic",
+              html: text,
+            },
+          ],
+        };
+      },
+    }),
   ],
   publicFiles: [
     {

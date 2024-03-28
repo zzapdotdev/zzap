@@ -46,7 +46,7 @@ export const ZzapBundler = {
       return {
         title: p.title,
         path: p.path,
-        template: p.template,
+        template: p.template || "default",
         data: p.data,
         type: p.type,
         description: p.description,

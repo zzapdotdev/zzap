@@ -13,7 +13,6 @@ export const PageBuilder = {
   async fromMarkdown(props: {
     config: zzapConfigType;
     path: string;
-    filePath: string;
     markdown: string;
   }): Promise<Array<ZzapPluginPageType<"markdown">>> {
     const frontmatterRegex = /---\n(.*?)\n---/s;
@@ -147,7 +146,7 @@ export type ZzapPluginPageType<TTemplateType extends string = ""> = {
   title: string;
   description: string;
   path: string;
-  template: TTemplateType | "default";
+  template?: TTemplateType | "default";
   data?: any;
   html?: string;
 };

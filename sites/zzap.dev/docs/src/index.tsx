@@ -206,7 +206,7 @@ export default function App(props: { page: ZzapClientPageType }) {
       ),
     };
 
-    const html = props.page.type === "markdown" && props.page.html;
+    const html = props.page.html;
     return (
       <div
         className={clsx({

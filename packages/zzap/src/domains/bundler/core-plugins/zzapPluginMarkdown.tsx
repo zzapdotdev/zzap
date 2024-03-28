@@ -33,7 +33,6 @@ export const zzapPluginMarkdown = definePlugin({
             const markdownPages = await PageBuilder.fromMarkdown({
               config: ctx.config as any,
               path: path,
-              filePath: filePath,
               markdown: pageMarkdown,
             });
 
