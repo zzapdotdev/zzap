@@ -14,12 +14,12 @@ logger.log("Updating package.json");
 packageJson.version = newVersion;
 await Bun.write("./package.json", JSON.stringify(packageJson, null, 2));
 
-logger.log("Tagging");
-await $`git tag -a v${newVersion} -m "v${newVersion}"`;
-
 logger.log("Configuring Git");
 await $`git config user.name github-actions`;
 await $`git config user.email`;
+
+logger.log("Tagging");
+await $`git tag -a v${newVersion} -m "v${newVersion}"`;
 
 logger.log("Pushing tag");
 await $`git push origin v${newVersion}`;
