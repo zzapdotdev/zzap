@@ -14,7 +14,7 @@ export const PageBuilder = {
     config: zzapConfigType;
     path: string;
     markdown: string;
-  }): Promise<Array<ZzapPluginPageType<"markdown">>> {
+  }): Promise<Array<PluginPageType<"markdown">>> {
     const frontmatterRegex = /---\n(.*?)\n---/s;
     const frontMatter = props.markdown.match(frontmatterRegex)?.[1];
     const data: {
@@ -33,7 +33,7 @@ export const PageBuilder = {
     } = data;
     const markdown = props.markdown.replace(frontmatterRegex, "");
 
-    const pages: Array<ZzapPluginPageType<"markdown">> = [];
+    const pages: Array<PluginPageType<"markdown">> = [];
     const documents: Array<DocumentType> = [];
     const fileName = props.path.split("/").pop();
 
@@ -110,7 +110,7 @@ export const PageBuilder = {
     renderedDocuments.forEach((renderedDocument) => {
       const template = frontmatterTemplate || "default";
 
-      const page: ZzapPluginPageType<"markdown"> = {
+      const page: PluginPageType<"markdown"> = {
         type: "markdown",
         template: template,
         title: renderedDocument.title,
@@ -141,7 +141,7 @@ type RenderedDocumentType = {
   description: string;
 };
 
-export type ZzapPluginPageType<TTemplateType extends string = ""> = {
+export type PluginPageType<TTemplateType = string> = {
   type: "markdown" | "dynamic";
   title: string;
   description: string;
@@ -151,7 +151,7 @@ export type ZzapPluginPageType<TTemplateType extends string = ""> = {
   html?: string;
 };
 
-export type ZzapClientPageType<TTemplateType extends string = ""> = {
+export type PageType<TTemplateType = string> = {
   type: "markdown" | "dynamic";
   title: string;
   description: string;

@@ -4,9 +4,9 @@ import { logger } from "../../cli";
 import type { zzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 import {
+  type PageType,
+  type PluginPageType,
   type SitemapItemType,
-  type ZzapClientPageType,
-  type ZzapPluginPageType,
 } from "../page/ZzapPageBuilder";
 import { ZzapRenderer } from "../renderer/ZzapRenderer";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
@@ -42,7 +42,7 @@ export const ZzapBundler = {
         return 0;
       });
 
-    const clientPages = pages.map((p): ZzapClientPageType => {
+    const clientPages = pages.map((p): PageType => {
       return {
         title: p.title,
         path: p.path,
@@ -79,7 +79,7 @@ export const ZzapBundler = {
 async function runPlugins(props: { config: zzapConfigType }) {
   const heads: Array<JSX.Element> = [];
   const scripts: Array<JSX.Element> = [];
-  const pages: Array<ZzapPluginPageType> = [];
+  const pages: Array<PluginPageType> = [];
 
   const allPlugins = [
     zzapPluginHeads(),
@@ -97,6 +97,7 @@ async function runPlugins(props: { config: zzapConfigType }) {
     const loaderResult = await plugin.loader({
       $,
       Bun,
+      makePage,
       logger: pluginLogger,
       config: props.config as (typeof plugin.loader)["arguments"]["config"],
     });
@@ -135,5 +136,24 @@ async function runPlugins(props: { config: zzapConfigType }) {
     heads,
     scripts,
     pages,
+  };
+}
+
+function makePage(props: {
+  title: string;
+  description: string;
+  path: string;
+  template: string;
+  data: any;
+  html: string;
+}): PluginPageType {
+  return {
+    title: props.title,
+    description: props.description,
+    path: props.path,
+    template: props.template || "default",
+    type: "dynamic",
+    data: props.data,
+    html: props.html,
   };
 }

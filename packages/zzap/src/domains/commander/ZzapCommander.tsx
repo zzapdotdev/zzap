@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import { watch } from "fs";
 import fs from "fs/promises";
-import { ZzapBundler } from "../bundler/ZzapBundler";
+import { ZzapBundler } from "../bundler/asd";
 import type { zzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 export let generatingPromise: ReturnType<typeof $> | undefined;

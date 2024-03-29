@@ -1,7 +1,4 @@
-import {
-  PageBuilder,
-  type ZzapPluginPageType,
-} from "../../page/ZzapPageBuilder";
+import { PageBuilder, type PluginPageType } from "../../page/ZzapPageBuilder";
 import { definePlugin } from "../../plugin/definePlugin";
 
 export const zzapPluginMarkdown = definePlugin({
@@ -9,7 +6,7 @@ export const zzapPluginMarkdown = definePlugin({
     return {
       name: "core-markdown",
       async loader(ctx) {
-        const pages: Array<ZzapPluginPageType<any>> = [];
+        const pages: Array<PluginPageType<any>> = [];
 
         const globPatterns = ["**/*.md", "**/*.mdx"];
 

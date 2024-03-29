@@ -20,18 +20,16 @@ export default defineConfig({
           "https://raw.githubusercontent.com/zzapdotdev/zzap/main/README.md",
         );
         const text = await res.text();
-        console.log("TEXT", text);
+        const page = ctx.makePage({
+          title: "README",
+          description: "README",
+          path: "/readme",
+          template: "default",
+          data: {},
+          html: text,
+        });
         return {
-          pages: [
-            {
-              title: "README",
-              description: "README",
-              path: "/readme",
-              template: "default",
-              type: "dynamic",
-              html: text,
-            },
-          ],
+          pages: [page],
         };
       },
     }),

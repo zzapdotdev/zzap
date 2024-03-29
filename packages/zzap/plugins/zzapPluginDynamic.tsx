@@ -1,4 +1,4 @@
-import type { ZzapPluginPageType } from "../src/domains/page/ZzapPageBuilder";
+import type { PluginPageType } from "../src/domains/page/ZzapPageBuilder";
 import {
   definePlugin,
   type ZzapPluginContextType,
@@ -8,7 +8,7 @@ export const zzapPluginDynamic = definePlugin({
   plugin(props: {
     name: string;
     loader: (ctx: ZzapPluginContextType) => Promise<{
-      pages: Array<ZzapPluginPageType>;
+      pages: Array<PluginPageType>;
     } | void>;
   }) {
     return {

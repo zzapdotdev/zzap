@@ -1,17 +1,14 @@
 import React from "react";
 import type { zzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
-import {
-  type SitemapItemType,
-  type ZzapClientPageType,
-} from "../page/ZzapPageBuilder";
+import { type PageType, type SitemapItemType } from "../page/ZzapPageBuilder";
 
 export const ZzapRenderer = {
   async renderAndWritePages(props: {
     config: zzapConfigType;
     heads: Array<JSX.Element>;
     scripts: Array<JSX.Element>;
-    pages: Array<ZzapClientPageType>;
+    pages: Array<PageType>;
   }) {
     const logger = getLogger();
 
@@ -148,6 +145,6 @@ async function getIndexModule(props: {
   );
 }
 
-function DefaultAppComponent(_props: { page: ZzapClientPageType }) {
+function DefaultAppComponent(_props: { page: PageType }) {
   return <></>;
 }
