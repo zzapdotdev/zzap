@@ -1,13 +1,13 @@
 import Bun, { $ } from "bun";
 import type { getLogger } from "../logging/getLogger";
 
-import type { default as Server } from "react-dom/server";
-import type { PluginPageType } from "../page/ZzapPageBuilder";
+import type { ZzapConfigType } from "../config/zzapConfigSchema";
+import type { PluginPageType, SitemapItemType } from "../page/ZzapPageBuilder";
 
 export function definePlugin<TArgs extends any[]>(props: {
   plugin(...args: TArgs): {
     name: string;
-    loader(context: ZzapPluginContextType): Promise<
+    loader?(ctx: ZzapPluginContextType): Promise<
       | {
           heads?: Array<JSX.Element>;
           scripts?: Array<JSX.Element>;
@@ -16,9 +16,12 @@ export function definePlugin<TArgs extends any[]>(props: {
       | undefined
       | void
     >;
-    processor(
-      context: ZzapPluginContextType & {
+    processor?(
+      ctx: ZzapPluginContextType & {
+        heads: Array<JSX.Element>;
+        scripts: Array<JSX.Element>;
         pages: Array<PluginPageType>;
+        sitemap: Array<SitemapItemType>;
       },
     ): Promise<void>;
   };
@@ -38,36 +41,8 @@ export type ZzapPluginContextType = {
     html?: string;
   }): PluginPageType;
   logger: ReturnType<typeof getLogger>;
-  config: {
-    isProduction: boolean;
-    title: string;
-    description: string;
-    base: string;
-    rootDir: string;
-    srcDir: string;
-    outputDir: string;
-    publicDir: string;
-    publicFiles: Array<{
-      path: string;
-      name: string;
-    }>;
-    commands: Array<{
-      command: string;
-    }>;
-    entryPoints: Array<{
-      path: string;
-    }>;
-    deps: {
-      "react-dom/server": typeof Server;
-    };
-    document(props: {
-      head: Array<JSX.Element>;
-      children: JSX.Element;
-      scripts: Array<JSX.Element>;
-    }): JSX.Element;
-    RootComponent: any;
-  };
+  config: ZzapConfigType;
 };
 
-export type zzapDefinePluginType = ReturnType<typeof definePlugin>;
-export type zzapPluginType = ReturnType<ReturnType<typeof definePlugin>>;
+export type ZzapDefinePluginType = ReturnType<typeof definePlugin>;
+export type ZzapPluginType = ReturnType<ReturnType<typeof definePlugin>>;

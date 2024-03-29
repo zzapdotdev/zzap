@@ -1,7 +1,7 @@
 import yaml from "js-yaml";
 import kebabCase from "lodash/kebabCase";
 import markdownit from "markdown-it";
-import type { zzapConfigType } from "../config/zzapConfigSchema";
+import type { ZzapConfigType } from "../config/zzapConfigSchema";
 
 const md = markdownit({
   html: true,
@@ -11,7 +11,7 @@ const md = markdownit({
 
 export const PageBuilder = {
   async fromMarkdown(props: {
-    config: zzapConfigType;
+    config: ZzapConfigType;
     path: string;
     markdown: string;
   }): Promise<Array<PluginPageType<"markdown">>> {

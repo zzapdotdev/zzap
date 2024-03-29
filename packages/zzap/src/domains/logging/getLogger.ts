@@ -18,12 +18,10 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
       const warnLabel = style("WARN").bold().yellow().toString();
       const errorLabel = style("ERROR").bold().red().toString();
       const prefixLabel = style(prefix).cyan().toString();
-
       let debugTimestamp: number;
       const childLogger = {
         log(message: string, data?: Record<string, any>) {
           const prettyData = getPrettyData(data);
-
           deps.console.info(`${prefixLabel} ${message}${prettyData}`);
         },
         info(message: string, data?: Record<string, any>) {

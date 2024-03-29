@@ -1,6 +1,6 @@
 import path from "path";
 import { getLogger } from "../logging/getLogger";
-import type { zzapConfigType } from "./zzapConfigSchema";
+import type { ZzapConfigType } from "./zzapConfigSchema";
 
 const logger = getLogger();
 
@@ -12,7 +12,7 @@ export const ZzapConfig = {
       rootDir: rootDir,
     });
 
-    const config = { ...module.default } as zzapConfigType;
+    const config = { ...module.default } as ZzapConfigType;
     config.srcDir = "./" + path.join(`${rootDir}/${config.srcDir}`);
     config.outputDir = "./" + path.join(`${rootDir}/${config.outputDir}`);
     config.publicDir = "./" + path.join(`${rootDir}/${config.publicDir}`);

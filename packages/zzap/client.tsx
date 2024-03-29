@@ -1,4 +1,4 @@
-export type { PageType as ZzapClientPageType } from "./src/domains/page/ZzapPageBuilder";
+export type { PageType } from "./src/domains/page/ZzapPageBuilder";
 
 export const ZzapClient = {
   isBrowser: typeof window !== "undefined",

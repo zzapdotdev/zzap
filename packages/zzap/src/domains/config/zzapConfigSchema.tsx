@@ -1,7 +1,7 @@
 import z from "zod";
 
 import type { default as Server } from "react-dom/server";
-import type { zzapPluginType } from "../plugin/definePlugin";
+import type { ZzapPluginType } from "../plugin/definePlugin";
 
 export const zzapConfigSchema = z.object({
   /**
@@ -53,9 +53,9 @@ export const zzapConfigSchema = z.object({
     )
     .default([]),
   plugins: z.array(z.any()).default([]) as z.ZodType<
-    Array<zzapPluginType>,
+    Array<ZzapPluginType>,
     z.ZodDefaultDef,
-    undefined | Array<zzapPluginType>
+    undefined | Array<ZzapPluginType>
   >,
   deps: z.object({
     /**
@@ -76,7 +76,7 @@ export const zzapConfigSchema = z.object({
     .returns(z.any() as z.ZodType<JSX.Element>),
 });
 
-export type zzapConfigType = z.infer<typeof zzapConfigSchema> & {
+export type ZzapConfigType = z.infer<typeof zzapConfigSchema> & {
   rootDir: string;
   isProduction: boolean;
 };
