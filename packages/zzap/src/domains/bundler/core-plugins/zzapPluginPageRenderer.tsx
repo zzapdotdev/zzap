@@ -86,19 +86,23 @@ export const zzapPluginPageRenderer = definePlugin({
               `${ctx.config.outputDir}/${page.path}/index.html`,
               html,
             );
-            await Bun.write(
-              `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
-              JSON.stringify(content.props),
-            );
+            if (!ctx.config.isProduction) {
+              await Bun.write(
+                `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
+                JSON.stringify(content.props),
+              );
+            }
           } else {
             await Bun.write(
               `${ctx.config.outputDir}/${page.path}/index.html`,
               html,
             );
-            await Bun.write(
-              `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
-              JSON.stringify(content.props),
-            );
+            if (!ctx.config.isProduction) {
+              await Bun.write(
+                `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
+                JSON.stringify(content.props),
+              );
+            }
           }
         });
 

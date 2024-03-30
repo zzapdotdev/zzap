@@ -4,13 +4,9 @@ export const zzapPluginHeads = definePlugin({
   plugin() {
     return {
       name: "core-heads",
-      async loader(ctx) {
+      async loader() {
         return {
           heads: [
-            <meta
-              name="zzap-mode"
-              content={ctx.config.isProduction ? "production" : "development"}
-            />,
             <style
               dangerouslySetInnerHTML={{
                 __html: zzapStyles,

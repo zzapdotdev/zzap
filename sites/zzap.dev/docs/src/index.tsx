@@ -5,6 +5,8 @@ import React, { useEffect } from "react";
 import { PageType, ZzapClient } from "zzap/client";
 import { sidebars } from "./sidebars";
 
+console.log("INSIDE CLIENT MODULE", process.env.NODE_ENV);
+
 ZzapClient.shiki({
   theme: "rose-pine",
 });

@@ -4,8 +4,6 @@ import { ZzapCommander } from "./domains/commander/ZzapCommander";
 import { ZzapConfig } from "./domains/config/ZzapConfig";
 import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
-process.env.NODE_ENV = process.env.NODE_ENV || "development";
-
 export const logger = getLogger();
 
 await main();
@@ -34,10 +32,14 @@ async function main() {
 
   const config = await ZzapConfig.get({
     rootDir: rootDir,
+    isProduction: command === "build",
   });
 
+  const env = command === "build" ? "production" : "development";
+  process.env.NODE_ENV = env;
+
   logger.log(
-    `Running "zzap ${command}" for root directory "${config.rootDir}"`,
+    `Running "zzap ${command}" for root directory "${config.rootDir}" (${env})`,
   );
 
   if (command === "watch") {
@@ -54,6 +56,10 @@ async function main() {
   }
 
   if (command === "build") {
+    logger.log(`Cleaning ${config.outputDir}`);
+    await ZzapCommander.clean({
+      config,
+    });
     await ZzapCommander.build({
       config,
     });
