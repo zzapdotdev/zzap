@@ -79,6 +79,7 @@ export const zzapConfigSchema = z.object({
 export type ZzapConfigType = z.infer<typeof zzapConfigSchema> & {
   rootDir: string;
   isProduction: boolean;
+  command: "watch" | "build" | "start";
 };
 export type zzapConfigInputType = z.input<typeof zzapConfigSchema>;
 

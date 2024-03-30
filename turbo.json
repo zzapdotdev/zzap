@@ -8,6 +8,9 @@
     "build": {
       "cache": false
     },
+    "start": {
+      "cache": false
+    },
     "package": {
       "cache": false
     },

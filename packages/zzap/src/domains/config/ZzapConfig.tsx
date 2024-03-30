@@ -5,7 +5,7 @@ import type { ZzapConfigType } from "./zzapConfigSchema";
 const logger = getLogger();
 
 export const ZzapConfig = {
-  async get(props: { rootDir: string; isProduction: boolean }) {
+  async get(props: { rootDir: string; command: ZzapConfigType["command"] }) {
     const rootDir = props.rootDir || "./docs";
 
     const module = await loadConfigModule({
@@ -18,7 +18,9 @@ export const ZzapConfig = {
     config.publicDir = "./" + path.join(`${rootDir}/${config.publicDir}`);
 
     config.rootDir = rootDir;
-    config.isProduction = props.isProduction;
+    config.isProduction =
+      props.command === "build" || props.command === "start";
+    config.command = props.command;
 
     return config;
   },

@@ -2,6 +2,7 @@ import Bun from "bun";
 import { parseArgs } from "util";
 import { ZzapCommander } from "./domains/commander/ZzapCommander";
 import { ZzapConfig } from "./domains/config/ZzapConfig";
+import type { ZzapConfigType } from "./domains/config/zzapConfigSchema";
 import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
 export const logger = getLogger();
@@ -27,19 +28,16 @@ async function main() {
     enableDebug();
   }
 
-  const command = positionals[2];
+  const command = positionals[2] as ZzapConfigType["command"];
   const rootDir = positionals[3];
 
   const config = await ZzapConfig.get({
     rootDir: rootDir,
-    isProduction: command === "build",
+    command,
   });
 
-  const env = command === "build" ? "production" : "development";
-  process.env.NODE_ENV = env;
-
   logger.log(
-    `Running "zzap ${command}" for root directory "${config.rootDir}" (${env})`,
+    `Running "zzap ${command}" for root directory "${config.rootDir}" (${process.env.NODE_ENV})`,
   );
 
   if (command === "watch") {
@@ -50,6 +48,19 @@ async function main() {
 
     logger.log(`Watching ${config.srcDir}`);
     await ZzapCommander.watch({
+      config,
+      port: Number(values.port),
+    });
+  }
+
+  if (command === "start") {
+    logger.log(`Cleaning ${config.outputDir}`);
+    await ZzapCommander.clean({
+      config,
+    });
+
+    logger.log(`Starting ${config.srcDir}`);
+    await ZzapCommander.start({
       config,
       port: Number(values.port),
     });

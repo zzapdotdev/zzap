@@ -27,8 +27,8 @@ export const ZzapClient = {
       logger.error("No #zzap-root element found");
     }
 
-    console.log("INSIDE CLIENT", process.env.NODE_ENV);
-    if (process.env.NODE_ENV === "development") {
+    const command = zzapRoot?.getAttribute("data-zzap-command");
+    if (command === "watch") {
       var ws = new WebSocket(`ws://${location.host}`);
 
       ws.onopen = function () {

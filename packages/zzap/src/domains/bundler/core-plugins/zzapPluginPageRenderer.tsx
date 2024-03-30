@@ -33,7 +33,11 @@ export const zzapPluginPageRenderer = definePlugin({
           const content = <AppComponent page={clientPage}></AppComponent>;
 
           const root = (
-            <div id="zzap-root" data-zzap-shiki="false">
+            <div
+              id="zzap-root"
+              data-zzap-shiki="false"
+              data-zzap-command={ctx.config.command}
+            >
               {content}
             </div>
           );
