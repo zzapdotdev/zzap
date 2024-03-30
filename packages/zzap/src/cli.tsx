@@ -4,6 +4,8 @@ import { ZzapCommander } from "./domains/commander/ZzapCommander";
 import { ZzapConfig } from "./domains/config/ZzapConfig";
 import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
+
 export const logger = getLogger();
 
 await main();

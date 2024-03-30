@@ -1,4 +1,4 @@
-import { $ } from "bun";
+import { $, type ServerWebSocket } from "bun";
 import { watch } from "fs";
 import fs from "fs/promises";
 import { ZzapBundler } from "../bundler/ZzapBundler";
@@ -8,12 +8,9 @@ export let generatingPromise: ReturnType<typeof $> | undefined;
 const logger = getLogger();
 
 export const ZzapCommander = {
-  async watch(props: {
-    port: number | undefined;
-
-    config: ZzapConfigType;
-  }) {
+  async watch(props: { port: number | undefined; config: ZzapConfigType }) {
     await ZzapBundler.generate({ config: props.config });
+    let websocket: ServerWebSocket<unknown> | undefined;
 
     const watcher = watch(
       props.config.rootDir,
@@ -27,10 +24,17 @@ export const ZzapCommander = {
           return;
         }
 
+        if (filename === ".DS_Store") {
+          return;
+        }
+
         logger.log(`File changed: ${filename}`);
 
-        generatingPromise = $`zzap build`;
+        generatingPromise = $`ZZAP_HOT=true zzap build`;
         generatingPromise.then(() => {
+          if (websocket) {
+            websocket.send("zzap:reload");
+          }
           generatingPromise = undefined;
         });
       },
@@ -46,11 +50,24 @@ export const ZzapCommander = {
 
     Bun.serve({
       port: port,
-      async fetch(request) {
+      websocket: {
+        open(ws) {
+          websocket = ws;
+        },
+        async message(_ws, _message) {},
+      },
+      async fetch(request, server) {
+        const success = server.upgrade(request);
+        if (success) {
+          // Bun automatically returns a 101 Switching Protocols
+          // if the upgrade succeeds
+          return undefined;
+        }
+
         const basePAth = props.config.base;
 
-        const url = request.url;
-        const pathname = new URL(url).pathname;
+        const url = new URL(request.url);
+        const pathname = url.pathname;
 
         if (props.config.base !== "/" && pathname === "/") {
           return new Response("", {
@@ -62,8 +79,9 @@ export const ZzapCommander = {
         }
 
         const pathNameForBasepath = pathname.replace(props.config.base, "/");
+        const hasFileExtension = pathNameForBasepath.split(".").length === 2;
+        // const hasFileExtension = pathNameForBasepath.split(".").length > 1;
 
-        const hasFileExtension = pathNameForBasepath.split(".").length > 1;
         const fileName = hasFileExtension ? "" : "/index.html";
         const path = `${props.config.outputDir}${pathNameForBasepath}${fileName}`;
 

@@ -13,26 +13,27 @@ export default defineConfig({
       conditional: true,
       module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
     }),
-    plugins.dynamic({
-      name: "README.md",
-      async loader(ctx) {
-        const res = await fetch(
-          "https://raw.githubusercontent.com/zzapdotdev/zzap/main/README.md",
-        );
-        const text = await res.text();
-        const page = ctx.makePage({
-          title: "README",
-          description: "README",
-          path: "/readme",
-          template: "default",
-          data: {},
-          html: text,
-        });
-        return {
-          pages: [page],
-        };
-      },
-    }),
+    // plugins.dynamic({
+    //   name: "releases",
+    //   async loader(ctx) {
+    //     const pages = new Array(4000).fill(0).map((_, i) => {
+    //       return ctx.makePage({
+    //         title: `Release ${i}`,
+    //         description: `Release ${i}`,
+    //         path: `/releases/${i}`,
+    //         template: "releases",
+    //         data: {
+    //           release: i,
+    //         },
+    //         html: `<h1>Release ${i}</h1>`,
+    //       });
+    //     });
+
+    //     return {
+    //       pages,
+    //     };
+    //   },
+    // }),
   ],
   publicFiles: [
     {
@@ -69,3 +70,44 @@ export default defineConfig({
     );
   },
 });
+
+type GitHubReleases = {
+  url: string;
+  assets_url: string;
+  upload_url: string;
+  html_url: string;
+  id: number;
+  author: {
+    login: string;
+    id: number;
+    node_id: string;
+    avatar_url: string;
+    gravatar_id: string;
+    url: string;
+    html_url: string;
+    followers_url: string;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string;
+    organizations_url: string;
+    repos_url: string;
+    events_url: string;
+    received_events_url: string;
+    type: string;
+    site_admin: boolean;
+  };
+  node_id: string;
+  tag_name: string;
+  target_commitish: string;
+  name: string;
+  draft: boolean;
+  prerelease: boolean;
+  created_at: string;
+  published_at: string;
+  assets: Array<any>;
+  tarball_url: string;
+  zipball_url: string;
+  body: string;
+  mentions_count?: number;
+};

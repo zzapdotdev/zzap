@@ -16,15 +16,12 @@ export const zzapPluginScripts = definePlugin({
           target: "browser",
           format: "esm",
           minify: ctx.config.isProduction,
-          outdir: ctx.config.outputDir + "/__zzap-scripts",
+          outdir: ctx.config.outputDir + "/__zzap",
         });
 
         return {
           scripts: [
-            <script
-              type="module"
-              src={`${ctx.config.base}__zzap-scripts/index.js`}
-            />,
+            <script type="module" src={`${ctx.config.base}__zzap/index.js`} />,
           ],
         };
 

@@ -1,4 +1,4 @@
-export const { getLogger, enableDebug } = makeGetLogger("⚡zzap", {
+export const { getLogger, enableDebug } = makeGetLogger("zzap", {
   console,
 });
 

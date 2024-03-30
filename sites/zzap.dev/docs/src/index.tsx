@@ -2,7 +2,7 @@ import { inject } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
 import clsx from "clsx";
 import React, { useEffect } from "react";
-import { ZzapClient, ZzapClientPageType } from "zzap/client";
+import { PageType, ZzapClient } from "zzap/client";
 import { sidebars } from "./sidebars";
 
 ZzapClient.shiki({
@@ -15,7 +15,7 @@ if (ZzapClient.isBrowser) {
   injectSpeedInsights();
 }
 
-export default function App(props: { page: ZzapClientPageType }) {
+export default function App(props: { page: PageType }) {
   const visibleSidebars = sidebars.filter((sidebar) => {
     return props.page.path.startsWith(sidebar.path);
   });

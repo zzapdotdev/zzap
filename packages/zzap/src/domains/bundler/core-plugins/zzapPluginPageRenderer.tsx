@@ -5,6 +5,9 @@ import type { PageType } from "../../page/ZzapPageBuilder";
 
 import { definePlugin } from "../../plugin/definePlugin";
 
+let indexModule: Awaited<ReturnType<typeof getIndexModule>> | undefined =
+  undefined;
+
 export const zzapPluginPageRenderer = definePlugin({
   plugin() {
     return {
@@ -18,18 +21,14 @@ export const zzapPluginPageRenderer = definePlugin({
             sitemap: ctx.sitemap,
           };
 
-          const module = await getIndexModule({
-            config: ctx.config,
-            logger: ctx.logger,
-          });
-          const AppComponent = module?.default;
-
-          if (!AppComponent) {
-            ctx.logger.error(
-              `while loading index.tsx or index.jsx in ${ctx.config.srcDir}.`,
-            );
-            process.exit(0);
+          if (!indexModule) {
+            indexModule = await getIndexModule({
+              config: ctx.config,
+              logger: ctx.logger,
+            });
           }
+
+          const AppComponent = indexModule?.default!;
 
           const content = <AppComponent page={clientPage}></AppComponent>;
 
@@ -87,10 +86,18 @@ export const zzapPluginPageRenderer = definePlugin({
               `${ctx.config.outputDir}/${page.path}/index.html`,
               html,
             );
+            await Bun.write(
+              `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
+              JSON.stringify(content.props),
+            );
           } else {
             await Bun.write(
               `${ctx.config.outputDir}/${page.path}/index.html`,
               html,
+            );
+            await Bun.write(
+              `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
+              JSON.stringify(content.props),
             );
           }
         });
@@ -116,6 +123,11 @@ async function getIndexModule(props: {
     try {
       const location = `${props.config.srcDir}/index.tsx`;
       const module = await import(location);
+
+      if (!module.default) {
+        props.logger.terminate(`index.tsx does not have a default export.`);
+      }
+
       return module;
     } catch (error) {
       props.logger.terminate(`loading index.tsx`, { error });
@@ -126,6 +138,11 @@ async function getIndexModule(props: {
     try {
       const location = `${props.config.srcDir}/index.jsx`;
       const module = await import(location);
+
+      if (!module.default) {
+        props.logger.terminate(`index.tsx does not have a default export.`);
+      }
+
       return module;
     } catch (error) {
       props.logger.terminate(`loading index.jsx`, { error });

@@ -50,7 +50,9 @@ export const ZzapBundler = {
       sitemap: siteMap,
     });
 
-    logger.log(`Finished in ${Date.now() - timetamp}ms.`);
+    logger.log(
+      `Finished building generating ${props.config.title} in ${Date.now() - timetamp}ms.`,
+    );
   },
 };
 
@@ -73,7 +75,7 @@ async function runLoaderPlugins(props: { config: ZzapConfigType }) {
   const pluginPromises = allPlugins.map(async (plugin) => {
     if (!plugin.loader) return;
     const timestamp = Date.now();
-    const pluginLogger = getLogger(`[loader]${plugin.name}`);
+    const pluginLogger = getLogger(`[loader] ▶ ${plugin.name}`);
     const loaderResult = await plugin.loader({
       $,
       Bun,
@@ -135,7 +137,7 @@ async function runProcessorPlugins(props: {
   const pluginPromises = allPlugins.map(async (plugin) => {
     if (!plugin.processor) return;
     const timestamp = Date.now();
-    const pluginLogger = getLogger(`[processor]${plugin.name}`);
+    const pluginLogger = getLogger(`[processor] ▶ ${plugin.name}`);
     await plugin.processor({
       $,
       Bun,
