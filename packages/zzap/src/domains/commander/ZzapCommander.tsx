@@ -5,43 +5,42 @@ import { ZzapBundler } from "../bundler/ZzapBundler";
 import type { ZzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 export let generatingPromise: ReturnType<typeof $> | undefined;
+
 const logger = getLogger();
 
+// let lastServedPath = "";
 export const ZzapCommander = {
   async watch(props: { port: number | undefined; config: ZzapConfigType }) {
-    await ZzapBundler.generate({ config: props.config });
+    await ZzapBundler.generate({ config: props.config, paths: [] });
     let websocket: ServerWebSocket<unknown> | undefined;
+    const zzapWatcher: Parameters<typeof watch>["1"] = (_event, filename) => {
+      if (generatingPromise || !filename) {
+        return;
+      }
 
-    const watcher = watch(
-      props.config.rootDir,
+      if (filename === ".DS_Store") {
+        return;
+      }
+
+      logger.debug(`File changed: ${filename}`);
+
+      websocket?.send("zzap:reload");
+    };
+
+    const srcWatcher = watch(
+      props.config.srcDir,
       { recursive: true },
-      (_event, filename) => {
-        if (generatingPromise || !filename) {
-          return;
-        }
-
-        if (filename.startsWith(".zzap")) {
-          return;
-        }
-
-        if (filename === ".DS_Store") {
-          return;
-        }
-
-        logger.log(`File changed: ${filename}`);
-
-        generatingPromise = $`ZZAP_HOT=true zzap build`;
-        generatingPromise.then(() => {
-          if (websocket) {
-            websocket.send("zzap:reload");
-          }
-          generatingPromise = undefined;
-        });
-      },
+      zzapWatcher,
+    );
+    const configWatcher = watch(
+      props.config.rootDir + "/zzap.config.tsx",
+      { recursive: true },
+      zzapWatcher,
     );
 
     process.on("SIGINT", function closeWatcherWhenCtrlCIsPressed() {
-      watcher.close();
+      srcWatcher.close();
+      configWatcher.close();
       process.exit(0);
     });
 
@@ -54,14 +53,15 @@ export const ZzapCommander = {
     });
   },
   async start(props: { port: number | undefined; config: ZzapConfigType }) {
-    await ZzapBundler.generate({ config: props.config });
+    await ZzapBundler.generate({ config: props.config, paths: [] });
     startDevServer({
       port: props.port,
       config: props.config,
     });
   },
-  async build(props: { config: ZzapConfigType }) {
-    await ZzapBundler.generate({ config: props.config });
+  async build(props: { config: ZzapConfigType; paths: string | undefined }) {
+    const pathsArray = props.paths?.split(",");
+    await ZzapBundler.generate({ config: props.config, paths: pathsArray });
   },
   async clean(props: { config: ZzapConfigType }) {
     await fs.rm(props.config.outputDir, { recursive: true, force: true });
@@ -87,6 +87,8 @@ function startDevServer(props: {
       async message(_ws, _message) {},
     },
     async fetch(request, server) {
+      const url = new URL(request.url);
+      const pathname = url.pathname;
       const success = server.upgrade(request);
       if (success) {
         // Bun automatically returns a 101 Switching Protocols
@@ -95,9 +97,6 @@ function startDevServer(props: {
       }
 
       const basePAth = props.config.base;
-
-      const url = new URL(request.url);
-      const pathname = url.pathname;
 
       if (props.config.base !== "/" && pathname === "/") {
         return new Response("", {
@@ -110,13 +109,33 @@ function startDevServer(props: {
 
       const pathNameForBasepath = pathname.replace(props.config.base, "/");
       const hasFileExtension = pathNameForBasepath.split(".").length === 2;
-      // const hasFileExtension = pathNameForBasepath.split(".").length > 1;
       const fileName = hasFileExtension ? "" : "/index.html";
       const path = `${props.config.outputDir}${pathNameForBasepath}${fileName}`;
 
       try {
-        const file = Bun.file(path);
-        const exists = await file.exists();
+        let file = Bun.file(path);
+        let exists = await file.exists();
+
+        if (path.endsWith(".html")) {
+          const pathToRebuild = pathNameForBasepath;
+
+          await $`zzap build --paths=${pathToRebuild} --child`;
+
+          file = Bun.file(path);
+          exists = await file.exists();
+        }
+
+        if (path.endsWith("props.json")) {
+          const pathToRebuild = pathNameForBasepath.replace(
+            "/__zzap/data/",
+            "",
+          );
+
+          await $`zzap build --paths=${pathToRebuild} --child`;
+
+          file = Bun.file(path);
+          exists = await file.exists();
+        }
 
         if (!exists) {
           return htmlToReponse({
@@ -128,7 +147,7 @@ function startDevServer(props: {
             status: 404,
           });
         }
-        return new Response(Bun.file(path), {
+        return new Response(file, {
           headers: {
             "Cache-Control": "no-cache, no-store, must-revalidate",
           },

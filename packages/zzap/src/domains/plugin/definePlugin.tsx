@@ -11,7 +11,6 @@ export function definePlugin<TArgs extends any[]>(props: {
       | {
           heads?: Array<JSX.Element>;
           scripts?: Array<JSX.Element>;
-          pages?: Array<PluginPageType>;
         }
       | undefined
       | void
@@ -32,14 +31,7 @@ export function definePlugin<TArgs extends any[]>(props: {
 export type ZzapPluginContextType = {
   $: typeof $;
   Bun: typeof Bun;
-  makePage(props: {
-    title: string;
-    description: string;
-    path: string;
-    template: string;
-    data?: any;
-    html?: string;
-  }): PluginPageType;
+
   logger: ReturnType<typeof getLogger>;
   config: ZzapConfigType;
 };

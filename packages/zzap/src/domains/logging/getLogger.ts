@@ -13,40 +13,27 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
         ? `${appName} ▶ ${serviceName} ▶`
         : `${appName} ▶`;
 
-      const infoLabel = style("INFO:").bold().blue().toString();
-      const debugLabel = style("DEBUG").bold().magenta().toString();
-      const warnLabel = style("WARN").bold().yellow().toString();
-      const errorLabel = style("ERROR").bold().red().toString();
-      const prefixLabel = style(prefix).cyan().toString();
-      let debugTimestamp: number;
       const childLogger = {
         log(message: string, data?: Record<string, any>) {
+          const prefixLabel = style(prefix).bold().cyan().toString();
           const prettyData = getPrettyData(data);
           deps.console.info(`${prefixLabel} ${message}${prettyData}`);
         },
         info(message: string, data?: Record<string, any>) {
-          const prettyData = getPrettyData(data);
-
-          deps.console.info(
-            `${prefixLabel} ${infoLabel} ${message}${prettyData}`,
-          );
+          this.log(message, data);
         },
         debug(message: string, data?: Record<string, any>) {
+          const prefixLabel = style(prefix).bold().magenta().toString();
+
           const prettyData = getPrettyData(data);
 
-          const currentTimestamp = new Date().getTime();
-          const timeDiff = debugTimestamp
-            ? ` [+${currentTimestamp - debugTimestamp}ms]`
-            : "";
-          debugTimestamp = currentTimestamp;
-
           if (includeDebugStatements) {
-            deps.console.debug(
-              `${prefixLabel} ${debugLabel}${timeDiff} ${message}${prettyData}`,
-            );
+            deps.console.debug(`${prefixLabel} ${message}${prettyData}`);
           }
         },
         warn(message: string, data?: Record<string, any>) {
+          const prefixLabel = style(prefix).bold().yellow().toString();
+          const warnLabel = style("WARN").bold().yellow().toString();
           const prettyData = getPrettyData(data);
 
           deps.console.warn(
@@ -54,6 +41,9 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
           );
         },
         error(message: string, data?: Record<string, any> & { error?: any }) {
+          const prefixLabel = style(prefix).bold().yellow().toString();
+          const errorLabel = style("ERROR").bold().red().toString();
+
           const { error, ...rest } = data || {};
 
           const prettyData = getPrettyData(rest);

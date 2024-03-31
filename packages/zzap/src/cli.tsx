@@ -2,7 +2,6 @@ import Bun from "bun";
 import { parseArgs } from "util";
 import { ZzapCommander } from "./domains/commander/ZzapCommander";
 import { ZzapConfig } from "./domains/config/ZzapConfig";
-import type { ZzapConfigType } from "./domains/config/zzapConfigSchema";
 import { enableDebug, getLogger } from "./domains/logging/getLogger";
 
 export const logger = getLogger();
@@ -19,6 +18,12 @@ async function main() {
       debug: {
         type: "boolean",
       },
+      paths: {
+        type: "string",
+      },
+      child: {
+        type: "boolean",
+      },
     },
     strict: true,
     allowPositionals: true,
@@ -28,25 +33,25 @@ async function main() {
     enableDebug();
   }
 
-  const command = positionals[2] as ZzapConfigType["command"];
+  const command = positionals[2] as "watch" | "start" | "build";
   const rootDir = positionals[3];
 
   const config = await ZzapConfig.get({
     rootDir: rootDir,
-    command,
+    isDev: command === "watch" || !!values.child,
   });
 
-  logger.log(
+  logger.debug(
     `Running "zzap ${command}" for root directory "${config.rootDir}" (${process.env.NODE_ENV})`,
   );
 
   if (command === "watch") {
-    logger.log(`Cleaning ${config.outputDir}`);
+    logger.debug(`Cleaning ${config.outputDir}`);
     await ZzapCommander.clean({
       config,
     });
 
-    logger.log(`Watching ${config.srcDir}`);
+    logger.debug(`Watching ${config.srcDir}`);
     await ZzapCommander.watch({
       config,
       port: Number(values.port),
@@ -54,7 +59,6 @@ async function main() {
   }
 
   if (command === "start") {
-    logger.log(`Cleaning ${config.outputDir}`);
     await ZzapCommander.clean({
       config,
     });
@@ -67,12 +71,14 @@ async function main() {
   }
 
   if (command === "build") {
-    logger.log(`Cleaning ${config.outputDir}`);
+    logger.debug(`Cleaning ${config.outputDir}`);
     await ZzapCommander.clean({
       config,
     });
+
     await ZzapCommander.build({
       config,
+      paths: values.paths,
     });
   }
 }

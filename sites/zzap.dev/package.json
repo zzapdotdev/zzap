@@ -3,7 +3,7 @@
   "description": "Documentation website for zzap",
   "authors": "René-Pier Deshaies-Géllinas",
   "scripts": {
-    "dev": "zzap watch --port 3000 --debug",
+    "dev": "zzap watch --port 3000",
     "start": "zzap start --port 3000",
     "build": "zzap build"
   },

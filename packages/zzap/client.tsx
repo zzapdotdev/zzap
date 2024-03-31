@@ -27,8 +27,8 @@ export const ZzapClient = {
       logger.error("No #zzap-root element found");
     }
 
-    const command = zzapRoot?.getAttribute("data-zzap-command");
-    if (command === "watch") {
+    const isDev = zzapRoot?.getAttribute("data-zzap-dev");
+    if (isDev === "true") {
       var ws = new WebSocket(`ws://${location.host}`);
 
       ws.onopen = function () {
@@ -59,6 +59,10 @@ export const ZzapClient = {
 
       ws.onclose = function () {
         logger.log("Disconnected from dev server");
+      };
+
+      ws.onerror = function (error) {
+        logger.error(`WebSocket error: ${error}`);
       };
     }
   },

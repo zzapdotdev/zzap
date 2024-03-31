@@ -1,32 +1,78 @@
 import Bun, { $ } from "bun";
 
-import { logger } from "../../cli";
 import type { ZzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 import {
+  PageBuilder,
   type PluginPageType,
   type SitemapItemType,
 } from "../page/ZzapPageBuilder";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
 import { zzapPluginHeads } from "./core-plugins/zzapPluginHeads";
-import { zzapPluginMarkdown } from "./core-plugins/zzapPluginMarkdown";
 import { zzapPluginPageRenderer } from "./core-plugins/zzapPluginPageRenderer";
 import { zzapPluginPublicDir } from "./core-plugins/zzapPluginPublicDir";
 import { zzapPluginPublicFiles } from "./core-plugins/zzapPluginPublicFiles";
 import { zzapPluginScripts } from "./core-plugins/zzapPluginScripts";
 import { zzapPluginSitemapRenderer } from "./core-plugins/zzapPluginSitemapRenderer";
 
+const logger = getLogger();
+
 export const ZzapBundler = {
-  async generate(props: { config: ZzapConfigType }) {
-    logger.log(`Building ${props.config.title}...`);
+  async generate(props: { config: ZzapConfigType; paths?: string[] }) {
+    const buildingLabel = !props.paths
+      ? `Building ${props.config.title}...`
+      : `Rebuilding "${props.paths.join(", ")}"`;
+    logger.log(buildingLabel);
     const timetamp = Date.now();
 
-    const { heads, scripts, pages } = await runLoaderPlugins({
+    const { heads, scripts } = await runLoaderPlugins({
       config: props.config,
     });
 
-    const siteMap: Array<SitemapItemType> = pages
-      .map((page) => {
+    const pages = new Map<string, PluginPageType>();
+
+    const staticPaths = await getPaths({
+      config: props.config,
+    });
+    const paths = [...staticPaths, ...(props.paths || [])];
+
+    const promises = paths.map(async (path) => {
+      // Check for Markdown files
+      const filePath = props.config.srcDir + path + ".md";
+      const indexFilePath = props.config.srcDir + path + "/index.md";
+      const pathForExploded = path.split("/").slice(0, -1).join("/");
+      const explodeFilePath = props.config.srcDir + pathForExploded + "/!.md";
+
+      let file = Bun.file(filePath);
+      let exists = await file.exists();
+
+      if (!exists) {
+        file = Bun.file(indexFilePath);
+        exists = await file.exists();
+      }
+
+      if (!exists) {
+        file = Bun.file(explodeFilePath);
+        exists = await file.exists();
+      }
+
+      if (exists) {
+        const pageMarkdown = await file.text();
+        const markdownPages = await PageBuilder.fromMarkdown({
+          config: props.config as any,
+          path: path,
+          markdown: pageMarkdown,
+        });
+
+        markdownPages.forEach((page) => {
+          pages.set(page.path, page);
+        });
+      }
+    });
+    await Promise.all(promises);
+
+    const siteMap: Array<SitemapItemType> = Array.from(pages)
+      .map(([_path, page]) => {
         return {
           path: page.path,
           title: page.title,
@@ -46,20 +92,48 @@ export const ZzapBundler = {
       config: props.config,
       heads: heads,
       scripts: scripts,
-      pages: pages,
+      pages: Array.from(pages.values()),
       sitemap: siteMap,
     });
 
     logger.log(
-      `Finished building generating ${props.config.title} in ${Date.now() - timetamp}ms.`,
+      `Finished building ${props.config.title} in ${Date.now() - timetamp}ms.`,
     );
   },
 };
 
+async function getPaths(props: { config: ZzapConfigType }) {
+  const paths: Array<string> = [];
+
+  // MARKDOWN
+  const globPatterns = ["**/*.md", "**/*.mdx"];
+  for (const pattern of globPatterns) {
+    const glob = new Bun.Glob(props.config.srcDir + "/" + pattern);
+
+    const filesIterator = glob.scan({
+      cwd: ".",
+      onlyFiles: true,
+    });
+
+    for await (const filePath of filesIterator) {
+      const path = filePath
+        .replace(props.config.srcDir, "")
+        .replace(/\.mdx?$/, "")
+        .replace(/\.md?$/, "")
+        .replace(/\/index$/, "");
+
+      paths.push(path);
+    }
+  }
+
+  // DYNAMIC
+
+  return paths;
+}
+
 async function runLoaderPlugins(props: { config: ZzapConfigType }) {
   const heads: Array<JSX.Element> = [];
   const scripts: Array<JSX.Element> = [];
-  const pages: Array<PluginPageType> = [];
 
   const allPlugins = [
     zzapPluginHeads(),
@@ -67,11 +141,11 @@ async function runLoaderPlugins(props: { config: ZzapConfigType }) {
     zzapPluginCommands(),
     zzapPluginPublicDir(),
     zzapPluginPublicFiles(),
-    zzapPluginMarkdown(),
+
     ...props.config.plugins,
   ];
   const pluginDoneLogs: Array<{ name: string; log: () => void }> = [];
-  logger.log(`Running loaders...`);
+  logger.debug(`Running loaders...`);
   const pluginPromises = allPlugins.map(async (plugin) => {
     if (!plugin.loader) return;
     const timestamp = Date.now();
@@ -79,16 +153,13 @@ async function runLoaderPlugins(props: { config: ZzapConfigType }) {
     const loaderResult = await plugin.loader({
       $,
       Bun,
-      makePage,
       logger: pluginLogger,
       config: props.config,
     });
     const newHeads = loaderResult?.heads || [];
     const newScripts = loaderResult?.scripts || [];
-    const newPages = loaderResult?.pages || [];
     heads.push(...newHeads);
     scripts.push(...newScripts);
-    pages.push(...newPages);
 
     const doneTimestamp = Date.now() - timestamp;
 
@@ -103,7 +174,7 @@ async function runLoaderPlugins(props: { config: ZzapConfigType }) {
     pluginDoneLogs.push({
       name: plugin.name,
       log: () => {
-        pluginLogger.log(`Done in ${doneTimestamp}ms.`);
+        pluginLogger.debug(`Done in ${doneTimestamp}ms.`);
       },
     });
   });
@@ -117,7 +188,6 @@ async function runLoaderPlugins(props: { config: ZzapConfigType }) {
   return {
     heads,
     scripts,
-    pages,
   };
 }
 
@@ -134,6 +204,7 @@ async function runProcessorPlugins(props: {
     ...props.config.plugins,
   ];
   const pluginDoneLogs: Array<{ name: string; log: () => void }> = [];
+  logger.debug(`Running processors...`);
   const pluginPromises = allPlugins.map(async (plugin) => {
     if (!plugin.processor) return;
     const timestamp = Date.now();
@@ -141,7 +212,6 @@ async function runProcessorPlugins(props: {
     await plugin.processor({
       $,
       Bun,
-      makePage,
       logger: pluginLogger,
       config: props.config,
       heads: props.heads,
@@ -162,7 +232,7 @@ async function runProcessorPlugins(props: {
     pluginDoneLogs.push({
       name: plugin.name,
       log: () => {
-        pluginLogger.log(`Done in ${doneTimestamp}ms.`);
+        pluginLogger.debug(`Done in ${doneTimestamp}ms.`);
       },
     });
   });
@@ -172,23 +242,4 @@ async function runProcessorPlugins(props: {
   pluginDoneLogs.forEach(({ log }) => {
     log();
   });
-}
-
-function makePage(props: {
-  title: string;
-  description: string;
-  path: string;
-  template: string;
-  data: any;
-  html: string;
-}): PluginPageType {
-  return {
-    title: props.title,
-    description: props.description,
-    path: props.path,
-    template: props.template || "default",
-    type: "dynamic",
-    data: props.data,
-    html: props.html,
-  };
 }
