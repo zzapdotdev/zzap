@@ -2,7 +2,7 @@
   "name": "with-base-path",
   "scripts": {
     "dev": "bun zzap watch --port 1337",
-    "build": "NODE_ENV=production zzap build"
+    "build": "zzap build"
   },
   "devDependencies": {
     "react": "18.2.0",

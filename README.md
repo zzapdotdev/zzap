@@ -7,6 +7,7 @@
   - [x] Tailwind
 - [x] index.tsx loader.
 - [ ] feat: dynamic pages
+- [ ] reach out to Bun because I can't use --minify
 
 # Features
 

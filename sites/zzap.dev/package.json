@@ -4,7 +4,8 @@
   "authors": "René-Pier Deshaies-Géllinas",
   "scripts": {
     "dev": "zzap watch --port 3000 --debug",
-    "build": "NODE_ENV=production zzap build"
+    "start": "zzap start --port 3000",
+    "build": "zzap build"
   },
   "dependencies": {
     "@docsearch/js": "3",

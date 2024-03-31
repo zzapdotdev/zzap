@@ -1,4 +1,10 @@
+import type { Root } from "react-dom/client";
+import { getLogger } from "./src/domains/logging/getLogger";
+
 export type { PageType } from "./src/domains/page/ZzapPageBuilder";
+
+const logger = getLogger("client");
+let reactRoot: Root;
 
 export const ZzapClient = {
   isBrowser: typeof window !== "undefined",
@@ -10,10 +16,50 @@ export const ZzapClient = {
     const ReactDOMClient = await import("react-dom/client");
     const hydrateRoot = ReactDOMClient.hydrateRoot;
 
-    const root = document.querySelector("#zzap-root");
+    const zzapRoot = document.querySelector("#zzap-root");
 
-    if (root) {
-      hydrateRoot(root, <RootComponent {...window.__zzap.props} />);
+    if (zzapRoot) {
+      reactRoot = hydrateRoot(
+        zzapRoot,
+        <RootComponent {...window.__zzap.props} />,
+      );
+    } else {
+      logger.error("No #zzap-root element found");
+    }
+
+    const command = zzapRoot?.getAttribute("data-zzap-command");
+    if (command === "watch") {
+      var ws = new WebSocket(`ws://${location.host}`);
+
+      ws.onopen = function () {
+        logger.log("Connected to dev server");
+      };
+
+      ws.onmessage = async function (event) {
+        if (event.data === "zzap:reload") {
+          logger.log("Change detected");
+
+          const response = await fetch(
+            `/__zzap/data/${location.pathname}/props.json`,
+          );
+          const props = await response.json();
+
+          const propsHaveChanged =
+            JSON.stringify(props) !== JSON.stringify(window.__zzap.props);
+
+          if (propsHaveChanged) {
+            logger.log("Props have changed, re-rendering...");
+            reactRoot.render(<RootComponent {...props} />);
+          } else {
+            logger.log("Props have not changed, reloading...");
+            window.location.reload();
+          }
+        }
+      };
+
+      ws.onclose = function () {
+        logger.log("Disconnected from dev server");
+      };
     }
   },
   getTheme() {

@@ -19,7 +19,7 @@
     "major": "npm version major"
   },
   "dependencies": {
-    "bun": "1.0.35",
+    "bun": "1.0.36",
     "markdown-it": "14.1.0",
     "js-yaml": "4.1.0",
     "zod": "^3.22.4",
