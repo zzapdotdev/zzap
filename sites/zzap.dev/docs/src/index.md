@@ -59,7 +59,7 @@ Est eu occaecat non anim ex nisi labore fugiat cillum Lorem ullamco. Nostrud exe
 **Install zzap**
 
 ```sh
-$ bun install zzap
+bun install zzap
 ```
 
 ---

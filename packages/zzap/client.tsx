@@ -98,7 +98,6 @@ export const ZzapClient = {
      * Theme id from https://shiki.matsu.io/themes
      */
     theme: string;
-
     selector: string;
   }) {
     if (!this.inBrowser) {
