@@ -9,6 +9,11 @@ let reactRoot: Root;
 let latestUsedShikiProps: Parameters<typeof ZzapClient.useShiki>[0] | undefined;
 export const ZzapClient = {
   inBrowser: typeof window !== "undefined",
+  async whenInBrowser(callback: () => Promise<void>) {
+    if (this.inBrowser) {
+      await callback();
+    }
+  },
   async interactive(RootComponent: any) {
     if (!this.inBrowser) {
       return;
@@ -97,7 +102,7 @@ export const ZzapClient = {
     selector: string;
   }) {
     if (!this.inBrowser) {
-      return;
+      return undefined;
     }
 
     latestUsedShikiProps = props;
