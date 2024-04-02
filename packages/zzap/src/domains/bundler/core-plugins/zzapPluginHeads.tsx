@@ -4,7 +4,7 @@ export const zzapPluginHeads = definePlugin({
   plugin() {
     return {
       name: "core-heads",
-      async loader() {
+      async onBuild() {
         return {
           heads: [
             <style
@@ -32,7 +32,7 @@ const zzapStyles = `
 
 #zzap-root[data-zzap-shiki="true"] pre {
   opacity: 1;
-  animation: fadein 0.3s;
+  animation: fadein 0.3s ease-in-out;
 }
 
 @keyframes fadein {

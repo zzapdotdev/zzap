@@ -13,31 +13,28 @@ export const PageBuilder = {
   async fromMarkdown(props: {
     config: ZzapConfigType;
     path: string;
+    filePath: string;
     markdown: string;
-  }): Promise<Array<PluginPageType<"markdown">>> {
+  }): Promise<Array<PluginPageType>> {
     const frontmatterRegex = /---\n(.*?)\n---/s;
     const frontMatter = props.markdown.match(frontmatterRegex)?.[1];
     const data: {
       title?: string;
       description?: string;
-      template?: any;
-
       [key: string]: any;
     } = yaml.load(frontMatter || "") || {};
     const {
       title: frontmatterTitle,
       description: frontmatterDescription,
-      template: frontmatterTemplate,
-
       ...rest
     } = data;
     const markdown = props.markdown.replace(frontmatterRegex, "");
 
-    const pages: Array<PluginPageType<"markdown">> = [];
+    const pages: Array<PluginPageType> = [];
     const documents: Array<DocumentType> = [];
-    const fileName = props.path.split("/").pop();
+    const fileName = props.filePath.split("/").pop();
 
-    const shouldExplode = fileName?.startsWith("[") && fileName?.endsWith("]");
+    const shouldExplode = fileName === "!index.md";
 
     if (!shouldExplode) {
       documents.push({
@@ -108,11 +105,8 @@ export const PageBuilder = {
     );
 
     renderedDocuments.forEach((renderedDocument) => {
-      const template = frontmatterTemplate || "default";
-
-      const page: PluginPageType<"markdown"> = {
+      const page: PluginPageType = {
         type: "markdown",
-        template: template,
         title: renderedDocument.title,
         description: renderedDocument.description,
         data: {
@@ -141,22 +135,20 @@ type RenderedDocumentType = {
   description: string;
 };
 
-export type PluginPageType<TTemplateType = string> = {
+export type PluginPageType = {
   type: "markdown" | "dynamic";
   title: string;
   description: string;
   path: string;
-  template?: TTemplateType | "default";
   data?: any;
   html?: string;
 };
 
-export type PageType<TTemplateType = string> = {
+export type PageType = {
   type: "markdown" | "dynamic";
   title: string;
   description: string;
   path: string;
-  template: TTemplateType | "default";
   data?: any;
   html?: string;
   sitemap: SitemapItemType[];

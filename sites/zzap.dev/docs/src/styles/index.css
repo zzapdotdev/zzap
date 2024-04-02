@@ -1,0 +1,53 @@
+body {
+  overflow-y: scroll;
+}
+
+/**
+ * Pico Override
+ */
+
+html[data-zzap-theme="dark"] pre code {
+  background: #333333;
+}
+
+/* Docsearch */
+
+#docsearch button {
+  display: none;
+}
+
+/* Copy Code*/
+
+.zzap-code-wrapper {
+  position: relative;
+}
+
+.zzap-code-wrapper .zzap-copy-code-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.5rem;
+  color: var(--pico-color);
+  border-radius: 0 0 0 0.25rem;
+  cursor: pointer;
+  opacity: 0;
+  background-color: var(--pico-background-color);
+  transition: opacity 100ms ease-in-out;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.zzap-code-wrapper:hover .zzap-copy-code-button {
+  opacity: 1;
+}
+
+.zzap-code-wrapper .zzap-copy-code-button:before {
+  content: "Copy";
+}
+
+.zzap-code-wrapper .zzap-copy-code-button.copied:before {
+  content: "Copied";
+}

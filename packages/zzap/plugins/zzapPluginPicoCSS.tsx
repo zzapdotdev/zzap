@@ -14,7 +14,7 @@ export const zzapPluginPicoCSS = definePlugin({
     const fileName = `pico${conditionalFileName}${classlessFileName}${colorFileName}.css`;
     return {
       name: "pico-css",
-      async loader(ctx) {
+      async onBuild(ctx) {
         const cssFile = Bun.file(`${props.module}/css/${fileName}`);
         await Bun.write(ctx.config.outputDir + "/pico.css", cssFile);
 

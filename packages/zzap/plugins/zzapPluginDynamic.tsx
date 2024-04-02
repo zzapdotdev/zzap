@@ -13,7 +13,7 @@ export const zzapPluginDynamic = definePlugin({
   }) {
     return {
       name: `dynamic-${props.name}`,
-      async loader(ctx) {
+      async onBuild(ctx) {
         try {
           const result = await props.loader(ctx);
           return {

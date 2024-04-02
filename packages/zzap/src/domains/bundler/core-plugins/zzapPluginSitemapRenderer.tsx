@@ -4,7 +4,7 @@ export const zzapPluginSitemapRenderer = definePlugin({
   plugin() {
     return {
       name: "core-sitemap",
-      async processor(ctx) {
+      async onRender(ctx) {
         const siteMap = `
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${ctx.sitemap
           .map((siteMapItem) => {

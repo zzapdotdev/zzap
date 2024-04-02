@@ -12,11 +12,10 @@ export const zzapPluginPageRenderer = definePlugin({
   plugin() {
     return {
       name: "core-page",
-      async processor(ctx) {
+      async onRender(ctx) {
         const promises = ctx.pages.map(async (page) => {
           const clientPage: PageType = {
             ...page,
-            template: page.template || "default",
             titleWithSiteTitle: `${page.title} • ${ctx.config.title}`,
             sitemap: ctx.sitemap,
           };
@@ -36,7 +35,7 @@ export const zzapPluginPageRenderer = definePlugin({
             <div
               id="zzap-root"
               data-zzap-shiki="false"
-              data-zzap-command={ctx.config.command}
+              data-zzap-dev={ctx.config.isDev ? "true" : "false"}
             >
               {content}
             </div>
@@ -90,7 +89,7 @@ export const zzapPluginPageRenderer = definePlugin({
               `${ctx.config.outputDir}/${page.path}/index.html`,
               html,
             );
-            if (!ctx.config.isProduction) {
+            if (ctx.config.isDev) {
               await Bun.write(
                 `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
                 JSON.stringify(content.props),
@@ -101,7 +100,7 @@ export const zzapPluginPageRenderer = definePlugin({
               `${ctx.config.outputDir}/${page.path}/index.html`,
               html,
             );
-            if (!ctx.config.isProduction) {
+            if (ctx.config.isDev) {
               await Bun.write(
                 `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
                 JSON.stringify(content.props),

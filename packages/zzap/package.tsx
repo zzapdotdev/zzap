@@ -11,8 +11,6 @@ const { positionals } = parseArgs({
 const command = positionals[2];
 const logger = getLogger("lib");
 
-logger.log(`Running "${command}"`);
-
 if (command === "dev") {
   const ZzapCLITask = $`bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node --watch`;
   const typeDefinitionTask = $`tsc --watch --outDir ./dist --preserveWatchOutput`;

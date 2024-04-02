@@ -4,7 +4,7 @@ export const zzapPluginTailwind = definePlugin({
   plugin() {
     return {
       name: "tailwind",
-      async loader(ctx) {
+      async onBuild(ctx) {
         await ctx.$`tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/styles/zzap-plugin-tailwind.css`;
 
         return {

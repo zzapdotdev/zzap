@@ -6,10 +6,16 @@ export type { PageType } from "./src/domains/page/ZzapPageBuilder";
 const logger = getLogger("client");
 let reactRoot: Root;
 
+let latestUsedShikiProps: Parameters<typeof ZzapClient.useShiki>[0] | undefined;
 export const ZzapClient = {
-  isBrowser: typeof window !== "undefined",
+  inBrowser: typeof window !== "undefined",
+  async whenInBrowser(callback: () => Promise<void>) {
+    if (this.inBrowser) {
+      await callback();
+    }
+  },
   async interactive(RootComponent: any) {
-    if (!this.isBrowser) {
+    if (!this.inBrowser) {
       return;
     }
 
@@ -27,21 +33,23 @@ export const ZzapClient = {
       logger.error("No #zzap-root element found");
     }
 
-    const command = zzapRoot?.getAttribute("data-zzap-command");
-    if (command === "watch") {
+    const isDev = zzapRoot?.getAttribute("data-zzap-dev");
+    if (isDev === "true") {
       var ws = new WebSocket(`ws://${location.host}`);
 
-      ws.onopen = function () {
+      ws.onopen = () => {
         logger.log("Connected to dev server");
       };
 
-      ws.onmessage = async function (event) {
+      ws.onmessage = async (event) => {
         if (event.data === "zzap:reload") {
           logger.log("Change detected");
 
-          const response = await fetch(
-            `/__zzap/data/${location.pathname}/props.json`,
-          );
+          const propsJSONPath =
+            location.pathname === "/"
+              ? `/__zzap/data/props.json`
+              : `/__zzap/data${location.pathname}/props.json`;
+          const response = await fetch(propsJSONPath);
           const props = await response.json();
 
           const propsHaveChanged =
@@ -50,6 +58,10 @@ export const ZzapClient = {
           if (propsHaveChanged) {
             logger.log("Props have changed, re-rendering...");
             reactRoot.render(<RootComponent {...props} />);
+
+            if (latestUsedShikiProps) {
+              this.useShiki(latestUsedShikiProps);
+            }
           } else {
             logger.log("Props have not changed, reloading...");
             window.location.reload();
@@ -57,13 +69,17 @@ export const ZzapClient = {
         }
       };
 
-      ws.onclose = function () {
+      ws.onclose = () => {
         logger.log("Disconnected from dev server");
+      };
+
+      ws.onerror = (error) => {
+        logger.error(`WebSocket error: ${error}`);
       };
     }
   },
   getTheme() {
-    if (!this.isBrowser) {
+    if (!this.inBrowser) {
       return;
     }
     const currentTheme =
@@ -71,33 +87,39 @@ export const ZzapClient = {
     return currentTheme as "light" | "dark";
   },
   setTheme(theme: "light" | "dark") {
-    if (!this.isBrowser) {
+    if (!this.inBrowser) {
       return;
     }
     document.documentElement.setAttribute("data-zzap-theme", theme);
     localStorage.setItem("zzap-theme", theme);
   },
-  async shiki(props?: {
+  async useShiki(props: {
     /**
      * Theme id from https://shiki.matsu.io/themes
      */
     theme: string;
+    selector: string;
   }) {
-    if (!this.isBrowser) {
-      return;
+    if (!this.inBrowser) {
+      return undefined;
     }
+
+    latestUsedShikiProps = props;
     const zzapRoot = document.querySelector("#zzap-root");
 
     const shikiCDN = "https://esm.sh/shiki@1.0.0";
     const { codeToHtml } = await import(shikiCDN);
-    const nodes = document.querySelectorAll("pre");
+
     const promises: Promise<void>[] = [];
+
+    const nodes = document.querySelectorAll(props?.selector);
     nodes.forEach((node) => {
-      promises.push(colorize(node));
+      promises.push(colorize(node as HTMLPreElement));
     });
 
-    Promise.all(promises);
+    await Promise.all(promises);
     zzapRoot?.setAttribute("data-zzap-shiki", "true");
+    return document.querySelectorAll(props?.selector);
 
     async function colorize(node: HTMLPreElement) {
       const lang = node.querySelector("code")?.className;

@@ -4,7 +4,7 @@ export const zzapPluginScripts = definePlugin({
   plugin() {
     return {
       name: "core-script",
-      async loader(ctx) {
+      async onBuild(ctx) {
         const extension = await getExtension();
 
         if (!extension) {
@@ -15,7 +15,7 @@ export const zzapPluginScripts = definePlugin({
           entrypoints: [ctx.config.srcDir + `/index.${extension}`],
           target: "browser",
           format: "esm",
-          minify: ctx.config.isProduction,
+          minify: !ctx.config.isDev,
           outdir: ctx.config.outputDir + "/__zzap",
         });
 
