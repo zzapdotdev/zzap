@@ -16,6 +16,7 @@ export const ZzapCommander = {
     debug: boolean | undefined;
   }) {
     await this.clean({ config: props.config, debug: props.debug });
+    await ZzapBundler.prepareBuild({ config: props.config });
     await ZzapBundler.build({ config: props.config, paths: props.paths });
   },
   async watch(props: {
@@ -23,10 +24,10 @@ export const ZzapCommander = {
     config: ZzapConfigType;
     debug: boolean | undefined;
   }) {
-    await this.clean({ config: props.config, debug: props.debug });
     let websocket: ServerWebSocket<unknown> | undefined;
     let generatingPromise: ReturnType<typeof $> | undefined;
 
+    await this.clean({ config: props.config, debug: props.debug });
     await ZzapBundler.prepareBuild({ config: props.config });
 
     const zzapWatcher: Parameters<typeof watch>["1"] = (_event, filename) => {
