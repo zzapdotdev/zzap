@@ -1,6 +1,9 @@
-export const { getLogger, enableDebug } = makeGetLogger("zzap", {
-  console,
-});
+export const { getLogger, enableDebug: enableDebugLogs } = makeGetLogger(
+  "zzap",
+  {
+    console,
+  },
+);
 
 function makeGetLogger(appName: string, deps: { console: Console }) {
   let includeDebugStatements = false;

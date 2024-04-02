@@ -4,7 +4,7 @@ export const zzapPluginCommands = definePlugin({
   plugin() {
     return {
       name: "core-commands",
-      async loader(ctx) {
+      async onBuild(ctx) {
         const commandPromises = ctx.config.commands.map(
           async (commandProps) => {
             ctx.logger.log(`  ${commandProps.command}`);

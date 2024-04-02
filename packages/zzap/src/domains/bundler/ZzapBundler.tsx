@@ -7,6 +7,7 @@ import {
   type PluginPageType,
   type SitemapItemType,
 } from "../page/ZzapPageBuilder";
+import type { ZzapPluginType } from "../plugin/definePlugin";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
 import { zzapPluginHeads } from "./core-plugins/zzapPluginHeads";
 import { zzapPluginPageRenderer } from "./core-plugins/zzapPluginPageRenderer";
@@ -18,89 +19,151 @@ import { zzapPluginSitemapRenderer } from "./core-plugins/zzapPluginSitemapRende
 const logger = getLogger();
 
 export const ZzapBundler = {
-  async generate(props: { config: ZzapConfigType; paths?: string[] }) {
-    const buildingLabel = !props.paths
-      ? `Building ${props.config.title}...`
-      : `Rebuilding "${props.paths.join(", ")}"`;
-    logger.log(buildingLabel);
+  async prepareBuild(props: { config: ZzapConfigType }) {
+    await runPluginsWithLifecycle({
+      config: props.config,
+      loggerPrefix: "prepare",
+      async onRun({ plugin, logger }) {
+        if (plugin.onPrepare) {
+          await plugin.onPrepare?.({
+            $,
+            Bun,
+            logger: logger,
+            config: props.config,
+          });
+          return true;
+        }
+      },
+    });
+  },
+  async build(props: { config: ZzapConfigType; paths: string | undefined }) {
     const timetamp = Date.now();
+    const pathFromProps = props.paths?.split(",").map((path) => path.trim());
 
-    const { heads, scripts } = await runLoaderPlugins({
+    if (!pathFromProps) {
+      logger.log(`Building ${props.config.title}...`);
+    } else {
+      logger.log(`Rebuilding... (${props.paths})`);
+    }
+    const heads: Array<JSX.Element> = [];
+    const scripts: Array<JSX.Element> = [];
+
+    await runPluginsWithLifecycle({
+      config: props.config,
+      loggerPrefix: "build",
+      async onRun({ logger, plugin }) {
+        if (plugin.onBuild) {
+          const result = await plugin.onBuild?.({
+            $,
+            Bun,
+            logger: logger,
+            config: props.config,
+          });
+          if (result) {
+            heads.push(...(result.heads || []));
+            scripts.push(...(result.scripts || []));
+          }
+          return true;
+        }
+      },
+    });
+
+    const paths =
+      pathFromProps ||
+      (await getPaths({
+        config: props.config,
+      }));
+
+    const { pages, sitemap } = await getPagesAndSitemap({
+      paths: paths,
       config: props.config,
     });
 
-    const pages = new Map<string, PluginPageType>();
-
-    const staticPaths = await getPaths({
+    await runPluginsWithLifecycle({
       config: props.config,
-    });
-    const paths = [...staticPaths, ...(props.paths || [])];
-
-    const promises = paths.map(async (path) => {
-      // Check for Markdown files
-      const filePath = props.config.srcDir + path + ".md";
-      const indexFilePath = props.config.srcDir + path + "/index.md";
-      const pathForExploded = path.split("/").slice(0, -1).join("/");
-      const explodeFilePath = props.config.srcDir + pathForExploded + "/!.md";
-
-      let file = Bun.file(filePath);
-      let exists = await file.exists();
-
-      if (!exists) {
-        file = Bun.file(indexFilePath);
-        exists = await file.exists();
-      }
-
-      if (!exists) {
-        file = Bun.file(explodeFilePath);
-        exists = await file.exists();
-      }
-
-      if (exists) {
-        const pageMarkdown = await file.text();
-        const markdownPages = await PageBuilder.fromMarkdown({
-          config: props.config as any,
-          path: path,
-          markdown: pageMarkdown,
-        });
-
-        markdownPages.forEach((page) => {
-          pages.set(page.path, page);
-        });
-      }
-    });
-    await Promise.all(promises);
-
-    const siteMap: Array<SitemapItemType> = Array.from(pages)
-      .map(([_path, page]) => {
-        return {
-          path: page.path,
-          title: page.title,
-        };
-      })
-      .sort((a, b) => {
-        const numberOfSlugsA = a.path.split("/").length;
-        const numberOfSlugsB = b.path.split("/").length;
-
-        if (numberOfSlugsA < numberOfSlugsB) return -1;
-        if (numberOfSlugsA > numberOfSlugsB) return 1;
-
-        return 0;
-      });
-
-    await runProcessorPlugins({
-      config: props.config,
-      heads: heads,
-      scripts: scripts,
-      pages: Array.from(pages.values()),
-      sitemap: siteMap,
+      loggerPrefix: "render",
+      async onRun({ plugin, logger }) {
+        if (plugin.onRender) {
+          await plugin.onRender({
+            $,
+            Bun,
+            logger: logger,
+            config: props.config,
+            heads: heads,
+            scripts: scripts,
+            pages: Array.from(pages.values()),
+            sitemap: sitemap,
+          });
+          return true;
+        }
+      },
     });
 
-    logger.log(
-      `Finished building ${props.config.title} in ${Date.now() - timetamp}ms.`,
-    );
+    logger.log(`Finished in ${Date.now() - timetamp}ms.`);
   },
 };
+
+async function getPagesAndSitemap(props: {
+  paths: string[];
+  config: ZzapConfigType;
+}) {
+  const pages = new Map<string, PluginPageType>();
+  const promises = props.paths.map(async (path) => {
+    // Check for Markdown files
+    let filePath = props.config.srcDir + path + ".md";
+
+    let file = Bun.file(filePath);
+    let exists = await file.exists();
+
+    if (!exists) {
+      filePath = props.config.srcDir + path + "/index.md";
+      file = Bun.file(filePath);
+      exists = await file.exists();
+    }
+
+    if (!exists) {
+      const pathForExploded = path.split("/").slice(0, -1).join("/");
+      filePath = props.config.srcDir + pathForExploded + "/!index.md";
+
+      file = Bun.file(filePath);
+      exists = await file.exists();
+    }
+
+    if (exists) {
+      const pageMarkdown = await file.text();
+      const markdownPages = await PageBuilder.fromMarkdown({
+        config: props.config as any,
+        path: path,
+        filePath,
+        markdown: pageMarkdown,
+      });
+
+      markdownPages.forEach((page) => {
+        pages.set(page.path, page);
+      });
+    }
+  });
+  await Promise.all(promises);
+
+  const siteMap: Array<SitemapItemType> = Array.from(pages)
+    .map(([_path, page]) => {
+      return {
+        path: page.path,
+        title: page.title,
+      };
+    })
+    .sort((a, b) => {
+      const numberOfSlugsA = a.path.split("/").length;
+      const numberOfSlugsB = b.path.split("/").length;
+
+      if (numberOfSlugsA < numberOfSlugsB) return -1;
+      if (numberOfSlugsA > numberOfSlugsB) return 1;
+
+      return 0;
+    });
+
+  return { pages, sitemap: siteMap };
+}
 
 async function getPaths(props: { config: ZzapConfigType }) {
   const paths: Array<string> = [];
@@ -131,113 +194,52 @@ async function getPaths(props: { config: ZzapConfigType }) {
   return paths;
 }
 
-async function runLoaderPlugins(props: { config: ZzapConfigType }) {
-  const heads: Array<JSX.Element> = [];
-  const scripts: Array<JSX.Element> = [];
-
+async function runPluginsWithLifecycle(props: {
+  config: ZzapConfigType;
+  loggerPrefix: string;
+  onRun(props: {
+    plugin: ZzapPluginType;
+    logger: ReturnType<typeof getLogger>;
+  }): Promise<true | undefined>;
+}) {
   const allPlugins = [
     zzapPluginHeads(),
     zzapPluginScripts(),
     zzapPluginCommands(),
     zzapPluginPublicDir(),
     zzapPluginPublicFiles(),
-
-    ...props.config.plugins,
-  ];
-  const pluginDoneLogs: Array<{ name: string; log: () => void }> = [];
-  logger.debug(`Running loaders...`);
-  const pluginPromises = allPlugins.map(async (plugin) => {
-    if (!plugin.loader) return;
-    const timestamp = Date.now();
-    const pluginLogger = getLogger(`[loader] ▶ ${plugin.name}`);
-    const loaderResult = await plugin.loader({
-      $,
-      Bun,
-      logger: pluginLogger,
-      config: props.config,
-    });
-    const newHeads = loaderResult?.heads || [];
-    const newScripts = loaderResult?.scripts || [];
-    heads.push(...newHeads);
-    scripts.push(...newScripts);
-
-    const doneTimestamp = Date.now() - timestamp;
-
-    pluginDoneLogs.sort((a, b) => {
-      if (a.name.startsWith("core-") && b.name.startsWith("core-"))
-        return a.name.localeCompare(b.name);
-
-      if (a.name.startsWith("core-")) return -1;
-      if (b.name.startsWith("core-")) return 1;
-      return a.name.localeCompare(b.name);
-    });
-    pluginDoneLogs.push({
-      name: plugin.name,
-      log: () => {
-        pluginLogger.debug(`Done in ${doneTimestamp}ms.`);
-      },
-    });
-  });
-
-  await Promise.all(pluginPromises);
-
-  pluginDoneLogs.forEach(({ log }) => {
-    log();
-  });
-
-  return {
-    heads,
-    scripts,
-  };
-}
-
-async function runProcessorPlugins(props: {
-  config: ZzapConfigType;
-  heads: Array<JSX.Element>;
-  scripts: Array<JSX.Element>;
-  pages: Array<PluginPageType>;
-  sitemap: Array<SitemapItemType>;
-}) {
-  const allPlugins = [
     zzapPluginSitemapRenderer(),
     zzapPluginPageRenderer(),
     ...props.config.plugins,
   ];
   const pluginDoneLogs: Array<{ name: string; log: () => void }> = [];
-  logger.debug(`Running processors...`);
+
   const pluginPromises = allPlugins.map(async (plugin) => {
-    if (!plugin.processor) return;
     const timestamp = Date.now();
-    const pluginLogger = getLogger(`[processor] ▶ ${plugin.name}`);
-    await plugin.processor({
-      $,
-      Bun,
-      logger: pluginLogger,
-      config: props.config,
-      heads: props.heads,
-      scripts: props.scripts,
-      pages: props.pages,
-      sitemap: props.sitemap,
-    });
-    const doneTimestamp = Date.now() - timestamp;
+    const pluginLogger = getLogger(`[${props.loggerPrefix}] ▶ ${plugin.name}`);
 
-    pluginDoneLogs.sort((a, b) => {
-      if (a.name.startsWith("core-") && b.name.startsWith("core-"))
-        return a.name.localeCompare(b.name);
-
-      if (a.name.startsWith("core-")) return -1;
-      if (b.name.startsWith("core-")) return 1;
-      return a.name.localeCompare(b.name);
-    });
-    pluginDoneLogs.push({
-      name: plugin.name,
-      log: () => {
-        pluginLogger.debug(`Done in ${doneTimestamp}ms.`);
-      },
-    });
+    const ran = await props.onRun({ plugin, logger });
+    if (ran) {
+      const doneTimestamp = Date.now() - timestamp;
+      pluginDoneLogs.push({
+        name: plugin.name,
+        log: () => {
+          pluginLogger.debug(`Done in ${doneTimestamp}ms.`);
+        },
+      });
+    }
   });
 
   await Promise.all(pluginPromises);
+
+  pluginDoneLogs.sort((a, b) => {
+    if (a.name.startsWith("core-") && b.name.startsWith("core-"))
+      return a.name.localeCompare(b.name);
+
+    if (a.name.startsWith("core-")) return -1;
+    if (b.name.startsWith("core-")) return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   pluginDoneLogs.forEach(({ log }) => {
     log();

@@ -43,6 +43,10 @@ export default defineConfig({
       ),
       name: "styles/docsearch.css",
     },
+    {
+      path: path.join(__dirname, "./src/styles/index.css"),
+      name: "styles/index.css",
+    },
   ],
   deps: {
     "react-dom/server": Server,

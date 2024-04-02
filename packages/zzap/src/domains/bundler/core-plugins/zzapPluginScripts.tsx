@@ -4,7 +4,7 @@ export const zzapPluginScripts = definePlugin({
   plugin() {
     return {
       name: "core-script",
-      async loader(ctx) {
+      async onBuild(ctx) {
         const extension = await getExtension();
 
         if (!extension) {

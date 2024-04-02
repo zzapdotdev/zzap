@@ -12,7 +12,7 @@ export const zzapPluginPageRenderer = definePlugin({
   plugin() {
     return {
       name: "core-page",
-      async processor(ctx) {
+      async onRender(ctx) {
         const promises = ctx.pages.map(async (page) => {
           const clientPage: PageType = {
             ...page,

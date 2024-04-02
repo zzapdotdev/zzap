@@ -7,7 +7,8 @@ import type { PluginPageType, SitemapItemType } from "../page/ZzapPageBuilder";
 export function definePlugin<TArgs extends any[]>(props: {
   plugin(...args: TArgs): {
     name: string;
-    loader?(ctx: ZzapPluginContextType): Promise<
+    onPrepare?(ctx: ZzapPluginContextType): Promise<void>;
+    onBuild?(ctx: ZzapPluginContextType): Promise<
       | {
           heads?: Array<JSX.Element>;
           scripts?: Array<JSX.Element>;
@@ -15,7 +16,7 @@ export function definePlugin<TArgs extends any[]>(props: {
       | undefined
       | void
     >;
-    processor?(
+    onRender?(
       ctx: ZzapPluginContextType & {
         heads: Array<JSX.Element>;
         scripts: Array<JSX.Element>;
@@ -38,3 +39,4 @@ export type ZzapPluginContextType = {
 
 export type ZzapDefinePluginType = ReturnType<typeof definePlugin>;
 export type ZzapPluginType = ReturnType<ReturnType<typeof definePlugin>>;
+export type ZzapPluginLifeCycleType = Exclude<keyof ZzapPluginType, "name">;

@@ -13,6 +13,7 @@ export const PageBuilder = {
   async fromMarkdown(props: {
     config: ZzapConfigType;
     path: string;
+    filePath: string;
     markdown: string;
   }): Promise<Array<PluginPageType>> {
     const frontmatterRegex = /---\n(.*?)\n---/s;
@@ -31,9 +32,9 @@ export const PageBuilder = {
 
     const pages: Array<PluginPageType> = [];
     const documents: Array<DocumentType> = [];
-    const fileName = props.path.split("/").pop();
+    const fileName = props.filePath.split("/").pop();
 
-    const shouldExplode = fileName?.startsWith("!");
+    const shouldExplode = fileName === "!index.md";
 
     if (!shouldExplode) {
       documents.push({
