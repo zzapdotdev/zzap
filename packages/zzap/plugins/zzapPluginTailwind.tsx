@@ -1,11 +1,12 @@
+import path from "path";
 import { definePlugin } from "../src/domains/plugin/definePlugin";
-
 export const zzapPluginTailwind = definePlugin({
-  plugin() {
+  plugin(props: { filePath: string }) {
     return {
       name: "tailwind",
       async onBuild(ctx) {
-        await ctx.$`tailwindcss -i ./tailwind.css -o ./docs/.zzap/dist/styles/zzap-plugin-tailwind.css`;
+        const filepath = path.join(ctx.config.rootDir, props.filePath);
+        await ctx.$`ls && tailwindcss -i ${filepath} -o ./docs/.zzap/dist/styles/zzap-plugin-tailwind.css`;
 
         return {
           heads: [
