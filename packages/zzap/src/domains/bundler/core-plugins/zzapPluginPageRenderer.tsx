@@ -100,6 +100,7 @@ export const zzapPluginPageRenderer = definePlugin({
               `${ctx.config.outputDir}/${page.path}/index.html`,
               html,
             );
+
             if (ctx.config.isDev) {
               await Bun.write(
                 `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,

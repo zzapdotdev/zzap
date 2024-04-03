@@ -235,20 +235,6 @@ export default function App(props: { page: PageType }) {
   }
 
   function renderContent() {
-    const contentByTemplate: Record<string, React.ReactNode> = {
-      "404": (
-        <>
-          <button
-            className=" contrast  outline tw-flex tw-gap-2 tw-px-4 tw-py-2"
-            onClick={handleSearchClick}
-          >
-            <SearchIcon className="tw-point tw-h-6 tw-w-6"></SearchIcon>
-            <span>Search a page</span>
-          </button>
-        </>
-      ),
-    };
-
     return (
       <div
         className={clsx({
@@ -273,21 +259,58 @@ export default function App(props: { page: PageType }) {
                 </>
               );
             },
+            ["404"](templateProps: TemplateProps) {
+              return (
+                <>
+                  <h1>Page Not Found</h1>
+                  <p>
+                    The page you are looking for does not exist, but you may use
+                    the search button below to find what you are looking for!
+                  </p>
+                  <button
+                    className=" contrast  outline tw-flex tw-gap-2 tw-px-4 tw-py-2"
+                    onClick={handleSearchClick}
+                  >
+                    <SearchIcon className="tw-point tw-h-6 tw-w-6"></SearchIcon>
+                    <span>Search a page</span>
+                  </button>
+                </>
+              );
+            },
             releases(
               templateProps: TemplateProps<{ releases: Array<GitHubReleases> }>,
             ) {
               const releases = templateProps.page.data.releases;
               return (
                 <div>
-                  <ul>
+                  <h1>Latest Releases</h1>
+                  <div className="tw-grid tw-grid-cols-3 tw-gap-2">
                     {releases.map((release) => {
                       return (
-                        <li key={release.id}>
-                          <a href={`/releases/${release.id}`}>{release.name}</a>
-                        </li>
+                        <div key={release.id} className="">
+                          <article>
+                            <h3>{release.name}</h3>
+                            <div>Body</div>
+                            <div>
+                              <a href={`/releases/${release.id}`}>Read more</a>
+                            </div>
+                          </article>
+                        </div>
                       );
                     })}
-                  </ul>
+                  </div>
+
+                  <p>
+                    Other releases can be found{" "}
+                    <a
+                      href="https://github.com/zzapdotdev/zzap/releases"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      here
+                    </a>
+                    .
+                  </p>
                 </div>
               );
             },
@@ -296,11 +319,13 @@ export default function App(props: { page: PageType }) {
               return (
                 <div>
                   <h1>{release.name}</h1>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: md.render(release.body),
-                    }}
-                  ></div>
+                  {release.body && (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: md.render(release.body),
+                      }}
+                    ></div>
+                  )}
                 </div>
               );
             },
@@ -321,6 +346,11 @@ export default function App(props: { page: PageType }) {
         <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
           <a href="/guides" className="contrast">
             Guides
+          </a>
+        </li>
+        <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
+          <a href="/releases" className="contrast">
+            Releases
           </a>
         </li>
         <li className={clsx("tw-flex tw-justify-end", pprops.className)}>
