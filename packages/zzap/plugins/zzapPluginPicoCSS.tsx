@@ -1,10 +1,10 @@
-import path from "path";
 import { definePlugin } from "../src/domains/plugin/definePlugin";
 
 export const zzapPluginPicoCSS = definePlugin({
   plugin(props: {
     color: string;
-    modulePath: string;
+    module: string;
+
     conditional?: boolean;
     classless?: boolean;
   }) {
@@ -15,9 +15,7 @@ export const zzapPluginPicoCSS = definePlugin({
     return {
       name: "pico-css",
       async onBuild(ctx) {
-        const modulePath = path.resolve(ctx.config.rootDir, props.modulePath);
-
-        const cssFile = Bun.file(`${modulePath}/css/${fileName}`);
+        const cssFile = Bun.file(`${props.module}/css/${fileName}`);
         await Bun.write(ctx.config.outputDir + "/pico.css", cssFile);
 
         return {
