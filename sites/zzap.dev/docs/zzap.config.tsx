@@ -2,16 +2,16 @@ import React from "react";
 import Server from "react-dom/server";
 import { defineConfig, plugins } from "zzap";
 
+import path from "path";
+
 export default defineConfig({
   title: "zzap.dev",
   plugins: [
-    plugins.tailwind({
-      filePath: "./src/tailwind.css",
-    }),
+    plugins.tailwind(),
     plugins.picoCSS({
       color: "amber",
       conditional: true,
-      modulePath: "../../../node_modules/@picocss/pico",
+      module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
     }),
     // plugins.dynamic({
     //   name: "releases",
@@ -37,11 +37,14 @@ export default defineConfig({
   ],
   publicFiles: [
     {
-      filePath: "../../../node_modules/@docsearch/css/dist/style.css",
+      path: path.join(
+        __dirname,
+        "../../../node_modules/@docsearch/css/dist/style.css",
+      ),
       name: "styles/docsearch.css",
     },
     {
-      filePath: "./src/styles/index.css",
+      path: path.join(__dirname, "./src/styles/index.css"),
       name: "styles/index.css",
     },
   ],

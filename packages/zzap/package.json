@@ -19,7 +19,7 @@
     "major": "npm version major"
   },
   "dependencies": {
-    "bun": "1.1.0",
+    "bun": "1.0.36",
     "markdown-it": "14.1.0",
     "js-yaml": "4.1.0",
     "zod": "^3.22.4",
@@ -28,9 +28,9 @@
   },
   "devDependencies": {
     "typescript": "5.4.3",
-    "@types/bun": "1.0.12",
-    "@types/react": "18.2.74",
-    "@types/react-dom": "18.2.23",
+    "@types/bun": "1.0.10",
+    "@types/react": "18.2.67",
+    "@types/react-dom": "18.2.22",
     "@types/markdown-it": "13.0.7",
     "@types/js-yaml": "4.0.9",
     "@types/lodash": "^4.17.0"

@@ -202,7 +202,7 @@ export default function App(props: { page: PageType }) {
                           className={clsx(
                             "secondary tw-ml-0 tw-rounded-none tw-border-2 tw-py-2 tw-text-sm",
                             {
-                              "tw-border-black tw-font-medium tw-text-black dark:tw-border-white dark:tw-text-white":
+                              "tw-border-black tw-font-medium tw-text-black":
                                 isCurrent,
                               "tw-border-zinc-200 ": !isCurrent,
                             },
