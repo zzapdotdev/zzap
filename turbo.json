@@ -5,6 +5,10 @@
       "persistent": true,
       "cache": false
     },
+    "debug": {
+      "persistent": true,
+      "cache": false
+    },
     "build": {
       "cache": false
     },

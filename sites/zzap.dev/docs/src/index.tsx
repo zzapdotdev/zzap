@@ -14,9 +14,9 @@ import {
   ZzapIconGradient,
 } from "./components/Icons";
 import { sidebars } from "./sidebars";
-import { GitHubReleases } from "./types/Data";
 
 import markdownit from "markdown-it";
+import { GitHubReleases } from "./types/DynamicData";
 const md = markdownit({
   html: true,
   linkify: true,
@@ -28,37 +28,6 @@ ZzapClient.interactive(App);
 ZzapClient.whenInBrowser(async () => {
   injectVercelAnalytics();
   injectVercelSpeedInsights();
-
-  const nodes = await ZzapClient.useShiki({
-    theme: "rose-pine",
-    selector: "pre:has(code)",
-  });
-
-  nodes?.forEach((node) => {
-    const copyCodeButton = document.createElement("div");
-
-    copyCodeButton.innerText = "Copy";
-    copyCodeButton.classList.add("zzap-copy-code-button");
-    copyCodeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-4 tw-h-4">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
-  </svg>
-  `;
-
-    copyCodeButton.onclick = (event) => {
-      navigator.clipboard.writeText(node.textContent || "");
-      copyCodeButton.classList.add("copied");
-
-      setTimeout(() => {
-        copyCodeButton.classList.remove("copied");
-      }, 1000);
-    };
-
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("zzap-code-wrapper");
-    wrapper.appendChild(copyCodeButton);
-    wrapper.appendChild(node.cloneNode(true));
-    node.replaceWith(wrapper);
-  });
 });
 
 export default function App(props: { page: PageType }) {
@@ -69,6 +38,7 @@ export default function App(props: { page: PageType }) {
   const hasSidebar = chapters.length > 0;
 
   useEffect(() => {
+    // algoila
     setupAlgoliaDocSearch();
     async function setupAlgoliaDocSearch() {
       const { default: docsearch } = await import("@docsearch/js");
@@ -81,6 +51,38 @@ export default function App(props: { page: PageType }) {
       });
     }
   }, []);
+
+  useEffect(() => {
+    // shiki
+    (async () => {
+      const nodes = await ZzapClient.useShiki({
+        theme: "rose-pine",
+        selector: "pre:has(code)",
+      });
+
+      nodes?.forEach((node) => {
+        const copyCodeButton = document.createElement("div");
+
+        copyCodeButton.innerText = "Copy";
+        copyCodeButton.classList.add("zzap-copy-code-button");
+        copyCodeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-4 tw-h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+      </svg>
+      `;
+
+        copyCodeButton.onclick = (event) => {
+          navigator.clipboard.writeText(node.textContent || "");
+          copyCodeButton.classList.add("copied");
+
+          setTimeout(() => {
+            copyCodeButton.classList.remove("copied");
+          }, 1000);
+        };
+
+        node.appendChild(copyCodeButton);
+      });
+    })();
+  });
 
   function handleSearchClick() {
     const docSearchButton = document.querySelector(

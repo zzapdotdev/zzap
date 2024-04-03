@@ -7,7 +7,6 @@ export type { PageType } from "./src/domains/page/ZzapPageBuilder";
 const logger = getLogger("client");
 let reactRoot: Root;
 
-let latestUsedShikiProps: Parameters<typeof ZzapClient.useShiki>[0] | undefined;
 export const ZzapClient = {
   inBrowser: typeof window !== "undefined",
   async whenInBrowser(callback: () => Promise<void>) {
@@ -59,10 +58,6 @@ export const ZzapClient = {
           if (propsHaveChanged) {
             logger.log("Props have changed, re-rendering...");
             reactRoot.render(<RootComponent {...props} />);
-
-            if (latestUsedShikiProps) {
-              this.useShiki(latestUsedShikiProps);
-            }
           } else {
             logger.log("Props have not changed, reloading...");
             window.location.reload();
@@ -105,7 +100,6 @@ export const ZzapClient = {
       return undefined;
     }
 
-    latestUsedShikiProps = props;
     const zzapRoot = document.querySelector("#zzap-root");
 
     const shikiCDN = "https://esm.sh/shiki@1.0.0";
@@ -120,16 +114,28 @@ export const ZzapClient = {
 
     await Promise.all(promises);
     zzapRoot?.setAttribute("data-zzap-shiki", "true");
-    return document.querySelectorAll(props?.selector);
+    return document.querySelectorAll(`div[data-zzap-shiki-block="true"]`);
 
     async function colorize(node: HTMLPreElement) {
       const lang = node.querySelector("code")?.className;
-      const nodeText = node.textContent;
-
-      node.outerHTML = await codeToHtml(nodeText, {
+      const code = node.textContent;
+      const html = await codeToHtml(code, {
         lang: lang,
         theme: props?.theme || "github-dark",
       });
+      let existingZzapShiki = node.nextElementSibling as
+        | HTMLDivElement
+        | undefined;
+      if (existingZzapShiki?.getAttribute("data-zzap-shiki-block") === "true") {
+        existingZzapShiki.innerHTML = html;
+        return;
+      } else {
+        node.style.display = "none";
+        const newZzapShiki = document.createElement("div");
+        newZzapShiki.setAttribute("data-zzap-shiki-block", "true");
+        newZzapShiki.innerHTML = html;
+        node.after(newZzapShiki);
+      }
     }
   },
 };

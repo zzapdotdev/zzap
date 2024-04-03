@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run package && bunx turbo dev --filter zzap.dev --filter zzap",
+    "debug": "bun run package && bunx turbo debug --filter zzap.dev --filter zzap",
     "start": "bun run package && bunx turbo start --filter zzap.dev",
     "build": "bun run package && bunx turbo build --log-order grouped",
     "build:zzap.dev": "bun run package && bunx turbo build --filter zzap.dev --log-order grouped",

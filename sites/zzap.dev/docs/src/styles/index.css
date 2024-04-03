@@ -18,11 +18,11 @@ html[data-zzap-theme="dark"] pre code {
 
 /* Copy Code*/
 
-.zzap-code-wrapper {
+div[data-zzap-shiki-block="true"] {
   position: relative;
 }
 
-.zzap-code-wrapper .zzap-copy-code-button {
+div[data-zzap-shiki-block="true"] .zzap-copy-code-button {
   position: absolute;
   top: 0;
   right: 0;
@@ -40,14 +40,14 @@ html[data-zzap-theme="dark"] pre code {
   gap: 0.25rem;
 }
 
-.zzap-code-wrapper:hover .zzap-copy-code-button {
+div[data-zzap-shiki-block="true"]:hover .zzap-copy-code-button {
   opacity: 1;
 }
 
-.zzap-code-wrapper .zzap-copy-code-button:before {
+div[data-zzap-shiki-block="true"] .zzap-copy-code-button:before {
   content: "Copy";
 }
 
-.zzap-code-wrapper .zzap-copy-code-button.copied:before {
+div[data-zzap-shiki-block="true"] .zzap-copy-code-button.copied:before {
   content: "Copied";
 }
