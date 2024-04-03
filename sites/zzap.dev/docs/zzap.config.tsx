@@ -1,6 +1,7 @@
 import React from "react";
 import Server from "react-dom/server";
 import { defineConfig, plugins } from "zzap";
+import { GitHubReleases } from "./src/types/Data";
 
 export default defineConfig({
   title: "zzap.dev",
@@ -70,45 +71,55 @@ export default defineConfig({
       </>
     );
   },
-});
 
-type GitHubReleases = {
-  url: string;
-  assets_url: string;
-  upload_url: string;
-  html_url: string;
-  id: number;
-  author: {
-    login: string;
-    id: number;
-    node_id: string;
-    avatar_url: string;
-    gravatar_id: string;
-    url: string;
-    html_url: string;
-    followers_url: string;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string;
-    organizations_url: string;
-    repos_url: string;
-    events_url: string;
-    received_events_url: string;
-    type: string;
-    site_admin: boolean;
-  };
-  node_id: string;
-  tag_name: string;
-  target_commitish: string;
-  name: string;
-  draft: boolean;
-  prerelease: boolean;
-  created_at: string;
-  published_at: string;
-  assets: Array<any>;
-  tarball_url: string;
-  zipball_url: string;
-  body: string;
-  mentions_count?: number;
-};
+  routes: {
+    "/releases": {
+      async getPage() {
+        const releasesResponse = await fetch(
+          "https://api.github.com/repos/zzapdotdev/zzap/releases",
+        );
+        const data: Array<GitHubReleases> = await releasesResponse.json();
+
+        return {
+          title: "zzap Releases",
+          description: "What's new with zzap",
+          template: "releases",
+          data: {
+            releases: data,
+          },
+        };
+      },
+    },
+    "/releases/:id": {
+      async getPathParams() {
+        const releaseResponse = await fetch(
+          "https://api.github.com/repos/zzapdotdev/zzap/releases",
+        );
+        const data: Array<GitHubReleases> = await releaseResponse.json();
+
+        return data.map((release) => {
+          return {
+            params: {
+              id: release.id,
+            },
+          };
+        });
+      },
+      async getPage(props) {
+        const releaseResponse = await fetch(
+          `https://api.github.com/repos/zzapdotdev/zzap/releases/${props.params.id}`,
+        );
+        const data: GitHubReleases = await releaseResponse.json();
+
+        return {
+          title: data.name,
+          description: data.body,
+          template: "release",
+          data: {
+            release: data,
+          },
+        };
+      },
+    },
+  },
+});

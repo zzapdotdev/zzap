@@ -26,6 +26,7 @@ export const PageBuilder = {
     const {
       title: frontmatterTitle,
       description: frontmatterDescription,
+      template: frontmatterTemplate,
       ...rest
     } = data;
     const markdown = props.markdown.replace(frontmatterRegex, "");
@@ -100,20 +101,21 @@ export const PageBuilder = {
           description,
           html,
           path: document.path,
+          template: frontmatterTemplate || "default",
         };
       },
     );
 
     renderedDocuments.forEach((renderedDocument) => {
       const page: PluginPageType = {
-        type: "markdown",
         title: renderedDocument.title,
         description: renderedDocument.description,
         data: {
           ...rest,
+          html: renderedDocument.html,
         },
         path: renderedDocument.path,
-        html: renderedDocument.html,
+        template: renderedDocument.template,
       };
 
       pages.push(page);
@@ -133,24 +135,34 @@ type RenderedDocumentType = {
   html: string;
   title: string;
   description: string;
+  template: string | "default";
 };
 
-export type PluginPageType = {
-  type: "markdown" | "dynamic";
+export type RoutePageType = {
+  title: string;
+  description: string;
+  template: string | "default";
+  data: any;
+};
+
+export type PluginPageType<T extends {} = {}> = {
   title: string;
   description: string;
   path: string;
-  data?: any;
-  html?: string;
+  template: string | "default";
+  data: {
+    html: string;
+  } & T;
 };
 
-export type PageType = {
-  type: "markdown" | "dynamic";
+export type PageType<T extends {} = {}> = {
   title: string;
   description: string;
   path: string;
-  data?: any;
-  html?: string;
+  template: string | "default";
+  data: {
+    html: string;
+  } & T;
   sitemap: SitemapItemType[];
   titleWithSiteTitle: string;
 };

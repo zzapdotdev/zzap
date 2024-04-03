@@ -1,6 +1,7 @@
 import type { Root } from "react-dom/client";
 import { getLogger } from "./src/domains/logging/getLogger";
 
+import type { PageType } from "./src/domains/page/ZzapPageBuilder";
 export type { PageType } from "./src/domains/page/ZzapPageBuilder";
 
 const logger = getLogger("client");
@@ -132,6 +133,38 @@ export const ZzapClient = {
     }
   },
 };
+
+export type TemplateProps<TData extends {} = {}> = {
+  page: PageType<TData>;
+};
+
+export function Templates(props: {
+  page: PageType;
+  templates: Record<string, (props: { page: any }) => JSX.Element | null>;
+  debug?: boolean;
+}) {
+  const PageComponent = props.templates[props.page.template];
+
+  if (!PageComponent) {
+    logger.error(`Template "${props.page.template}" not found`);
+    return (
+      <pre>
+        <code className="json">{JSON.stringify(props.page, null, 2)}</code>
+      </pre>
+    );
+  }
+
+  return (
+    <>
+      {props.debug && (
+        <pre>
+          <code className="json">{JSON.stringify(props.page, null, 2)}</code>
+        </pre>
+      )}
+      <PageComponent page={props.page} />
+    </>
+  );
+}
 
 declare global {
   interface Window {

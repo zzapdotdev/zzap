@@ -109,6 +109,42 @@ async function getPagesAndSitemap(props: {
 }) {
   const pages = new Map<string, PluginPageType>();
   const promises = props.paths.map(async (path) => {
+    // Check for route
+    const routes = Object.entries(props.config.routes);
+
+    for (const [routePath, routeConfig] of routes) {
+      const pathSegments = path.split("/");
+      const routeSegments = routePath.split("/");
+
+      if (pathSegments.length !== routeSegments.length) {
+        continue;
+      }
+
+      const match = routeSegments.every((routeSegment, i) => {
+        if (routeSegment.startsWith(":")) return true;
+        return routeSegment === pathSegments[i];
+      });
+
+      if (match) {
+        const params: Record<string, string> = {};
+
+        for (const segment of routeSegments) {
+          if (segment.startsWith(":")) {
+            const key = segment.replace(":", "");
+            const value = pathSegments[routeSegments.indexOf(segment)];
+            params[key] = value;
+          }
+        }
+
+        const routePage = await routeConfig.getPage({ params: params });
+
+        pages.set(path, {
+          ...routePage,
+          path,
+        });
+      }
+    }
+
     // Check for Markdown files
     let filePath = props.config.srcDir + path + ".md";
 
@@ -129,19 +165,21 @@ async function getPagesAndSitemap(props: {
       exists = await file.exists();
     }
 
-    if (exists) {
-      const pageMarkdown = await file.text();
-      const markdownPages = await PageBuilder.fromMarkdown({
-        config: props.config as any,
-        path: path,
-        filePath,
-        markdown: pageMarkdown,
-      });
-
-      markdownPages.forEach((page) => {
-        pages.set(page.path, page);
-      });
+    if (!exists) {
+      return;
     }
+
+    const pageMarkdown = await file.text();
+    const markdownPages = await PageBuilder.fromMarkdown({
+      config: props.config as any,
+      path: path,
+      filePath,
+      markdown: pageMarkdown,
+    });
+
+    markdownPages.forEach((page) => {
+      pages.set(page.path, page);
+    });
   });
   await Promise.all(promises);
 
@@ -190,6 +228,24 @@ async function getPaths(props: { config: ZzapConfigType }) {
   }
 
   // DYNAMIC
+  const routesPromises = Object.entries(props.config.routes).map(
+    async ([dynamicPath, routeConfig]) => {
+      routeConfig;
+      const pathParamsConfigs = await routeConfig.getPathParams?.();
+
+      for (const pathParamsConfig of pathParamsConfigs || []) {
+        let pathToAdd = dynamicPath;
+
+        for (const [key, value] of Object.entries(pathParamsConfig.params)) {
+          pathToAdd = pathToAdd.replace(`:${key}`, value);
+        }
+
+        paths.push(pathToAdd);
+      }
+    },
+  );
+
+  await Promise.all(routesPromises);
 
   return paths;
 }

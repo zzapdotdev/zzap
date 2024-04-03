@@ -13,9 +13,8 @@ const logger = getLogger("lib");
 
 if (command === "dev") {
   const ZzapCLITask = $`bun build --compile ./src/cli.tsx --outfile ./dist/zzap --target node --watch`;
-  const typeDefinitionTask = $`tsc --watch --outDir ./dist --preserveWatchOutput`;
 
-  await Promise.all([ZzapCLITask, typeDefinitionTask]);
+  await Promise.all([ZzapCLITask]);
   process.exit(0);
 }
 

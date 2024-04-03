@@ -1,6 +1,7 @@
 import z from "zod";
 
 import type { default as Server } from "react-dom/server";
+import type { RoutePageType } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
 
 export const zzapConfigSchema = z.object({
@@ -49,6 +50,7 @@ export const zzapConfigSchema = z.object({
     .array(
       z.object({
         command: z.string(),
+        quiet: z.boolean().default(false),
       }),
     )
     .default([]),
@@ -74,6 +76,25 @@ export const zzapConfigSchema = z.object({
       }),
     )
     .returns(z.any() as z.ZodType<JSX.Element>),
+  routes: z
+    .record(
+      z.string(),
+      z.object({
+        getPathParams: z
+          .function()
+          .returns(
+            z.promise(
+              z.array(z.object({ params: z.record(z.string(), z.any()) })),
+            ),
+          )
+          .optional(),
+        getPage: z
+          .function()
+          .args(z.object({ params: z.record(z.string(), z.any()) }))
+          .returns(z.promise(z.any() as z.ZodType<RoutePageType>)),
+      }),
+    )
+    .default({}),
 });
 
 export type ZzapConfigType = z.infer<typeof zzapConfigSchema> & {

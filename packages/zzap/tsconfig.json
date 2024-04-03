@@ -27,6 +27,7 @@
     // Custom
     "declaration": true
   },
+
   "include": [
     "src/**/*",
     "node",

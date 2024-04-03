@@ -6,7 +6,12 @@ export const zzapPluginTailwind = definePlugin({
       name: "tailwind",
       async onBuild(ctx) {
         const filepath = path.join(ctx.config.rootDir, props.filePath);
-        await ctx.$`ls && tailwindcss -i ${filepath} -o ./docs/.zzap/dist/styles/zzap-plugin-tailwind.css`;
+
+        try {
+          await ctx.$`tailwindcss -i ${filepath} -o ./docs/.zzap/dist/styles/zzap-plugin-tailwind.css`.quiet();
+        } catch (error) {
+          ctx.logger.error("running tailwindcss", { error: error });
+        }
 
         return {
           heads: [

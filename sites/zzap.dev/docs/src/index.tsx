@@ -2,7 +2,7 @@ import { inject as injectVercelAnalytics } from "@vercel/analytics";
 import { injectSpeedInsights as injectVercelSpeedInsights } from "@vercel/speed-insights";
 import clsx from "clsx";
 import React, { useEffect } from "react";
-import { PageType, ZzapClient } from "zzap/client";
+import { PageType, TemplateProps, Templates, ZzapClient } from "zzap/client";
 import {
   DiscordIcon,
   GitHubIcon,
@@ -14,6 +14,14 @@ import {
   ZzapIconGradient,
 } from "./components/Icons";
 import { sidebars } from "./sidebars";
+import { GitHubReleases } from "./types/Data";
+
+import markdownit from "markdown-it";
+const md = markdownit({
+  html: true,
+  linkify: true,
+  langPrefix: "",
+});
 
 ZzapClient.interactive(App);
 
@@ -241,7 +249,6 @@ export default function App(props: { page: PageType }) {
       ),
     };
 
-    const html = props.page.html;
     return (
       <div
         className={clsx({
@@ -249,14 +256,56 @@ export default function App(props: { page: PageType }) {
           "tw-w-[100%] lg:tw-w-[75%]": hasSidebar,
         })}
       >
-        {html && (
-          <div
-            dangerouslySetInnerHTML={{
-              __html: html,
-            }}
-          ></div>
-        )}
-        {/* {contentByTemplate[props.page.template]} */}
+        <Templates
+          page={props.page}
+          templates={{
+            default(templateProps: TemplateProps) {
+              const html = templateProps.page.data.html;
+              return (
+                <>
+                  {html && (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: html,
+                      }}
+                    ></div>
+                  )}
+                </>
+              );
+            },
+            releases(
+              templateProps: TemplateProps<{ releases: Array<GitHubReleases> }>,
+            ) {
+              const releases = templateProps.page.data.releases;
+              return (
+                <div>
+                  <ul>
+                    {releases.map((release) => {
+                      return (
+                        <li key={release.id}>
+                          <a href={`/releases/${release.id}`}>{release.name}</a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            },
+            release(templateProps: TemplateProps<{ release: GitHubReleases }>) {
+              const release = templateProps.page.data.release;
+              return (
+                <div>
+                  <h1>{release.name}</h1>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: md.render(release.body),
+                    }}
+                  ></div>
+                </div>
+              );
+            },
+          }}
+        ></Templates>
       </div>
     );
   }
