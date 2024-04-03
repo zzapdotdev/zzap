@@ -7,11 +7,13 @@ import path from "path";
 export default defineConfig({
   title: "zzap.dev",
   plugins: [
-    plugins.tailwind(),
+    plugins.tailwind({
+      filePath: "./src/tailwind.css",
+    }),
     plugins.picoCSS({
       color: "amber",
       conditional: true,
-      module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
+      modulePath: "../../../node_modules/@picocss/pico",
     }),
     // plugins.dynamic({
     //   name: "releases",

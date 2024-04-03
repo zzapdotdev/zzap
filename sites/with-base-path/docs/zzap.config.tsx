@@ -7,11 +7,10 @@ export default defineConfig({
   title: "zzap.dev",
   base: "/base/",
   plugins: [
-    plugins.tailwind(),
     plugins.picoCSS({
       color: "amber",
       conditional: true,
-      module: path.join(__dirname, "../../../node_modules/@picocss/pico"),
+      modulePath: path.join(__dirname, "../../../node_modules/@picocss/pico"),
     }),
   ],
   deps: {
