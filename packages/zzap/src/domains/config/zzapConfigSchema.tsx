@@ -37,7 +37,7 @@ export const zzapConfigSchema = z.object({
   publicFiles: z
     .array(
       z.object({
-        path: z.string(),
+        filePath: z.string(),
         name: z.string(),
       }),
     )
