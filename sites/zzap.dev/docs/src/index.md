@@ -10,7 +10,7 @@ description: Add zzap to your project, include some markdown files, and trust zz
   <h2
     class="tw-m-0  tw-text-center tw-text-[50pt] tw-font-extrabold tw-leading-none"
   >
-    that is ok nice
+    that is
     <span
       class="tw-bg-gradient-to-r tw-from-yellow-400 tw-to-amber-200 tw-bg-clip-text tw-text-transparent"
       >really</span

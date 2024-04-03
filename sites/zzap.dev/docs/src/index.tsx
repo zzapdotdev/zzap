@@ -71,7 +71,7 @@ export default function App(props: { page: PageType }) {
       `;
 
         copyCodeButton.onclick = (event) => {
-          navigator.clipboard.writeText(node.textContent || "");
+          navigator.clipboard.writeText(node.textContent?.trim() || "");
           copyCodeButton.classList.add("copied");
 
           setTimeout(() => {
