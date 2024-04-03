@@ -2,8 +2,6 @@ import React from "react";
 import Server from "react-dom/server";
 import { defineConfig, plugins } from "zzap";
 
-import path from "path";
-
 export default defineConfig({
   title: "zzap.dev",
   plugins: [
@@ -39,14 +37,11 @@ export default defineConfig({
   ],
   publicFiles: [
     {
-      path: path.join(
-        __dirname,
-        "../../../node_modules/@docsearch/css/dist/style.css",
-      ),
+      filePath: "../../../node_modules/@docsearch/css/dist/style.css",
       name: "styles/docsearch.css",
     },
     {
-      path: path.join(__dirname, "./src/styles/index.css"),
+      filePath: "./src/styles/index.css",
       name: "styles/index.css",
     },
   ],

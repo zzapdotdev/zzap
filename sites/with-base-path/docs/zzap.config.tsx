@@ -1,4 +1,3 @@
-import path from "path";
 import React from "react";
 import Server from "react-dom/server";
 import { defineConfig, plugins } from "zzap";
@@ -10,7 +9,7 @@ export default defineConfig({
     plugins.picoCSS({
       color: "amber",
       conditional: true,
-      modulePath: path.join(__dirname, "../../../node_modules/@picocss/pico"),
+      modulePath: "../../../node_modules/@picocss/pico",
     }),
   ],
   deps: {
