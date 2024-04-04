@@ -19,13 +19,13 @@ import { zzapPluginSitemapRenderer } from "./core-plugins/zzapPluginSitemapRende
 const logger = getLogger();
 
 export const ZzapBundler = {
-  async prepareBuild(props: { config: ZzapConfigType }) {
+  async setupBuild(props: { config: ZzapConfigType }) {
     await runPluginsWithLifecycle({
       config: props.config,
-      loggerPrefix: "prepare",
+      loggerPrefix: "setup",
       async onRun({ plugin, logger }) {
-        if (plugin.onPrepare) {
-          await plugin.onPrepare?.({
+        if (plugin.onSetup) {
+          await plugin.onSetup?.({
             $,
             Bun,
             logger: logger,

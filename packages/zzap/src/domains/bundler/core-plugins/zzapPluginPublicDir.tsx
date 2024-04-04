@@ -4,7 +4,7 @@ export const zzapPluginPublicDir = definePlugin({
   plugin() {
     return {
       name: "core-public-dir",
-      async onPrepare(ctx) {
+      async onSetup(ctx) {
         const publicGlob = new ctx.Bun.Glob(ctx.config.publicDir + "/**/*");
 
         const publicFiles = publicGlob.scan({

@@ -7,7 +7,7 @@ import type { PluginPageType, SitemapItemType } from "../page/ZzapPageBuilder";
 export function definePlugin<TArgs extends any[]>(props: {
   plugin(...args: TArgs): {
     name: string;
-    onPrepare?(ctx: ZzapPluginContextType): Promise<void>;
+    onSetup?(ctx: ZzapPluginContextType): Promise<void>;
     onBuild?(ctx: ZzapPluginContextType): Promise<
       | {
           heads?: Array<JSX.Element>;
