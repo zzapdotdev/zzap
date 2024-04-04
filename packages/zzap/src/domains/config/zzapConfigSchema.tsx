@@ -3,7 +3,7 @@ import z from "zod";
 
 import type { default as Server } from "react-dom/server";
 import type { getLogger } from "../logging/getLogger";
-import type { PageType, RoutePageType } from "../page/ZzapPageBuilder";
+import type { ZzapPageProps } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
 
 export const zzapConfigSchema = z.object({
@@ -98,19 +98,21 @@ export type GetPathParamsType = (
 export type GetPageType = (
   props: Record<string, any>,
   ctx: RouteHandlerContextType,
-) => Promise<RoutePageType | undefined | void>;
+) => Promise<Omit<ZzapPageProps, "path"> | undefined | void>;
 
 export type RouteHandlerContextType = {
   $: typeof $;
   Bun: typeof Bun;
   logger: ReturnType<typeof getLogger>;
   config: ZzapConfigType;
-  markdownToPage(props: { markdown: string }): Array<PageType>;
+  markdownToPage(props: { markdown: string }): Array<ZzapPageProps>;
 };
 
 export type ZzapConfigType = z.infer<typeof zzapConfigSchema> & {
-  rootDir: string;
   isDev: boolean;
+  rootDir: string;
+  routesDir: string;
+  layoutsDir: string;
 };
 export type zzapConfigInputType = z.input<typeof zzapConfigSchema>;
 

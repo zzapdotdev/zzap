@@ -2,8 +2,8 @@ import { inject as injectVercelAnalytics } from "@vercel/analytics";
 import { injectSpeedInsights as injectVercelSpeedInsights } from "@vercel/speed-insights";
 import clsx from "clsx";
 import React, { useEffect } from "react";
-import { TemplateProps, Templates, ZzapClient } from "zzap/client";
-import { RenderedPageType } from "zzap/src/domains/page/ZzapPageBuilder";
+import { ZzapClient } from "zzap/client";
+import { ZzapPageProps } from "zzap/src/domains/page/ZzapPageBuilder";
 import {
   DiscordIcon,
   GitHubIcon,
@@ -13,18 +13,21 @@ import {
   SunIcon,
   ZzapIcon,
   ZzapIconGradient,
-} from "./components/Icons";
+} from "../Icons/Icons";
 import { sidebars } from "./sidebars";
-ZzapClient.interactive(App);
 
 ZzapClient.whenInBrowser(async () => {
   injectVercelAnalytics();
   injectVercelSpeedInsights();
 });
 
-export default function App(props: { page: RenderedPageType }) {
+export function Layout(
+  props: ZzapPageProps & {
+    children: React.ReactNode;
+  },
+) {
   const visibleSidebars = sidebars.filter((sidebar) => {
-    return props.page.path.startsWith(sidebar.path);
+    return props.path.startsWith(sidebar.path);
   });
   const chapters = visibleSidebars.flatMap((sidebar) => sidebar.chapters);
   const hasSidebar = chapters.length > 0;
@@ -187,9 +190,10 @@ export default function App(props: { page: RenderedPageType }) {
       >
         <nav>
           {chapters.map((chapter, i) => {
-            const items = props.page.sitemap?.filter((item) => {
-              return item.path.startsWith(chapter.path);
-            });
+            // const items = props.page.sitemap?.filter((item) => {
+            //   return item.path.startsWith(chapter.path);
+            // });
+            const items = [] as any[];
             return (
               <details open key={i}>
                 <summary className="tw-mb-2 tw-text-sm tw-font-bold tw-text-black dark:tw-text-white">
@@ -197,7 +201,7 @@ export default function App(props: { page: RenderedPageType }) {
                 </summary>
                 <ul className="">
                   {items?.map((item) => {
-                    const isCurrent = item.path === props.page.path;
+                    const isCurrent = item.path === props.path;
                     return (
                       <li key={item.path}>
                         <a
@@ -236,87 +240,7 @@ export default function App(props: { page: RenderedPageType }) {
           "tw-w-[100%] lg:tw-w-[75%]": hasSidebar,
         })}
       >
-        <Templates
-          page={props.page}
-          templates={{
-            default(templateProps: TemplateProps) {
-              const html = templateProps.page.data.html;
-              return (
-                <>
-                  {html && (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: html,
-                      }}
-                    ></div>
-                  )}
-                </>
-              );
-            },
-            ["404"](templateProps: TemplateProps) {
-              return (
-                <>
-                  <h1>Page Not Found</h1>
-                  <p>
-                    The page you are looking for does not exist, but you may use
-                    the search button below to find what you are looking for!
-                  </p>
-                  <button
-                    className=" contrast  outline tw-flex tw-gap-2 tw-px-4 tw-py-2"
-                    onClick={handleSearchClick}
-                  >
-                    <SearchIcon className="tw-point tw-h-6 tw-w-6"></SearchIcon>
-                    <span>Search a page</span>
-                  </button>
-                </>
-              );
-            },
-            releases(
-              templateProps: TemplateProps<{
-                releases: Array<{
-                  title: string;
-                  description: string;
-                  id: string;
-                }>;
-              }>,
-            ) {
-              const releases = templateProps.page.data.releases;
-              return (
-                <div>
-                  <h1>Latest Releases</h1>
-                  <div className="tw-grid tw-grid-cols-3 tw-gap-2">
-                    {releases.map((release, i) => {
-                      return (
-                        <div key={i} className="">
-                          <article>
-                            <h3>{release.title} </h3>
-                            <p>{release.description}</p>
-                            <div>
-                              <a href={`/releases/${release.id}`}>Read more</a>
-                            </div>
-                          </article>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            },
-            release(templateProps: TemplateProps<{}>) {
-              return (
-                <div>
-                  {templateProps.page.data.html && (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: templateProps.page.data.html,
-                      }}
-                    ></div>
-                  )}
-                </div>
-              );
-            },
-          }}
-        ></Templates>
+        {props.children}
       </div>
     );
   }

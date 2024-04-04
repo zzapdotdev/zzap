@@ -1,35 +1,42 @@
 import React from "react";
 import type { ZzapConfigType } from "../../config/zzapConfigSchema";
 import type { getLogger } from "../../logging/getLogger";
-import type { RenderedPageType } from "../../page/ZzapPageBuilder";
+import type { ZzapPageProps } from "../../page/ZzapPageBuilder";
 
 import { definePlugin } from "../../plugin/definePlugin";
-
-let indexModule: Awaited<ReturnType<typeof getIndexModule>> | undefined =
-  undefined;
 
 export const zzapPluginPageRenderer = definePlugin({
   plugin() {
     return {
       name: "core-page",
       async onRender(ctx) {
-        const promises = ctx.pages.map(async (page) => {
-          const clientPage: RenderedPageType = {
-            ...page,
-            titleWithSiteTitle: `${page.title} • ${ctx.config.title}`,
-            sitemap: ctx.sitemap,
-          };
+        const promises = ctx.pages.map(async (props) => {
+          // const indexModule = await getModule({
+          //   fileName: "index",
+          //   config: ctx.config,
+          //   logger: ctx.logger,
+          // });
+          const result = await getModule({
+            fileName: props.template,
+            config: ctx.config,
+            logger: ctx.logger,
+          });
 
-          if (!indexModule) {
-            indexModule = await getIndexModule({
-              config: ctx.config,
-              logger: ctx.logger,
-            });
-          }
+          await Bun.build({
+            entrypoints: [result?.location!],
+            target: "browser",
+            format: "esm",
+            minify: !ctx.config.isDev,
+            outdir: ctx.config.outputDir + "/__zzap/layouts",
+          });
 
-          const AppComponent = indexModule?.default!;
-
-          const content = <AppComponent page={clientPage}></AppComponent>;
+          // const AppComponent = indexModule?.default!;
+          const TemplateComponent = result?.module?.default!;
+          const content = (
+            // <AppComponent page={clientPage}>
+            <TemplateComponent {...props} />
+            // </AppComponent>
+          );
 
           const root = (
             <div
@@ -47,17 +54,20 @@ export const zzapPluginPageRenderer = definePlugin({
                 {ctx.heads.map((head, i) => {
                   return <React.Fragment key={i}>{head}</React.Fragment>;
                 })}
-                <title>{clientPage.titleWithSiteTitle}</title>
-                <meta name="og:title" content={clientPage.titleWithSiteTitle} />
-                <meta name="og:description" content={clientPage.description} />
+                <title>{props.title}</title>
+                <meta name="og:title" content={props.title} />
+                <meta name="og:description" content={props.description} />
                 <meta property="og:type" content="website" />
                 <meta property="og:site_name" content={ctx.config.title} />
                 {/* <meta name="og:image" content=""></meta> */}
                 <meta name="twitter:card" content="summary_large_image" />
+                <meta name="zzap:template" content={props.template} />
                 <meta
-                  name="twitter:title"
-                  content={clientPage.titleWithSiteTitle}
+                  name="zzap:props"
+                  content={JSON.stringify(content.props)}
                 />
+
+                <meta name="twitter:title" content={props.title} />
                 {/* <meta name="twitter:image" content=""></meta> */}
               </>
             ),
@@ -66,12 +76,7 @@ export const zzapPluginPageRenderer = definePlugin({
               <>
                 <script
                   type="module"
-                  dangerouslySetInnerHTML={{
-                    __html: `
-              window.__zzap = ${JSON.stringify({
-                props: content.props,
-              })};`,
-                  }}
+                  src={`${ctx.config.base}__zzap/layouts/${props.template}.js`}
                 ></script>
                 {ctx.scripts.map((script, i) => {
                   return <React.Fragment key={i}>{script}</React.Fragment>;
@@ -81,29 +86,29 @@ export const zzapPluginPageRenderer = definePlugin({
           });
           const html = ctx.config.deps["react-dom/server"].renderToString(jsx);
 
-          const is404Page = page.path === "/404";
+          const is404Page = props.path === "/404";
 
           if (is404Page) {
-            await Bun.write(`${ctx.config.outputDir}/${page.path}.html`, html);
+            await Bun.write(`${ctx.config.outputDir}/${props.path}.html`, html);
             await Bun.write(
-              `${ctx.config.outputDir}/${page.path}/index.html`,
+              `${ctx.config.outputDir}/${props.path}/index.html`,
               html,
             );
             if (ctx.config.isDev) {
               await Bun.write(
-                `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
+                `${ctx.config.outputDir}/__zzap/data/${props.path}/props.json`,
                 JSON.stringify(content.props),
               );
             }
           } else {
             await Bun.write(
-              `${ctx.config.outputDir}/${page.path}/index.html`,
+              `${ctx.config.outputDir}/${props.path}/index.html`,
               html,
             );
 
             if (ctx.config.isDev) {
               await Bun.write(
-                `${ctx.config.outputDir}/__zzap/data/${page.path}/props.json`,
+                `${ctx.config.outputDir}/__zzap/data/${props.path}/props.json`,
                 JSON.stringify(content.props),
               );
             }
@@ -116,52 +121,70 @@ export const zzapPluginPageRenderer = definePlugin({
   },
 });
 
-async function getIndexModule(props: {
+type Module = Awaited<ReturnType<typeof getModule>>;
+const modules: Record<string, Module> = {};
+
+async function getModule(props: {
   config: ZzapConfigType;
+  fileName: string;
   logger: ReturnType<typeof getLogger>;
-}): Promise<{ default: typeof DefaultAppComponent } | undefined> {
-  const indexTsxExists = await Bun.file(
-    `${props.config.srcDir}/index.tsx`,
+}): Promise<
+  | {
+      location: string;
+      module: {
+        default(props: ZzapPageProps): JSX.Element;
+      };
+    }
+  | undefined
+> {
+  const module = modules[props.fileName];
+
+  if (module) {
+    return module;
+  }
+
+  const tsxExists = await Bun.file(
+    `${props.config.layoutsDir}/${props.fileName}.tsx`,
   ).exists();
-  const indexJsxExists = await Bun.file(
-    `${props.config.srcDir}/index.jsx`,
+  const jsxexists = await Bun.file(
+    `${props.config.layoutsDir}/${props.fileName}.jsx`,
   ).exists();
 
-  if (indexTsxExists) {
+  if (tsxExists) {
     try {
-      const location = `${props.config.srcDir}/index.tsx`;
+      const location = `${props.config.layoutsDir}/${props.fileName}.tsx`;
       const module = await import(location);
 
       if (!module.default) {
-        props.logger.terminate(`index.tsx does not have a default export.`);
+        props.logger.terminate(
+          `${props.fileName}.tsx does not have a default export.`,
+        );
       }
-
-      return module;
+      modules[props.fileName] = module;
+      return { module, location };
     } catch (error) {
-      props.logger.terminate(`loading index.tsx`, { error });
+      props.logger.terminate(`loading ${props.fileName}.tsx`, { error });
     }
   }
 
-  if (indexJsxExists) {
+  if (jsxexists) {
     try {
-      const location = `${props.config.srcDir}/index.jsx`;
+      const location = `${props.config.layoutsDir}/${props.fileName}.jsx`;
       const module = await import(location);
 
       if (!module.default) {
-        props.logger.terminate(`index.tsx does not have a default export.`);
+        props.logger.terminate(
+          `${props.fileName}.tsx does not have a default export.`,
+        );
       }
-
-      return module;
+      modules[props.fileName] = module;
+      return { module, location };
     } catch (error) {
-      props.logger.terminate(`loading index.jsx`, { error });
+      props.logger.terminate(`loading ${props.fileName}.jsx`, { error });
     }
   }
 
   props.logger.terminate(
-    `no index.tsx or index.jsx was found in ${props.config.srcDir}.`,
+    `no ${props.fileName}.tsx or ${props.fileName}.jsx was found in ${props.config.layoutsDir}.`,
   );
-}
-
-function DefaultAppComponent(_props: { page: RenderedPageType }) {
-  return <></>;
 }

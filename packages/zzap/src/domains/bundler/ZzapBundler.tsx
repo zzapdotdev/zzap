@@ -7,8 +7,8 @@ import type {
 import { getLogger } from "../logging/getLogger";
 import {
   PageBuilder,
-  type PageType,
   type SitemapItemType,
+  type ZzapPageProps,
 } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
@@ -110,7 +110,7 @@ async function getPagesAndSitemap(props: {
   paths: string[];
   config: ZzapConfigType;
 }) {
-  const pages = new Map<string, PageType>();
+  const pages = new Map<string, ZzapPageProps>();
 
   const ctx: RouteHandlerContextType = {
     $,
@@ -173,20 +173,20 @@ async function getPagesAndSitemap(props: {
     }
 
     // Check for Markdown files
-    let filePath = props.config.srcDir + path + ".md";
+    let filePath = props.config.routesDir + path + ".md";
 
     let file = Bun.file(filePath);
     let exists = await file.exists();
 
     if (!exists) {
-      filePath = props.config.srcDir + path + "/index.md";
+      filePath = props.config.routesDir + path + "index.md";
       file = Bun.file(filePath);
       exists = await file.exists();
     }
 
     if (!exists) {
       const pathForExploded = path.split("/").slice(0, -1).join("/");
-      filePath = props.config.srcDir + pathForExploded + "/!index.md";
+      filePath = props.config.routesDir + pathForExploded + "/!index.md";
 
       file = Bun.file(filePath);
       exists = await file.exists();
@@ -281,7 +281,7 @@ async function getPaths(props: { config: ZzapConfigType }) {
   // MARKDOWN
   const globPatterns = ["**/*.md", "**/*.mdx"];
   for (const pattern of globPatterns) {
-    const glob = new Bun.Glob(props.config.srcDir + "/" + pattern);
+    const glob = new Bun.Glob(props.config.routesDir + "/" + pattern);
 
     const filesIterator = glob.scan({
       cwd: ".",
@@ -290,7 +290,7 @@ async function getPaths(props: { config: ZzapConfigType }) {
 
     for await (const filePath of filesIterator) {
       const path = filePath
-        .replace(props.config.srcDir, "")
+        .replace(props.config.routesDir, "")
         .replace(/\.mdx?$/, "")
         .replace(/\.md?$/, "")
         .replace(/\/index$/, "");

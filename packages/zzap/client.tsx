@@ -1,8 +1,5 @@
 import type { Root } from "react-dom/client";
 import { getLogger } from "./src/domains/logging/getLogger";
-import type { RenderedPageType } from "./src/domains/page/ZzapPageBuilder";
-
-export type { PageType } from "./src/domains/page/ZzapPageBuilder";
 
 const logger = getLogger("client");
 let reactRoot: Root;
@@ -14,7 +11,7 @@ export const ZzapClient = {
       await callback();
     }
   },
-  async interactive(RootComponent: any) {
+  async interactive() {
     if (!this.inBrowser) {
       return;
     }
@@ -23,12 +20,19 @@ export const ZzapClient = {
     const hydrateRoot = ReactDOMClient.hydrateRoot;
 
     const zzapRoot = document.querySelector("#zzap-root");
+    const props = JSON.parse(
+      document
+        .querySelector(`meta[name="zzap:props"]`)
+        ?.getAttribute("content") || "{}",
+    );
+    const template = document
+      .querySelector(`meta[name="zzap:template"]`)
+      ?.getAttribute("content");
+    const LayoutModule = await import(`/__zzap/layouts/${template}.js`);
+    const LayoutComponent = LayoutModule.default;
 
     if (zzapRoot) {
-      reactRoot = hydrateRoot(
-        zzapRoot,
-        <RootComponent {...window.__zzap.props} />,
-      );
+      reactRoot = hydrateRoot(zzapRoot, <LayoutComponent {...props} />);
     } else {
       logger.error("No #zzap-root element found");
     }
@@ -53,11 +57,11 @@ export const ZzapClient = {
           const props = await response.json();
 
           const propsHaveChanged =
-            JSON.stringify(props) !== JSON.stringify(window.__zzap.props);
+            JSON.stringify(props) !== JSON.stringify(props);
 
           if (propsHaveChanged) {
             logger.log("Props have changed, re-rendering...");
-            reactRoot.render(<RootComponent {...props} />);
+            reactRoot.render(<LayoutComponent {...props} />);
           } else {
             logger.log("Props have not changed, reloading...");
             window.location.reload();
@@ -139,38 +143,6 @@ export const ZzapClient = {
     }
   },
 };
-
-export type TemplateProps<TData extends {} = {}> = {
-  page: RenderedPageType<TData>;
-};
-
-export function Templates(props: {
-  page: RenderedPageType;
-  templates: Record<string, (props: { page: any }) => JSX.Element | null>;
-  debug?: boolean;
-}) {
-  const PageComponent = props.templates[props.page.template];
-
-  if (!PageComponent) {
-    logger.error(`Template "${props.page.template}" not found`);
-    return (
-      <pre>
-        <code className="json">{JSON.stringify(props.page, null, 2)}</code>
-      </pre>
-    );
-  }
-
-  return (
-    <>
-      {props.debug && (
-        <pre>
-          <code className="json">{JSON.stringify(props.page, null, 2)}</code>
-        </pre>
-      )}
-      <PageComponent page={props.page} />
-    </>
-  );
-}
 
 declare global {
   interface Window {

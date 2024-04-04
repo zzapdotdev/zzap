@@ -13,12 +13,14 @@ export const ZzapConfig = {
     });
 
     const config = { ...module.default } as ZzapConfigType;
-    config.srcDir = "./" + path.join(`${rootDir}/${config.srcDir}`);
-    config.outputDir = "./" + path.join(`${rootDir}/${config.outputDir}`);
-    config.publicDir = "./" + path.join(`${rootDir}/${config.publicDir}`);
-
     config.rootDir = rootDir;
     config.isDev = props.isDev;
+
+    config.srcDir = "./" + path.join(rootDir, config.srcDir);
+    config.outputDir = "./" + path.join(rootDir, config.outputDir);
+    config.publicDir = "./" + path.join(rootDir, config.publicDir);
+    config.routesDir = "./" + path.join(config.srcDir, "routes");
+    config.layoutsDir = "./" + path.join(config.srcDir, "layouts");
 
     return config;
   },

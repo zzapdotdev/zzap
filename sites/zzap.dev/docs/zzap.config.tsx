@@ -4,14 +4,7 @@ import React from "react";
 import Server from "react-dom/server";
 import { RouteHandlerContextType, defineConfig, plugins } from "zzap";
 
-import markdownit from "markdown-it";
-import { PageType } from "zzap/client";
-
-const md = markdownit({
-  html: true,
-  linkify: true,
-  langPrefix: "",
-});
+import { ZzapPageProps } from "zzap/src/domains/page/ZzapPageBuilder";
 
 export default defineConfig({
   title: "zzap.dev",
@@ -65,17 +58,12 @@ export default defineConfig({
     "/releases": {
       async getPage(params, ctx) {
         const releases = await getRelease({ ctx, includePage: false });
-        console.log(
-          "IDS",
-          releases.map((release) => release.id),
-        );
+
         return {
           title: "zzap Releases",
           description: "What's new with zzap",
           template: "releases",
-          data: {
-            releases,
-          },
+          releases,
         };
       },
     },
@@ -101,12 +89,12 @@ export default defineConfig({
           (release) => release.id === props.params.id,
         );
 
-        if (!release?.page) {
+        if (!release) {
           return;
         }
 
         return {
-          ...release.page,
+          ...release,
           template: "release",
         };
       },
@@ -118,33 +106,26 @@ export async function getRelease(props: {
   ctx: RouteHandlerContextType;
   includePage: boolean;
 }) {
-  const glob = new Bun.Glob("./src/releases/*.md");
+  const glob = new Bun.Glob("./src/data/releases/*.md");
 
   const fileIterator = glob.scan({
     cwd: __dirname,
     onlyFiles: true,
   });
 
-  const releases: Array<{
-    title: string;
-    description: string;
-    id: string;
-    page: PageType | undefined;
-  }> = [];
+  const releases: Array<ZzapPageProps<{ id: string }>> = [];
 
   for await (const filePath of fileIterator) {
     const markdown = await Bun.file(path.join(__dirname, filePath)).text();
     const fileNameWithoutExtension = path.basename(filePath, ".md");
 
-    const [page] = props.ctx.markdownToPage({
+    const [pageProps] = props.ctx.markdownToPage({
       markdown,
     });
 
     releases.push({
-      title: page.title,
-      description: page.description,
+      ...pageProps,
       id: kebabCase(fileNameWithoutExtension),
-      page: props.includePage ? page : undefined,
     });
   }
   return releases;

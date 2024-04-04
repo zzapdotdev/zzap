@@ -15,7 +15,7 @@ export const PageBuilder = {
     path: string;
     markdown: string;
     explode?: boolean;
-  }): Array<PageType> {
+  }): Array<ZzapPageProps> {
     const frontmatterRegex = /---\n(.*?)\n---/s;
     const frontMatter = props.markdown.match(frontmatterRegex)?.[1];
     const data: {
@@ -31,7 +31,7 @@ export const PageBuilder = {
     } = data;
     const markdown = props.markdown.replace(frontmatterRegex, "");
 
-    const pages: Array<PageType> = [];
+    const pages: Array<ZzapPageProps> = [];
     const documents: Array<DocumentType> = [];
 
     if (!props.explode) {
@@ -94,6 +94,7 @@ export const PageBuilder = {
         const title = frontmatterTitle || firstH1 || "";
         const description = frontmatterDescription || firstP || "";
         return {
+          ...rest,
           title,
           description,
           html,
@@ -104,15 +105,15 @@ export const PageBuilder = {
     );
 
     renderedDocuments.forEach((renderedDocument) => {
-      const page: PageType = {
+      const page: ZzapPageProps = {
+        ...rest,
         title: renderedDocument.title,
         description: renderedDocument.description,
-        data: {
-          ...rest,
-          html: renderedDocument.html,
-        },
         path: renderedDocument.path,
         template: renderedDocument.template,
+        markdown: {
+          html: renderedDocument.html,
+        },
       };
 
       pages.push(page);
@@ -135,36 +136,17 @@ type RenderedDocumentType = {
   template: string | "default";
 };
 
-export type RoutePageType = {
-  title: string;
-  description: string;
-  template: string | "default";
-  data: any;
-};
-
-export type PageType<T extends {} = {}> = {
-  title: string;
-  description: string;
+export type ZzapPageProps<T = {}> = {
+  title?: string;
+  description?: string;
   path: string;
   template: string | "default";
-  data: {
+  markdown?: {
     html: string;
-  } & T;
-};
-
-export type RenderedPageType<T extends {} = {}> = {
-  title: string;
-  description: string;
-  path: string;
-  template: string | "default";
-  data: {
-    html: string;
-  } & T;
-  sitemap: SitemapItemType[];
-  titleWithSiteTitle: string;
-};
+  };
+} & T;
 
 export type SitemapItemType = {
-  title: string;
+  title?: string;
   path: string;
 };
