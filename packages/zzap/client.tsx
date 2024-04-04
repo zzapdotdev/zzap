@@ -1,7 +1,7 @@
 import type { Root } from "react-dom/client";
 import { getLogger } from "./src/domains/logging/getLogger";
+import type { RenderedPageType } from "./src/domains/page/ZzapPageBuilder";
 
-import type { PageType } from "./src/domains/page/ZzapPageBuilder";
 export type { PageType } from "./src/domains/page/ZzapPageBuilder";
 
 const logger = getLogger("client");
@@ -141,11 +141,11 @@ export const ZzapClient = {
 };
 
 export type TemplateProps<TData extends {} = {}> = {
-  page: PageType<TData>;
+  page: RenderedPageType<TData>;
 };
 
 export function Templates(props: {
-  page: PageType;
+  page: RenderedPageType;
   templates: Record<string, (props: { page: any }) => JSX.Element | null>;
   debug?: boolean;
 }) {

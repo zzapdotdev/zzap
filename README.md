@@ -1,5 +1,9 @@
 # zzap - A fast all-in-one toolkit for static site generation
 
+# TODO
+
+- [ ] api KEY for releases
+
 # v0.1
 
 - [x] feat: dynamic pages

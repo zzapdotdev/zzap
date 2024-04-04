@@ -1,10 +1,13 @@
 import Bun, { $ } from "bun";
 
-import type { ZzapConfigType } from "../config/zzapConfigSchema";
+import type {
+  RouteHandlerContextType,
+  ZzapConfigType,
+} from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 import {
   PageBuilder,
-  type PluginPageType,
+  type PageType,
   type SitemapItemType,
 } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
@@ -107,7 +110,23 @@ async function getPagesAndSitemap(props: {
   paths: string[];
   config: ZzapConfigType;
 }) {
-  const pages = new Map<string, PluginPageType>();
+  const pages = new Map<string, PageType>();
+
+  const ctx: RouteHandlerContextType = {
+    $,
+    Bun,
+    logger,
+    config: props.config,
+    markdownToPage(handlerProps: { markdown: string; explode?: boolean }) {
+      return PageBuilder.fromMarkdown({
+        config: props.config,
+        path: "",
+        markdown: handlerProps.markdown,
+        explode: handlerProps.explode,
+      });
+    },
+  };
+
   const promises = props.paths.map(async (path) => {
     // Check for route
     const routes = Object.entries(props.config.routes);
@@ -136,12 +155,20 @@ async function getPagesAndSitemap(props: {
           }
         }
 
-        const routePage = await routeConfig.getPage({ params: params });
+        try {
+          const routePage = await routeConfig.getPage({ params: params }, ctx);
 
-        pages.set(path, {
-          ...routePage,
-          path,
-        });
+          if (routePage) {
+            pages.set(path, {
+              ...routePage,
+              path,
+            });
+          }
+        } catch (error) {
+          logger.error(`while getting page for route ${routePath}`, {
+            error,
+          });
+        }
       }
     }
 
@@ -170,10 +197,14 @@ async function getPagesAndSitemap(props: {
     }
 
     const pageMarkdown = await file.text();
-    const markdownPages = await PageBuilder.fromMarkdown({
+
+    const fileName = filePath.split("/").pop();
+    const shouldExplode = fileName === "!index.md";
+
+    const markdownPages = PageBuilder.fromMarkdown({
       config: props.config as any,
       path: path,
-      filePath,
+      explode: shouldExplode,
       markdown: pageMarkdown,
     });
 
@@ -205,6 +236,47 @@ async function getPagesAndSitemap(props: {
 
 async function getPaths(props: { config: ZzapConfigType }) {
   const paths: Array<string> = [];
+  const ctx: RouteHandlerContextType = {
+    $,
+    Bun,
+    logger,
+    config: props.config,
+    markdownToPage(handlerProps: { markdown: string; explode?: boolean }) {
+      return PageBuilder.fromMarkdown({
+        config: props.config,
+        path: "",
+        markdown: handlerProps.markdown,
+        explode: handlerProps.explode,
+      });
+    },
+  };
+
+  // DYNAMIC
+  const routesPromises = Object.entries(props.config.routes).map(
+    async ([dynamicPath, routeConfig]) => {
+      try {
+        const pathParamsConfigs = await routeConfig.getPathParams?.(ctx);
+        if (pathParamsConfigs) {
+          for (const pathParamsConfig of pathParamsConfigs || []) {
+            let pathToAdd = dynamicPath;
+
+            for (const [key, value] of Object.entries(
+              pathParamsConfig.params,
+            )) {
+              pathToAdd = pathToAdd.replace(`:${key}`, value);
+            }
+
+            paths.push(pathToAdd);
+          }
+        }
+      } catch (error) {
+        logger.error(`while getting path params for route ${dynamicPath}`, {
+          error,
+        });
+      }
+    },
+  );
+  await Promise.all(routesPromises);
 
   // MARKDOWN
   const globPatterns = ["**/*.md", "**/*.mdx"];
@@ -226,26 +298,6 @@ async function getPaths(props: { config: ZzapConfigType }) {
       paths.push(path);
     }
   }
-
-  // DYNAMIC
-  const routesPromises = Object.entries(props.config.routes).map(
-    async ([dynamicPath, routeConfig]) => {
-      routeConfig;
-      const pathParamsConfigs = await routeConfig.getPathParams?.();
-
-      for (const pathParamsConfig of pathParamsConfigs || []) {
-        let pathToAdd = dynamicPath;
-
-        for (const [key, value] of Object.entries(pathParamsConfig.params)) {
-          pathToAdd = pathToAdd.replace(`:${key}`, value);
-        }
-
-        paths.push(pathToAdd);
-      }
-    },
-  );
-
-  await Promise.all(routesPromises);
 
   return paths;
 }

@@ -10,12 +10,12 @@ const md = markdownit({
 });
 
 export const PageBuilder = {
-  async fromMarkdown(props: {
+  fromMarkdown(props: {
     config: ZzapConfigType;
     path: string;
-    filePath: string;
     markdown: string;
-  }): Promise<Array<PluginPageType>> {
+    explode?: boolean;
+  }): Array<PageType> {
     const frontmatterRegex = /---\n(.*?)\n---/s;
     const frontMatter = props.markdown.match(frontmatterRegex)?.[1];
     const data: {
@@ -31,13 +31,10 @@ export const PageBuilder = {
     } = data;
     const markdown = props.markdown.replace(frontmatterRegex, "");
 
-    const pages: Array<PluginPageType> = [];
+    const pages: Array<PageType> = [];
     const documents: Array<DocumentType> = [];
-    const fileName = props.filePath.split("/").pop();
 
-    const shouldExplode = fileName === "!index.md";
-
-    if (!shouldExplode) {
+    if (!props.explode) {
       documents.push({
         path: props.path,
         markdown: markdown,
@@ -107,7 +104,7 @@ export const PageBuilder = {
     );
 
     renderedDocuments.forEach((renderedDocument) => {
-      const page: PluginPageType = {
+      const page: PageType = {
         title: renderedDocument.title,
         description: renderedDocument.description,
         data: {
@@ -145,7 +142,7 @@ export type RoutePageType = {
   data: any;
 };
 
-export type PluginPageType<T extends {} = {}> = {
+export type PageType<T extends {} = {}> = {
   title: string;
   description: string;
   path: string;
@@ -155,7 +152,7 @@ export type PluginPageType<T extends {} = {}> = {
   } & T;
 };
 
-export type PageType<T extends {} = {}> = {
+export type RenderedPageType<T extends {} = {}> = {
   title: string;
   description: string;
   path: string;

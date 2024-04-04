@@ -2,7 +2,8 @@ import { inject as injectVercelAnalytics } from "@vercel/analytics";
 import { injectSpeedInsights as injectVercelSpeedInsights } from "@vercel/speed-insights";
 import clsx from "clsx";
 import React, { useEffect } from "react";
-import { PageType, TemplateProps, Templates, ZzapClient } from "zzap/client";
+import { TemplateProps, Templates, ZzapClient } from "zzap/client";
+import { RenderedPageType } from "zzap/src/domains/page/ZzapPageBuilder";
 import {
   DiscordIcon,
   GitHubIcon,
@@ -14,15 +15,6 @@ import {
   ZzapIconGradient,
 } from "./components/Icons";
 import { sidebars } from "./sidebars";
-
-import markdownit from "markdown-it";
-import { GitHubReleases } from "./types/DynamicData";
-const md = markdownit({
-  html: true,
-  linkify: true,
-  langPrefix: "",
-});
-
 ZzapClient.interactive(App);
 
 ZzapClient.whenInBrowser(async () => {
@@ -30,7 +22,7 @@ ZzapClient.whenInBrowser(async () => {
   injectVercelSpeedInsights();
 });
 
-export default function App(props: { page: PageType }) {
+export default function App(props: { page: RenderedPageType }) {
   const visibleSidebars = sidebars.filter((sidebar) => {
     return props.page.path.startsWith(sidebar.path);
   });
@@ -280,19 +272,25 @@ export default function App(props: { page: PageType }) {
               );
             },
             releases(
-              templateProps: TemplateProps<{ releases: Array<GitHubReleases> }>,
+              templateProps: TemplateProps<{
+                releases: Array<{
+                  title: string;
+                  description: string;
+                  id: string;
+                }>;
+              }>,
             ) {
               const releases = templateProps.page.data.releases;
               return (
                 <div>
                   <h1>Latest Releases</h1>
                   <div className="tw-grid tw-grid-cols-3 tw-gap-2">
-                    {releases.map((release) => {
+                    {releases.map((release, i) => {
                       return (
-                        <div key={release.id} className="">
+                        <div key={i} className="">
                           <article>
-                            <h3>{release.name}</h3>
-                            <div>Body</div>
+                            <h3>{release.title} </h3>
+                            <p>{release.description}</p>
                             <div>
                               <a href={`/releases/${release.id}`}>Read more</a>
                             </div>
@@ -301,30 +299,16 @@ export default function App(props: { page: PageType }) {
                       );
                     })}
                   </div>
-
-                  <p>
-                    Other releases can be found{" "}
-                    <a
-                      href="https://github.com/zzapdotdev/zzap/releases"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      here
-                    </a>
-                    .
-                  </p>
                 </div>
               );
             },
-            release(templateProps: TemplateProps<{ release: GitHubReleases }>) {
-              const release = templateProps.page.data.release;
+            release(templateProps: TemplateProps<{}>) {
               return (
                 <div>
-                  <h1>{release.name}</h1>
-                  {release.body && (
+                  {templateProps.page.data.html && (
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: md.render(release.body),
+                        __html: templateProps.page.data.html,
                       }}
                     ></div>
                   )}

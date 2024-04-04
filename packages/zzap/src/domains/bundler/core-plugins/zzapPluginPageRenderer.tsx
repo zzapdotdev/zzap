@@ -1,7 +1,7 @@
 import React from "react";
 import type { ZzapConfigType } from "../../config/zzapConfigSchema";
 import type { getLogger } from "../../logging/getLogger";
-import type { PageType } from "../../page/ZzapPageBuilder";
+import type { RenderedPageType } from "../../page/ZzapPageBuilder";
 
 import { definePlugin } from "../../plugin/definePlugin";
 
@@ -14,7 +14,7 @@ export const zzapPluginPageRenderer = definePlugin({
       name: "core-page",
       async onRender(ctx) {
         const promises = ctx.pages.map(async (page) => {
-          const clientPage: PageType = {
+          const clientPage: RenderedPageType = {
             ...page,
             titleWithSiteTitle: `${page.title} • ${ctx.config.title}`,
             sitemap: ctx.sitemap,
@@ -162,6 +162,6 @@ async function getIndexModule(props: {
   );
 }
 
-function DefaultAppComponent(_props: { page: PageType }) {
+function DefaultAppComponent(_props: { page: RenderedPageType }) {
   return <></>;
 }

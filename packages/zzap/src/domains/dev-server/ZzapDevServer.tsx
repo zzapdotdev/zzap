@@ -1,6 +1,8 @@
 import { $, type ServerWebSocket } from "bun";
+import path from "path";
 import { logger } from "../../cli";
 import type { ZzapConfigType } from "../config/zzapConfigSchema";
+import { WebPath } from "../web-path/WebPath";
 
 export const ZzapDevServer = {
   start(props: {
@@ -52,7 +54,11 @@ export const ZzapDevServer = {
           props.config.base,
           "/",
         );
-        const outDirFilePath = `${props.config.outputDir}${pathnameWithoutBasepath}${fileName}`;
+        const outDirFilePath = path.join(
+          props.config.outputDir,
+          pathnameWithoutBasepath,
+          fileName,
+        );
 
         try {
           let file = Bun.file(outDirFilePath);
@@ -61,7 +67,7 @@ export const ZzapDevServer = {
           if (outDirFilePath.endsWith(".html")) {
             const shouldRebuild = state.shouldRevalidate || !exists;
             if (shouldRebuild) {
-              const pathToRebuild = pathnameWithoutBasepath;
+              const pathToRebuild = WebPath.join(pathnameWithoutBasepath);
               await $`zzap rebuild --paths=${pathToRebuild} --child ${props.debug ? "--debug" : ""}`;
               state.shouldRevalidate = false;
             }
@@ -74,9 +80,11 @@ export const ZzapDevServer = {
             const shouldRebuild = state.shouldRevalidate || !exists;
 
             if (shouldRebuild) {
-              const pathToRebuild = pathnameWithoutBasepath
-                .replace("/__zzap/data", "")
-                .replace("props.json", "");
+              const pathToRebuild = WebPath.join(
+                pathnameWithoutBasepath
+                  .replace("/__zzap/data/", "")
+                  .replace("props.json", ""),
+              );
 
               await $`zzap rebuild --paths=${pathToRebuild} --child ${props.debug ? "--debug" : ""}`;
               state.shouldRevalidate = false;

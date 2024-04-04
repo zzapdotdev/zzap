@@ -15,9 +15,7 @@
     "package": "bun package.tsx package",
     "bump": "bun ./scripts/bump.ts",
     "distribute": "npm publish",
-    "patch": "npm version patch",
-    "minor": "npm version minor",
-    "major": "npm version major"
+    "test": "bun test"
   },
   "dependencies": {
     "bun": "1.1.0",

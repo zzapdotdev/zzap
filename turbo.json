@@ -18,9 +18,6 @@
     "package": {
       "cache": false
     },
-    "test": {
-      "cache": false
-    },
     "distribute": {
       "cache": false
     },

@@ -1,7 +1,9 @@
+import type { $ } from "bun";
 import z from "zod";
 
 import type { default as Server } from "react-dom/server";
-import type { RoutePageType } from "../page/ZzapPageBuilder";
+import type { getLogger } from "../logging/getLogger";
+import type { PageType, RoutePageType } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
 
 export const zzapConfigSchema = z.object({
@@ -80,22 +82,31 @@ export const zzapConfigSchema = z.object({
     .record(
       z.string(),
       z.object({
-        getPathParams: z
-          .function()
-          .returns(
-            z.promise(
-              z.array(z.object({ params: z.record(z.string(), z.any()) })),
-            ),
-          )
-          .optional(),
-        getPage: z
-          .function()
-          .args(z.object({ params: z.record(z.string(), z.any()) }))
-          .returns(z.promise(z.any() as z.ZodType<RoutePageType>)),
+        getPathParams: z.function().optional() as z.ZodType<
+          GetPathParamsType | undefined
+        >,
+        getPage: z.function() as z.ZodType<GetPageType>,
       }),
     )
     .default({}),
 });
+
+export type GetPathParamsType = (
+  ctx: RouteHandlerContextType,
+) => Promise<Array<{ params: Record<string, any> }> | undefined | void>;
+
+export type GetPageType = (
+  props: Record<string, any>,
+  ctx: RouteHandlerContextType,
+) => Promise<RoutePageType | undefined | void>;
+
+export type RouteHandlerContextType = {
+  $: typeof $;
+  Bun: typeof Bun;
+  logger: ReturnType<typeof getLogger>;
+  config: ZzapConfigType;
+  markdownToPage(props: { markdown: string }): Array<PageType>;
+};
 
 export type ZzapConfigType = z.infer<typeof zzapConfigSchema> & {
   rootDir: string;

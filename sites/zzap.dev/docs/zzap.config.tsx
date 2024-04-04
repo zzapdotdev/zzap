@@ -1,7 +1,17 @@
+import kebabCase from "lodash/kebabCase";
+import path from "path";
 import React from "react";
 import Server from "react-dom/server";
-import { defineConfig, plugins } from "zzap";
-import { GitHubReleases } from "./src/types/Data";
+import { RouteHandlerContextType, defineConfig, plugins } from "zzap";
+
+import markdownit from "markdown-it";
+import { PageType } from "zzap/client";
+
+const md = markdownit({
+  html: true,
+  linkify: true,
+  langPrefix: "",
+});
 
 export default defineConfig({
   title: "zzap.dev",
@@ -14,27 +24,6 @@ export default defineConfig({
       conditional: true,
       modulePath: "../../../node_modules/@picocss/pico",
     }),
-    // plugins.dynamic({
-    //   name: "releases",
-    //   async loader(ctx) {
-    //     const pages = new Array(4000).fill(0).map((_, i) => {
-    //       return ctx.makePage({
-    //         title: `Release ${i}`,
-    //         description: `Release ${i}`,
-    //         path: `/releases/${i}`,
-    //         template: "releases",
-    //         data: {
-    //           release: i,
-    //         },
-    //         html: `<h1>Release ${i}</h1>`,
-    //       });
-    //     });
-
-    //     return {
-    //       pages,
-    //     };
-    //   },
-    // }),
   ],
   publicFiles: [
     {
@@ -74,52 +63,89 @@ export default defineConfig({
 
   routes: {
     "/releases": {
-      async getPage() {
-        const releasesResponse = await fetch(
-          "https://api.github.com/repos/zzapdotdev/zzap/releases",
+      async getPage(params, ctx) {
+        const releases = await getRelease({ ctx, includePage: false });
+        console.log(
+          "IDS",
+          releases.map((release) => release.id),
         );
-        const data: Array<GitHubReleases> = await releasesResponse.json();
-
         return {
           title: "zzap Releases",
           description: "What's new with zzap",
           template: "releases",
           data: {
-            releases: data,
+            releases,
           },
         };
       },
     },
     "/releases/:id": {
-      async getPathParams() {
-        const releaseResponse = await fetch(
-          "https://api.github.com/repos/zzapdotdev/zzap/releases",
-        );
-        const data: Array<GitHubReleases> = await releaseResponse.json();
-
-        return data.map((release) => {
-          return {
-            params: {
-              id: release.id,
-            },
-          };
+      async getPathParams(ctx) {
+        const releases = await getRelease({
+          ctx,
+          includePage: true,
         });
+
+        return releases.map((release) => ({
+          params: {
+            id: release.id,
+          },
+        }));
       },
-      async getPage(props) {
-        const releaseResponse = await fetch(
-          `https://api.github.com/repos/zzapdotdev/zzap/releases/${props.params.id}`,
+      async getPage(props, ctx) {
+        const releases = await getRelease({
+          ctx: ctx,
+          includePage: true,
+        });
+        const release = releases.find(
+          (release) => release.id === props.params.id,
         );
-        const data: GitHubReleases = await releaseResponse.json();
+
+        if (!release?.page) {
+          return;
+        }
 
         return {
-          title: data.name,
-          description: data.body,
+          ...release.page,
           template: "release",
-          data: {
-            release: data,
-          },
         };
       },
     },
   },
 });
+
+export async function getRelease(props: {
+  ctx: RouteHandlerContextType;
+  includePage: boolean;
+}) {
+  const glob = new Bun.Glob("./src/releases/*.md");
+
+  const fileIterator = glob.scan({
+    cwd: __dirname,
+    onlyFiles: true,
+  });
+
+  const releases: Array<{
+    title: string;
+    description: string;
+    id: string;
+    page: PageType | undefined;
+  }> = [];
+
+  for await (const filePath of fileIterator) {
+    const markdown = await Bun.file(path.join(__dirname, filePath)).text();
+    const fileNameWithoutExtension = path.basename(filePath, ".md");
+
+    const [page] = props.ctx.markdownToPage({
+      markdown,
+    });
+
+    releases.push({
+      title: page.title,
+      description: page.description,
+      id: kebabCase(fileNameWithoutExtension),
+      page: props.includePage ? page : undefined,
+    });
+  }
+  return releases;
+}
