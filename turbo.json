@@ -15,6 +15,9 @@
     "start": {
       "cache": false
     },
+    "test": {
+      "cache": false
+    },
     "package": {
       "cache": false
     },

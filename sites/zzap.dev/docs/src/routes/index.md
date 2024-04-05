@@ -1,5 +1,4 @@
 ---
-title: zzap The content site generator for React, and it's... really fast
 description: Add zzap to your project, include some markdown files, and trust zzap to build your site in milliseconds.
 ---
 

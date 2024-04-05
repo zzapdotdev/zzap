@@ -27,6 +27,11 @@ export default defineConfig({
     "react-dom/server": Server,
   },
   document(props, slots) {
+    const title = props.title
+      ? props.title + " • zzap"
+      : "zzap • The content site generator for React that's just really fast";
+    const description = props.description;
+
     return (
       <>
         <html lang="en">
@@ -39,8 +44,18 @@ export default defineConfig({
             <link rel="icon" href="/favicon.png" />
             <link rel="stylesheet" href="/styles/index.css" />
             <link rel="stylesheet" href="/styles/docsearch.css" />
-            <title>{props.title + " • zzap.dev"}</title>
-            <meta name="description" content={props.description} />
+            <title>{title}</title>
+
+            <meta name="og:title" content={title} />
+            <meta name="og:description" content={description} />
+            <meta property="og:type" content="website" />
+            <meta property="og:site_name" content={title} />
+            {/* <meta name="og:image" content=""></meta> */}
+            <meta name="twitter:card" content="summary_large_image" />
+
+            <meta name="twitter:title" content={title} />
+            {/* <meta name="twitter:image" content=""></meta> */}
+            <meta name="description" content={description} />
             {slots.head}
           </head>
           <body>{slots.children}</body>

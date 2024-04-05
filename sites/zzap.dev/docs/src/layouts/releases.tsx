@@ -13,17 +13,21 @@ export default function Releases(
   return (
     <Layout {...props}>
       <h1>Latest Releases</h1>
-      <div className="tw-grid tw-grid-cols-3 tw-gap-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-2">
         {props.releases.map((release, i) => {
           return (
             <div key={i} className="">
-              <article>
-                <h3>{release.title} </h3>
-                <p>{release.description}</p>
-                <div>
-                  <a href={`/releases/${release.id}`}>Read more</a>
-                </div>
-              </article>
+              <a
+                href={`/releases/${release.id}`}
+                className="tw-text- tw-no-underline"
+              >
+                <article className="tw-cursor-pointer ">
+                  <h3>{release.title} </h3>
+                  <p className="tw-text-[color:#373c44] dark:tw-text-[color:#c2c7d0]">
+                    {release.description}
+                  </p>
+                </article>
+              </a>
             </div>
           );
         })}
