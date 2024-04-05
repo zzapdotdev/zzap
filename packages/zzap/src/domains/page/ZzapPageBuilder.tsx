@@ -26,7 +26,7 @@ export const PageBuilder = {
     const {
       title: frontmatterTitle,
       description: frontmatterDescription,
-      template: frontmatterTemplate,
+      layout: frontmatterLayout,
       ...rest
     } = data;
     const markdown = props.markdown.replace(frontmatterRegex, "");
@@ -99,7 +99,7 @@ export const PageBuilder = {
           description,
           html,
           path: document.path,
-          template: frontmatterTemplate || "default",
+          layout: frontmatterLayout || "default",
         };
       },
     );
@@ -110,7 +110,7 @@ export const PageBuilder = {
         title: renderedDocument.title,
         description: renderedDocument.description,
         path: renderedDocument.path,
-        template: renderedDocument.template,
+        layout: renderedDocument.layout,
         markdown: {
           html: renderedDocument.html,
         },
@@ -133,14 +133,14 @@ type RenderedDocumentType = {
   html: string;
   title: string;
   description: string;
-  template: string | "default";
+  layout: string | "default";
 };
 
 export type ZzapPageProps<T = {}> = {
   title?: string;
   description?: string;
   path: string;
-  template: string | "default";
+  layout: string | "default";
   markdown?: {
     html: string;
   };

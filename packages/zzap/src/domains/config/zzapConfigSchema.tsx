@@ -1,16 +1,11 @@
-import type { $ } from "bun";
 import z from "zod";
 
 import type { default as Server } from "react-dom/server";
-import type { getLogger } from "../logging/getLogger";
 import type { ZzapPageProps } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
+import type { ZzapRouteType } from "../route/defineRoute";
 
 export const zzapConfigSchema = z.object({
-  /**
-   * The title of the site.
-   */
-  title: z.string().default(""),
   /**
    * The description of the site.
    */
@@ -71,6 +66,7 @@ export const zzapConfigSchema = z.object({
   document: z
     .function()
     .args(
+      z.any() as z.ZodType<ZzapPageProps>,
       z.object({
         head: z.any() as z.ZodType<JSX.Element>,
         children: z.any() as z.ZodType<JSX.Element>,
@@ -78,45 +74,22 @@ export const zzapConfigSchema = z.object({
       }),
     )
     .returns(z.any() as z.ZodType<JSX.Element>),
-  routes: z
-    .record(
-      z.string(),
-      z.object({
-        getPathParams: z.function().optional() as z.ZodType<
-          GetPathParamsType | undefined
-        >,
-        getPage: z.function() as z.ZodType<GetPageType>,
-      }),
-    )
-    .default({}),
 });
-
-export type GetPathParamsType = (
-  ctx: RouteHandlerContextType,
-) => Promise<Array<{ params: Record<string, any> }> | undefined | void>;
-
-export type GetPageType = (
-  props: Record<string, any>,
-  ctx: RouteHandlerContextType,
-) => Promise<Omit<ZzapPageProps, "path"> | undefined | void>;
-
-export type RouteHandlerContextType = {
-  $: typeof $;
-  Bun: typeof Bun;
-  logger: ReturnType<typeof getLogger>;
-  config: ZzapConfigType;
-  markdownToPage(props: { markdown: string }): Array<ZzapPageProps>;
-};
 
 export type ZzapConfigType = z.infer<typeof zzapConfigSchema> & {
   isDev: boolean;
   rootDir: string;
   routesDir: string;
   layoutsDir: string;
+  routes: Array<ZzapRouteType>;
+  layouts: Record<
+    string,
+    {
+      location: string;
+      module: {
+        default(props: ZzapPageProps): JSX.Element;
+      };
+    }
+  >;
 };
 export type zzapConfigInputType = z.input<typeof zzapConfigSchema>;
-
-export function defineConfig(config: zzapConfigInputType) {
-  const parsedConfig = zzapConfigSchema.parse(config);
-  return parsedConfig;
-}

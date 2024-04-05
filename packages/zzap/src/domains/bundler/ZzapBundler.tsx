@@ -1,9 +1,6 @@
 import Bun, { $ } from "bun";
 
-import type {
-  RouteHandlerContextType,
-  ZzapConfigType,
-} from "../config/zzapConfigSchema";
+import type { ZzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 import {
   PageBuilder,
@@ -11,6 +8,7 @@ import {
   type ZzapPageProps,
 } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
+import type { RouteHandlerContextType } from "../route/defineRoute";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
 import { zzapPluginHeads } from "./core-plugins/zzapPluginHeads";
 import { zzapPluginPageRenderer } from "./core-plugins/zzapPluginPageRenderer";
@@ -44,7 +42,7 @@ export const ZzapBundler = {
     const pathFromProps = props.paths?.split(",").map((path) => path.trim());
 
     if (!pathFromProps) {
-      logger.log(`Building ${props.config.title}...`);
+      logger.log(`Building...`);
     } else {
       logger.log(`Rebuilding... (${props.paths})`);
     }
@@ -129,18 +127,17 @@ async function getPagesAndSitemap(props: {
 
   const promises = props.paths.map(async (path) => {
     // Check for route
-    const routes = Object.entries(props.config.routes);
 
-    for (const [routePath, routeConfig] of routes) {
+    for (const route of props.config.routes) {
       const pathSegments = path.split("/");
-      const routeSegments = routePath.split("/");
+      const routeSegments = route.path.split("/");
 
       if (pathSegments.length !== routeSegments.length) {
         continue;
       }
 
       const match = routeSegments.every((routeSegment, i) => {
-        if (routeSegment.startsWith(":")) return true;
+        if (routeSegment.startsWith("$")) return true;
         return routeSegment === pathSegments[i];
       });
 
@@ -148,15 +145,15 @@ async function getPagesAndSitemap(props: {
         const params: Record<string, string> = {};
 
         for (const segment of routeSegments) {
-          if (segment.startsWith(":")) {
-            const key = segment.replace(":", "");
+          if (segment.startsWith("$")) {
+            const key = segment.replace("$", "");
             const value = pathSegments[routeSegments.indexOf(segment)];
             params[key] = value;
           }
         }
 
         try {
-          const routePage = await routeConfig.getPage({ params: params }, ctx);
+          const routePage = await route.getPage({ params: params }, ctx);
 
           if (routePage) {
             pages.set(path, {
@@ -165,7 +162,7 @@ async function getPagesAndSitemap(props: {
             });
           }
         } catch (error) {
-          logger.error(`while getting page for route ${routePath}`, {
+          logger.error(`while getting page for route ${route.path}`, {
             error,
           });
         }
@@ -252,30 +249,26 @@ async function getPaths(props: { config: ZzapConfigType }) {
   };
 
   // DYNAMIC
-  const routesPromises = Object.entries(props.config.routes).map(
-    async ([dynamicPath, routeConfig]) => {
-      try {
-        const pathParamsConfigs = await routeConfig.getPathParams?.(ctx);
-        if (pathParamsConfigs) {
-          for (const pathParamsConfig of pathParamsConfigs || []) {
-            let pathToAdd = dynamicPath;
+  const routesPromises = props.config.routes.map(async (route) => {
+    try {
+      const pathParamsConfigs = await route.getPathParams?.(ctx);
+      if (pathParamsConfigs) {
+        for (const pathParamsConfig of pathParamsConfigs || []) {
+          let pathToAdd = route.path;
 
-            for (const [key, value] of Object.entries(
-              pathParamsConfig.params,
-            )) {
-              pathToAdd = pathToAdd.replace(`:${key}`, value);
-            }
-
-            paths.push(pathToAdd);
+          for (const [key, value] of Object.entries(pathParamsConfig.params)) {
+            pathToAdd = pathToAdd.replace(`:${key}`, value);
           }
+
+          paths.push(pathToAdd);
         }
-      } catch (error) {
-        logger.error(`while getting path params for route ${dynamicPath}`, {
-          error,
-        });
       }
-    },
-  );
+    } catch (error) {
+      logger.error(`while getting path params for route ${route.path}`, {
+        error,
+      });
+    }
+  });
   await Promise.all(routesPromises);
 
   // MARKDOWN
