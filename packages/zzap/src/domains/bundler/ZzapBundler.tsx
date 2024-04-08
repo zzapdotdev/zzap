@@ -167,7 +167,6 @@ async function getPagesAndSitemap(props: {
             { params: params, path: pathWithInjectedParams },
             ctx,
           );
-          logger.warn("PPPPP", { pathWithInjectedParams });
 
           if (routePage) {
             pages.set(pathWithInjectedParams, {
