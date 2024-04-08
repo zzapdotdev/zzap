@@ -3,7 +3,6 @@ import Server from "react-dom/server";
 import { defineConfig, plugins } from "zzap";
 
 export default defineConfig({
-  title: "zzap.dev",
   plugins: [
     plugins.tailwind({
       filePath: "./src/tailwind.css",
@@ -13,27 +12,6 @@ export default defineConfig({
       conditional: true,
       modulePath: "../../../node_modules/@picocss/pico",
     }),
-    // plugins.dynamic({
-    //   name: "releases",
-    //   async loader(ctx) {
-    //     const pages = new Array(4000).fill(0).map((_, i) => {
-    //       return ctx.makePage({
-    //         title: `Release ${i}`,
-    //         description: `Release ${i}`,
-    //         path: `/releases/${i}`,
-    //         template: "releases",
-    //         data: {
-    //           release: i,
-    //         },
-    //         html: `<h1>Release ${i}</h1>`,
-    //       });
-    //     });
-
-    //     return {
-    //       pages,
-    //     };
-    //   },
-    // }),
   ],
   publicFiles: [
     {
@@ -48,7 +26,12 @@ export default defineConfig({
   deps: {
     "react-dom/server": Server,
   },
-  document(props) {
+  document(props, slots) {
+    const title = props.title
+      ? props.title + " • zzap"
+      : "zzap • The content site generator for React that's just really fast";
+    const description = props.description;
+
     return (
       <>
         <html lang="en">
@@ -61,54 +44,24 @@ export default defineConfig({
             <link rel="icon" href="/favicon.png" />
             <link rel="stylesheet" href="/styles/index.css" />
             <link rel="stylesheet" href="/styles/docsearch.css" />
+            <title>{title}</title>
 
-            {props.head}
+            <meta name="og:title" content={title} />
+            <meta name="og:description" content={description} />
+            <meta property="og:type" content="website" />
+            <meta property="og:site_name" content={title} />
+            {/* <meta name="og:image" content=""></meta> */}
+            <meta name="twitter:card" content="summary_large_image" />
+
+            <meta name="twitter:title" content={title} />
+            {/* <meta name="twitter:image" content=""></meta> */}
+            <meta name="description" content={description} />
+            {slots.head}
           </head>
-          <body>{props.children}</body>
-          {props.scripts}
+          <body>{slots.children}</body>
+          {slots.scripts}
         </html>
       </>
     );
   },
 });
-
-type GitHubReleases = {
-  url: string;
-  assets_url: string;
-  upload_url: string;
-  html_url: string;
-  id: number;
-  author: {
-    login: string;
-    id: number;
-    node_id: string;
-    avatar_url: string;
-    gravatar_id: string;
-    url: string;
-    html_url: string;
-    followers_url: string;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string;
-    organizations_url: string;
-    repos_url: string;
-    events_url: string;
-    received_events_url: string;
-    type: string;
-    site_admin: boolean;
-  };
-  node_id: string;
-  tag_name: string;
-  target_commitish: string;
-  name: string;
-  draft: boolean;
-  prerelease: boolean;
-  created_at: string;
-  published_at: string;
-  assets: Array<any>;
-  tarball_url: string;
-  zipball_url: string;
-  body: string;
-  mentions_count?: number;
-};

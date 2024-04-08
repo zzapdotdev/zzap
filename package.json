@@ -3,13 +3,16 @@
   "private": true,
   "scripts": {
     "dev": "bun run package && bunx turbo dev --filter zzap.dev --filter zzap",
-    "start": "bun run package && bunx turbo start --filter zzap.dev",
+    "debug": "bun run package && bunx turbo debug --filter zzap.dev --filter zzap",
+    "start": "bun run package && cd sites/zzap.dev && bun start",
     "build": "bun run package && bunx turbo build --log-order grouped",
     "build:zzap.dev": "bun run package && bunx turbo build --filter zzap.dev --log-order grouped",
     "distribute": "bun run package && bunx turbo distribute",
     "bump": "bunx turbo bump",
     "test": "bunx turbo test --log-order grouped",
-    "package": "bunx turbo package --log-order grouped"
+    "package": "bunx turbo package --log-order grouped",
+    "e2e": "bun run package && bunx turbo e2e",
+    "e2e:ui": "bun run package && bunx turbo e2e:ui --filter zzap.dev"
   },
   "workspaces": [
     "packages/*",
@@ -19,5 +22,9 @@
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "turbo": "^1.13.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.4",
+    "@playwright/test": "^1.43.0"
   }
 }

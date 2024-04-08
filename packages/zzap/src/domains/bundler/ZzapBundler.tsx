@@ -1,13 +1,15 @@
 import Bun, { $ } from "bun";
-
+import path from "path";
 import type { ZzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 import {
   PageBuilder,
-  type PluginPageType,
   type SitemapItemType,
+  type ZzapPageProps,
 } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
+import type { RouteHandlerContextType } from "../route/defineRoute";
+import { WebPath } from "../web-path/WebPath";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
 import { zzapPluginHeads } from "./core-plugins/zzapPluginHeads";
 import { zzapPluginPageRenderer } from "./core-plugins/zzapPluginPageRenderer";
@@ -19,13 +21,13 @@ import { zzapPluginSitemapRenderer } from "./core-plugins/zzapPluginSitemapRende
 const logger = getLogger();
 
 export const ZzapBundler = {
-  async prepareBuild(props: { config: ZzapConfigType }) {
+  async setupBuild(props: { config: ZzapConfigType }) {
     await runPluginsWithLifecycle({
       config: props.config,
-      loggerPrefix: "prepare",
+      loggerPrefix: "setup",
       async onRun({ plugin, logger }) {
-        if (plugin.onPrepare) {
-          await plugin.onPrepare?.({
+        if (plugin.onSetup) {
+          await plugin.onSetup?.({
             $,
             Bun,
             logger: logger,
@@ -41,7 +43,7 @@ export const ZzapBundler = {
     const pathFromProps = props.paths?.split(",").map((path) => path.trim());
 
     if (!pathFromProps) {
-      logger.log(`Building ${props.config.title}...`);
+      logger.log(`Building...`);
     } else {
       logger.log(`Rebuilding... (${props.paths})`);
     }
@@ -99,7 +101,9 @@ export const ZzapBundler = {
       },
     });
 
-    logger.log(`Finished in ${Date.now() - timetamp}ms.`);
+    logger.log(
+      `Finished in ${Date.now() - timetamp}ms. Rendered ${pages.size} pages.`,
+    );
   },
 };
 
@@ -107,41 +111,122 @@ async function getPagesAndSitemap(props: {
   paths: string[];
   config: ZzapConfigType;
 }) {
-  const pages = new Map<string, PluginPageType>();
-  const promises = props.paths.map(async (path) => {
-    // Check for Markdown files
-    let filePath = props.config.srcDir + path + ".md";
+  const pages = new Map<string, ZzapPageProps>();
 
+  const ctx: RouteHandlerContextType = {
+    $,
+    Bun,
+    logger,
+    config: props.config,
+    markdownToPage(handlerProps: { markdown: string; explode?: boolean }) {
+      return PageBuilder.fromMarkdown({
+        config: props.config,
+        path: "",
+        markdown: handlerProps.markdown,
+        explode: handlerProps.explode,
+      });
+    },
+  };
+
+  const promises = props.paths.map(async (webPath) => {
+    // DYNAMIC ROUTES
+    for (const route of props.config.routes) {
+      const pathSegments = webPath.split("/");
+      const routeSegments = route.path.split("/");
+
+      if (pathSegments.length !== routeSegments.length) {
+        continue;
+      }
+
+      const match = routeSegments.every((routeSegment, i) => {
+        if (routeSegment.startsWith("$")) return true;
+        return routeSegment === pathSegments[i];
+      });
+
+      if (match) {
+        const params: Record<string, string> = {};
+        const segmentsWithInjectedParams: Array<string> = [];
+
+        for (const segment of routeSegments) {
+          if (segment.startsWith("$")) {
+            const key = segment.replace("$", "");
+            const value = pathSegments[routeSegments.indexOf(segment)];
+
+            params[key] = value;
+            segmentsWithInjectedParams.push(value);
+          } else {
+            segmentsWithInjectedParams.push(segment);
+          }
+        }
+
+        try {
+          const pathWithInjectedParams = WebPath.join(
+            segmentsWithInjectedParams.join("/"),
+          );
+          const routePage = await route.getPage(
+            { params: params, path: pathWithInjectedParams },
+            ctx,
+          );
+
+          if (routePage) {
+            pages.set(pathWithInjectedParams, {
+              ...routePage,
+              path: pathWithInjectedParams,
+            });
+          }
+        } catch (error) {
+          logger.error(`while getting page for route ${route.path}`, {
+            error,
+          });
+        }
+      }
+    }
+
+    // MARKDOWN
+    // check index.md
+    let filePath = path.join(props.config.routesDir, webPath, "index.md");
     let file = Bun.file(filePath);
     let exists = await file.exists();
 
     if (!exists) {
-      filePath = props.config.srcDir + path + "/index.md";
+      // check [segment].md
+      filePath = path.join(props.config.routesDir, webPath) + ".md";
       file = Bun.file(filePath);
       exists = await file.exists();
     }
 
     if (!exists) {
-      const pathForExploded = path.split("/").slice(0, -1).join("/");
-      filePath = props.config.srcDir + pathForExploded + "/!index.md";
+      // check !index.md
+      const pathForExploded = webPath.split("/").slice(0, -1).join("/");
+      filePath = path.join(
+        props.config.routesDir,
+        pathForExploded,
+        "!index.md",
+      );
 
       file = Bun.file(filePath);
       exists = await file.exists();
     }
 
-    if (exists) {
-      const pageMarkdown = await file.text();
-      const markdownPages = await PageBuilder.fromMarkdown({
-        config: props.config as any,
-        path: path,
-        filePath,
-        markdown: pageMarkdown,
-      });
-
-      markdownPages.forEach((page) => {
-        pages.set(page.path, page);
-      });
+    if (!exists) {
+      return;
     }
+
+    const pageMarkdown = await file.text();
+
+    const fileName = filePath.split("/").pop();
+    const shouldExplode = fileName === "!index.md";
+
+    const markdownPages = PageBuilder.fromMarkdown({
+      config: props.config as any,
+      path: webPath,
+      explode: shouldExplode,
+      markdown: pageMarkdown,
+    });
+
+    markdownPages.forEach((page) => {
+      pages.set(page.path, page);
+    });
   });
   await Promise.all(promises);
 
@@ -167,29 +252,69 @@ async function getPagesAndSitemap(props: {
 
 async function getPaths(props: { config: ZzapConfigType }) {
   const paths: Array<string> = [];
+  const ctx: RouteHandlerContextType = {
+    $,
+    Bun,
+    logger,
+    config: props.config,
+    markdownToPage(handlerProps: { markdown: string; explode?: boolean }) {
+      return PageBuilder.fromMarkdown({
+        config: props.config,
+        path: "",
+        markdown: handlerProps.markdown,
+        explode: handlerProps.explode,
+      });
+    },
+  };
+
+  // DYNAMIC
+  const routesPromises = props.config.routes.map(async (route) => {
+    try {
+      const pathParamsConfigs = await route.getPathParams?.(ctx);
+      if (!pathParamsConfigs) {
+        const path = WebPath.join(route.path);
+        paths.push(path);
+      } else {
+        for (const pathParamsConfig of pathParamsConfigs || []) {
+          let pathToAdd = route.path;
+
+          for (const [key, value] of Object.entries(pathParamsConfig.params)) {
+            pathToAdd = pathToAdd.replace(`$${key}`, value);
+          }
+
+          const path = WebPath.join(pathToAdd);
+          paths.push(path);
+        }
+      }
+    } catch (error) {
+      logger.error(`while getting path params for route ${route.path}`, {
+        error,
+      });
+    }
+  });
+  await Promise.all(routesPromises);
 
   // MARKDOWN
   const globPatterns = ["**/*.md", "**/*.mdx"];
   for (const pattern of globPatterns) {
-    const glob = new Bun.Glob(props.config.srcDir + "/" + pattern);
-
+    const glob = new Bun.Glob(props.config.routesDir + "/" + pattern);
     const filesIterator = glob.scan({
       cwd: ".",
       onlyFiles: true,
     });
 
     for await (const filePath of filesIterator) {
-      const path = filePath
-        .replace(props.config.srcDir, "")
+      const cleanedFilePath = filePath
+        .replace(props.config.routesDir, "")
         .replace(/\.mdx?$/, "")
         .replace(/\.md?$/, "")
         .replace(/\/index$/, "");
 
+      const path = WebPath.join(cleanedFilePath);
+
       paths.push(path);
     }
   }
-
-  // DYNAMIC
 
   return paths;
 }

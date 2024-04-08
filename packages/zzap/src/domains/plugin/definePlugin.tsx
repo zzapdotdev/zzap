@@ -2,12 +2,12 @@ import Bun, { $ } from "bun";
 import type { getLogger } from "../logging/getLogger";
 
 import type { ZzapConfigType } from "../config/zzapConfigSchema";
-import type { PluginPageType, SitemapItemType } from "../page/ZzapPageBuilder";
+import type { SitemapItemType, ZzapPageProps } from "../page/ZzapPageBuilder";
 
 export function definePlugin<TArgs extends any[]>(props: {
   plugin(...args: TArgs): {
     name: string;
-    onPrepare?(ctx: ZzapPluginContextType): Promise<void>;
+    onSetup?(ctx: ZzapPluginContextType): Promise<void>;
     onBuild?(ctx: ZzapPluginContextType): Promise<
       | {
           heads?: Array<JSX.Element>;
@@ -20,7 +20,7 @@ export function definePlugin<TArgs extends any[]>(props: {
       ctx: ZzapPluginContextType & {
         heads: Array<JSX.Element>;
         scripts: Array<JSX.Element>;
-        pages: Array<PluginPageType>;
+        pages: Array<ZzapPageProps>;
         sitemap: Array<SitemapItemType>;
       },
     ): Promise<void>;
@@ -32,7 +32,6 @@ export function definePlugin<TArgs extends any[]>(props: {
 export type ZzapPluginContextType = {
   $: typeof $;
   Bun: typeof Bun;
-
   logger: ReturnType<typeof getLogger>;
   config: ZzapConfigType;
 };

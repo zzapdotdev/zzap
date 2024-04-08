@@ -1,12 +1,14 @@
 # zzap - A fast all-in-one toolkit for static site generation
 
-# Todo
+# TODO
 
-- [ ] feat: dynamic pages
-- [ ] tempaltes (fix 404 template)
-- [ ] prefetch with <link prefetch>
-- [ ] SSG then SPA ?
-- [ ] reach out to Bun because I can't use --minify ?
+- [ ] api KEY for releases
+
+# v0.1
+
+- [x] feat: dynamic pages
+- [x] tempaltes (fix 404 template)
+- [ ] Bundle with ESBuild
 - [x] `base` path
 - [x] public directory
 - [x] public files
@@ -20,8 +22,12 @@
 - [x] 404 page
 - [x] sitemap
 
-# Features
+# vFuture
 
-- [ ] Bun shell output
+- [ ] gzip compression with [Bun](https://bun.sh/guides/util/gzip)
+- [ ] SSG then SPA
+- [ ] Link prefetch with <link prefetch>
 
-discord: https://discord.gg/3FxnevyEth
+# Links
+
+Discord: https://zzap.dev/discord

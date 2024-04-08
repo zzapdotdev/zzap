@@ -16,7 +16,7 @@ await Bun.write("./package.json", JSON.stringify(packageJson, null, 2));
 
 logger.log("Configuring Git");
 await $`git config user.name github-actions`;
-await $`git config user.email`;
+await $`git config user.email github-actions@github.com`;
 
 logger.log("Tagging");
 await $`git tag -a v${newVersion} -m "v${newVersion}"`;

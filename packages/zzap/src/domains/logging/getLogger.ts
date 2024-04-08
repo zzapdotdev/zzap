@@ -76,11 +76,12 @@ function makeGetLogger(appName: string, deps: { console: Console }) {
   };
 }
 
-function getPrettyData(data?: Record<string, any>, pretty?: boolean) {
+function getPrettyData(data?: Record<string, any>) {
   if (!data) {
     return "";
   }
-  return pretty ? ` \n${style(JSON.stringify(data, null, 2)).dim()}` : "";
+
+  return ` \n${style(JSON.stringify(data, null, 2)).dim()}`;
 }
 
 function style(msg: string) {

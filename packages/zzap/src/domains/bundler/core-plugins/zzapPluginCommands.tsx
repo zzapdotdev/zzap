@@ -8,7 +8,16 @@ export const zzapPluginCommands = definePlugin({
         const commandPromises = ctx.config.commands.map(
           async (commandProps) => {
             ctx.logger.log(`  ${commandProps.command}`);
-            await ctx.$`${{ raw: commandProps.command }}`;
+
+            try {
+              if (commandProps.quiet) {
+                await ctx.$`${{ raw: commandProps.command }}`.quiet();
+              } else {
+                await ctx.$`${{ raw: commandProps.command }}`;
+              }
+            } catch (error) {
+              ctx.logger.error("running command", { error: error });
+            }
           },
         );
         await Promise.all(commandPromises);

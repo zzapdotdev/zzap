@@ -5,16 +5,26 @@
       "persistent": true,
       "cache": false
     },
+    "debug": {
+      "persistent": true,
+      "cache": false
+    },
     "build": {
       "cache": false
     },
     "start": {
       "cache": false
     },
+    "test": {
+      "cache": false
+    },
     "package": {
       "cache": false
     },
-    "test": {
+    "e2e": {
+      "cache": false
+    },
+    "e2e:ui": {
       "cache": false
     },
     "distribute": {

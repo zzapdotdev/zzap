@@ -3,9 +3,12 @@
   "description": "Documentation website for zzap",
   "authors": "René-Pier Deshaies-Géllinas",
   "scripts": {
-    "dev": "zzap watch --port 3000 --debug",
-    "start": "zzap start --port 3000 --debug",
-    "build": "zzap build --debug"
+    "dev": "zzap watch --port 3000",
+    "debug": "bun run dev --debug",
+    "start": "zzap build --debug && zzap start --port 3000 --debug",
+    "build": "zzap build --debug",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@docsearch/js": "3",

@@ -1,13 +1,11 @@
 import z from "zod";
 
 import type { default as Server } from "react-dom/server";
+import type { ZzapPageProps } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
+import type { ZzapRouteType } from "../route/defineRoute";
 
 export const zzapConfigSchema = z.object({
-  /**
-   * The title of the site.
-   */
-  title: z.string().default(""),
   /**
    * The description of the site.
    */
@@ -49,6 +47,7 @@ export const zzapConfigSchema = z.object({
     .array(
       z.object({
         command: z.string(),
+        quiet: z.boolean().default(false),
       }),
     )
     .default([]),
@@ -67,6 +66,7 @@ export const zzapConfigSchema = z.object({
   document: z
     .function()
     .args(
+      z.any() as z.ZodType<ZzapPageProps>,
       z.object({
         head: z.any() as z.ZodType<JSX.Element>,
         children: z.any() as z.ZodType<JSX.Element>,
@@ -77,12 +77,19 @@ export const zzapConfigSchema = z.object({
 });
 
 export type ZzapConfigType = z.infer<typeof zzapConfigSchema> & {
-  rootDir: string;
   isDev: boolean;
+  rootDir: string;
+  routesDir: string;
+  layoutsDir: string;
+  routes: Array<ZzapRouteType>;
+  layouts: Record<
+    string,
+    {
+      location: string;
+      module: {
+        default(props: ZzapPageProps): JSX.Element;
+      };
+    }
+  >;
 };
 export type zzapConfigInputType = z.input<typeof zzapConfigSchema>;
-
-export function defineConfig(config: zzapConfigInputType) {
-  const parsedConfig = zzapConfigSchema.parse(config);
-  return parsedConfig;
-}

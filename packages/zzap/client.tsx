@@ -1,12 +1,9 @@
 import type { Root } from "react-dom/client";
 import { getLogger } from "./src/domains/logging/getLogger";
 
-export type { PageType } from "./src/domains/page/ZzapPageBuilder";
-
 const logger = getLogger("client");
 let reactRoot: Root;
 
-let latestUsedShikiProps: Parameters<typeof ZzapClient.useShiki>[0] | undefined;
 export const ZzapClient = {
   inBrowser: typeof window !== "undefined",
   async whenInBrowser(callback: () => Promise<void>) {
@@ -14,7 +11,7 @@ export const ZzapClient = {
       await callback();
     }
   },
-  async interactive(RootComponent: any) {
+  async interactive() {
     if (!this.inBrowser) {
       return;
     }
@@ -23,12 +20,19 @@ export const ZzapClient = {
     const hydrateRoot = ReactDOMClient.hydrateRoot;
 
     const zzapRoot = document.querySelector("#zzap-root");
+    const props = JSON.parse(
+      document
+        .querySelector(`meta[name="zzap:props"]`)
+        ?.getAttribute("content") || "{}",
+    );
+    const template = document
+      .querySelector(`meta[name="zzap:template"]`)
+      ?.getAttribute("content");
+    const LayoutModule = await import(`/__zzap/layouts/${template}.js`);
+    const LayoutComponent = LayoutModule.default;
 
     if (zzapRoot) {
-      reactRoot = hydrateRoot(
-        zzapRoot,
-        <RootComponent {...window.__zzap.props} />,
-      );
+      reactRoot = hydrateRoot(zzapRoot, <LayoutComponent {...props} />);
     } else {
       logger.error("No #zzap-root element found");
     }
@@ -53,15 +57,11 @@ export const ZzapClient = {
           const props = await response.json();
 
           const propsHaveChanged =
-            JSON.stringify(props) !== JSON.stringify(window.__zzap.props);
+            JSON.stringify(props) !== JSON.stringify(props);
 
           if (propsHaveChanged) {
             logger.log("Props have changed, re-rendering...");
-            reactRoot.render(<RootComponent {...props} />);
-
-            if (latestUsedShikiProps) {
-              this.useShiki(latestUsedShikiProps);
-            }
+            reactRoot.render(<LayoutComponent {...props} />);
           } else {
             logger.log("Props have not changed, reloading...");
             window.location.reload();
@@ -104,7 +104,6 @@ export const ZzapClient = {
       return undefined;
     }
 
-    latestUsedShikiProps = props;
     const zzapRoot = document.querySelector("#zzap-root");
 
     const shikiCDN = "https://esm.sh/shiki@1.0.0";
@@ -119,16 +118,28 @@ export const ZzapClient = {
 
     await Promise.all(promises);
     zzapRoot?.setAttribute("data-zzap-shiki", "true");
-    return document.querySelectorAll(props?.selector);
+    return document.querySelectorAll(`div[data-zzap-shiki-block="true"]`);
 
     async function colorize(node: HTMLPreElement) {
       const lang = node.querySelector("code")?.className;
-      const nodeText = node.textContent;
-
-      node.outerHTML = await codeToHtml(nodeText, {
+      const code = node.textContent;
+      const html = await codeToHtml(code, {
         lang: lang,
         theme: props?.theme || "github-dark",
       });
+      let existingZzapShiki = node.nextElementSibling as
+        | HTMLDivElement
+        | undefined;
+      if (existingZzapShiki?.getAttribute("data-zzap-shiki-block") === "true") {
+        existingZzapShiki.innerHTML = html;
+        return;
+      } else {
+        node.style.display = "none";
+        const newZzapShiki = document.createElement("div");
+        newZzapShiki.setAttribute("data-zzap-shiki-block", "true");
+        newZzapShiki.innerHTML = html;
+        node.after(newZzapShiki);
+      }
     }
   },
 };

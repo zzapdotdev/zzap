@@ -10,12 +10,12 @@ const md = markdownit({
 });
 
 export const PageBuilder = {
-  async fromMarkdown(props: {
+  fromMarkdown(props: {
     config: ZzapConfigType;
     path: string;
-    filePath: string;
     markdown: string;
-  }): Promise<Array<PluginPageType>> {
+    explode?: boolean;
+  }): Array<ZzapPageProps> {
     const frontmatterRegex = /---\n(.*?)\n---/s;
     const frontMatter = props.markdown.match(frontmatterRegex)?.[1];
     const data: {
@@ -26,17 +26,15 @@ export const PageBuilder = {
     const {
       title: frontmatterTitle,
       description: frontmatterDescription,
+      layout: frontmatterLayout,
       ...rest
     } = data;
     const markdown = props.markdown.replace(frontmatterRegex, "");
 
-    const pages: Array<PluginPageType> = [];
+    const pages: Array<ZzapPageProps> = [];
     const documents: Array<DocumentType> = [];
-    const fileName = props.filePath.split("/").pop();
 
-    const shouldExplode = fileName === "!index.md";
-
-    if (!shouldExplode) {
+    if (!props.explode) {
       documents.push({
         path: props.path,
         markdown: markdown,
@@ -96,24 +94,26 @@ export const PageBuilder = {
         const title = frontmatterTitle || firstH1 || "";
         const description = frontmatterDescription || firstP || "";
         return {
+          ...rest,
           title,
           description,
           html,
           path: document.path,
+          layout: frontmatterLayout || "default",
         };
       },
     );
 
     renderedDocuments.forEach((renderedDocument) => {
-      const page: PluginPageType = {
-        type: "markdown",
+      const page: ZzapPageProps = {
+        ...rest,
         title: renderedDocument.title,
         description: renderedDocument.description,
-        data: {
-          ...rest,
-        },
         path: renderedDocument.path,
-        html: renderedDocument.html,
+        layout: renderedDocument.layout,
+        markdown: {
+          html: renderedDocument.html,
+        },
       };
 
       pages.push(page);
@@ -133,29 +133,20 @@ type RenderedDocumentType = {
   html: string;
   title: string;
   description: string;
+  layout: string | "default";
 };
 
-export type PluginPageType = {
-  type: "markdown" | "dynamic";
-  title: string;
-  description: string;
+export type ZzapPageProps<T = {}> = {
+  title?: string;
+  description?: string;
   path: string;
-  data?: any;
-  html?: string;
-};
-
-export type PageType = {
-  type: "markdown" | "dynamic";
-  title: string;
-  description: string;
-  path: string;
-  data?: any;
-  html?: string;
-  sitemap: SitemapItemType[];
-  titleWithSiteTitle: string;
-};
+  layout: string | "default";
+  markdown?: {
+    html: string;
+  };
+} & T;
 
 export type SitemapItemType = {
-  title: string;
+  title?: string;
   path: string;
 };
