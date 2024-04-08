@@ -60,6 +60,10 @@ export const ZzapDevServer = {
           pathnameWithoutBasepath,
           fileName,
         );
+        const outDirPageNotFoundFilePath = path.join(
+          props.config.outputDir,
+          "/404/index.html",
+        );
 
         try {
           let file = Bun.file(outDirFilePath);
@@ -96,14 +100,26 @@ export const ZzapDevServer = {
           }
 
           if (!exists) {
-            return devServerResponse({
-              html: `
-                  <h1>zzap watch - 404</h1>
-                  <p>File not found: <code>${pathnameWithoutBasepath}</code></p>
-                  <p>Looked at: <code>${outDirFilePath}</code></p>
-              `,
-              status: 404,
-            });
+            const pageNotFoundFile = Bun.file(outDirPageNotFoundFilePath);
+            const pageNotFoundExists = await pageNotFoundFile.exists();
+
+            if (pageNotFoundExists) {
+              return new Response(pageNotFoundFile, {
+                headers: {
+                  "Cache-Control": "no-cache, no-store, must-revalidate",
+                },
+                status: 404,
+              });
+            } else {
+              return devServerResponse({
+                html: `
+                    <h1>zzap watch - 404</h1>
+                    <p>File not found: <code>${pathnameWithoutBasepath}</code></p>
+                    <p>Looked at: <code>${outDirFilePath}</code></p>
+                `,
+                status: 404,
+              });
+            }
           }
           return new Response(file, {
             headers: {

@@ -6,3 +6,5 @@ dist
 .zzap
 .env.local
 *.bun-build
+playwright-report
+test-results
