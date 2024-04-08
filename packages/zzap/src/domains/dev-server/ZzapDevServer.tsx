@@ -9,6 +9,7 @@ export const ZzapDevServer = {
     port: number | undefined;
     config: ZzapConfigType;
     debug: boolean | undefined;
+    mode: "dev" | "start";
     onWebSocketOpen?: (ws: ServerWebSocket<unknown>) => void;
   }) {
     const state = {
@@ -66,7 +67,7 @@ export const ZzapDevServer = {
 
           if (outDirFilePath.endsWith(".html")) {
             const shouldRebuild = state.shouldRevalidate || !exists;
-            if (shouldRebuild) {
+            if (shouldRebuild && props.mode === "dev") {
               const pathToRebuild = WebPath.join(pathnameWithoutBasepath);
               await $`zzap rebuild --paths=${pathToRebuild} --child ${props.debug ? "--debug" : ""}`;
               state.shouldRevalidate = false;
@@ -79,7 +80,7 @@ export const ZzapDevServer = {
           if (outDirFilePath.endsWith("props.json")) {
             const shouldRebuild = state.shouldRevalidate || !exists;
 
-            if (shouldRebuild) {
+            if (shouldRebuild && props.mode === "dev") {
               const pathToRebuild = WebPath.join(
                 pathnameWithoutBasepath
                   .replace("/__zzap/data/", "")

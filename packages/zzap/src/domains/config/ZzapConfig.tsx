@@ -2,6 +2,7 @@ import path from "path";
 import { getLogger } from "../logging/getLogger";
 import type { ZzapPageProps } from "../page/ZzapPageBuilder";
 import type { ZzapRouteType, defineRoute } from "../route/defineRoute";
+import { WebPath } from "../web-path/WebPath";
 import type { ZzapConfigType } from "./zzapConfigSchema";
 
 const logger = getLogger();
@@ -67,14 +68,14 @@ async function loadRoutes(props: { routesDir: string }) {
     for await (const filePath of filesIterator) {
       const module = await import(filePath);
       const fileName = filePath.split("/").pop() || "";
-      const path = "/" + fileName.split(".").slice(0, -1).join("/");
+      const path = fileName.split(".").slice(0, -1).join("/");
 
       const route = module.default as ReturnType<typeof defineRoute>;
 
       if (route) {
         routes.push({
           ...route,
-          path: path!,
+          path: WebPath.join(path!),
         });
       }
     }

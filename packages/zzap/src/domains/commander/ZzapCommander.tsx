@@ -32,6 +32,7 @@ export const ZzapCommander = {
       port: props.port,
       config: props.config,
       debug: props.debug,
+      mode: "dev",
       onWebSocketOpen(ws) {
         websocket = ws;
       },
@@ -92,6 +93,7 @@ export const ZzapCommander = {
       port: props.port,
       config: props.config,
       debug: props.debug,
+      mode: "start",
     });
   },
 };

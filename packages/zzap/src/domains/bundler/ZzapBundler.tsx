@@ -1,5 +1,5 @@
 import Bun, { $ } from "bun";
-
+import path from "path";
 import type { ZzapConfigType } from "../config/zzapConfigSchema";
 import { getLogger } from "../logging/getLogger";
 import {
@@ -9,6 +9,7 @@ import {
 } from "../page/ZzapPageBuilder";
 import type { ZzapPluginType } from "../plugin/definePlugin";
 import type { RouteHandlerContextType } from "../route/defineRoute";
+import { WebPath } from "../web-path/WebPath";
 import { zzapPluginCommands } from "./core-plugins/zzapPluginCommands";
 import { zzapPluginHeads } from "./core-plugins/zzapPluginHeads";
 import { zzapPluginPageRenderer } from "./core-plugins/zzapPluginPageRenderer";
@@ -100,7 +101,9 @@ export const ZzapBundler = {
       },
     });
 
-    logger.log(`Finished in ${Date.now() - timetamp}ms.`);
+    logger.log(
+      `Finished in ${Date.now() - timetamp}ms. Rendered ${pages.size} pages.`,
+    );
   },
 };
 
@@ -125,11 +128,10 @@ async function getPagesAndSitemap(props: {
     },
   };
 
-  const promises = props.paths.map(async (path) => {
-    // Check for route
-
+  const promises = props.paths.map(async (webPath) => {
+    // DYNAMIC ROUTES
     for (const route of props.config.routes) {
-      const pathSegments = path.split("/");
+      const pathSegments = webPath.split("/");
       const routeSegments = route.path.split("/");
 
       if (pathSegments.length !== routeSegments.length) {
@@ -143,22 +145,34 @@ async function getPagesAndSitemap(props: {
 
       if (match) {
         const params: Record<string, string> = {};
+        const segmentsWithInjectedParams: Array<string> = [];
 
         for (const segment of routeSegments) {
           if (segment.startsWith("$")) {
             const key = segment.replace("$", "");
             const value = pathSegments[routeSegments.indexOf(segment)];
+
             params[key] = value;
+            segmentsWithInjectedParams.push(value);
+          } else {
+            segmentsWithInjectedParams.push(segment);
           }
         }
 
         try {
-          const routePage = await route.getPage({ params: params }, ctx);
+          const pathWithInjectedParams = WebPath.join(
+            segmentsWithInjectedParams.join("/"),
+          );
+          const routePage = await route.getPage(
+            { params: params, path: pathWithInjectedParams },
+            ctx,
+          );
+          logger.warn("PPPPP", { pathWithInjectedParams });
 
           if (routePage) {
-            pages.set(path, {
+            pages.set(pathWithInjectedParams, {
               ...routePage,
-              path,
+              path: pathWithInjectedParams,
             });
           }
         } catch (error) {
@@ -169,21 +183,27 @@ async function getPagesAndSitemap(props: {
       }
     }
 
-    // Check for Markdown files
-    let filePath = props.config.routesDir + path + ".md";
-
+    // MARKDOWN
+    // check index.md
+    let filePath = path.join(props.config.routesDir, webPath, "index.md");
     let file = Bun.file(filePath);
     let exists = await file.exists();
 
     if (!exists) {
-      filePath = props.config.routesDir + path + "index.md";
+      // check [segment].md
+      filePath = path.join(props.config.routesDir, webPath) + ".md";
       file = Bun.file(filePath);
       exists = await file.exists();
     }
 
     if (!exists) {
-      const pathForExploded = path.split("/").slice(0, -1).join("/");
-      filePath = props.config.routesDir + pathForExploded + "/!index.md";
+      // check !index.md
+      const pathForExploded = webPath.split("/").slice(0, -1).join("/");
+      filePath = path.join(
+        props.config.routesDir,
+        pathForExploded,
+        "!index.md",
+      );
 
       file = Bun.file(filePath);
       exists = await file.exists();
@@ -200,7 +220,7 @@ async function getPagesAndSitemap(props: {
 
     const markdownPages = PageBuilder.fromMarkdown({
       config: props.config as any,
-      path: path,
+      path: webPath,
       explode: shouldExplode,
       markdown: pageMarkdown,
     });
@@ -252,15 +272,19 @@ async function getPaths(props: { config: ZzapConfigType }) {
   const routesPromises = props.config.routes.map(async (route) => {
     try {
       const pathParamsConfigs = await route.getPathParams?.(ctx);
-      if (pathParamsConfigs) {
+      if (!pathParamsConfigs) {
+        const path = WebPath.join(route.path);
+        paths.push(path);
+      } else {
         for (const pathParamsConfig of pathParamsConfigs || []) {
           let pathToAdd = route.path;
 
           for (const [key, value] of Object.entries(pathParamsConfig.params)) {
-            pathToAdd = pathToAdd.replace(`:${key}`, value);
+            pathToAdd = pathToAdd.replace(`$${key}`, value);
           }
 
-          paths.push(pathToAdd);
+          const path = WebPath.join(pathToAdd);
+          paths.push(path);
         }
       }
     } catch (error) {
@@ -275,18 +299,19 @@ async function getPaths(props: { config: ZzapConfigType }) {
   const globPatterns = ["**/*.md", "**/*.mdx"];
   for (const pattern of globPatterns) {
     const glob = new Bun.Glob(props.config.routesDir + "/" + pattern);
-
     const filesIterator = glob.scan({
       cwd: ".",
       onlyFiles: true,
     });
 
     for await (const filePath of filesIterator) {
-      const path = filePath
+      const cleanedFilePath = filePath
         .replace(props.config.routesDir, "")
         .replace(/\.mdx?$/, "")
         .replace(/\.md?$/, "")
         .replace(/\/index$/, "");
+
+      const path = WebPath.join(cleanedFilePath);
 
       paths.push(path);
     }
